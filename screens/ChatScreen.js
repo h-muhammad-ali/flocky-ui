@@ -5,6 +5,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Text,
 } from "react-native";
 import Header from "../components/Header";
 import SentMessage from "../components/SentMessage";
@@ -38,10 +39,13 @@ const ChatScreen = ({ name }) => {
   const [messages, setMessages] = useState(dummyTextMessages);
   const [text, setText] = useState("");
   return (
-    <View style={styles.container}>
+    <View style={styles?.container}>
       <Header text={name} />
       <FlatList
         data={messages}
+        ListFooterComponent={
+          <Text style={styles.flatlistHeader}>{moment()?.format("MMMM DD, YYYY")}</Text>
+        }
         keyExtractor={(item, index) => index}
         renderItem={({ item }) => (
           <>
@@ -54,11 +58,11 @@ const ChatScreen = ({ name }) => {
         )}
         inverted
       />
-      <View style={styles.textBarContainer}>
+      <View style={styles?.textBarContainer}>
         <TextInput
           value={text}
-          style={styles.textBar}
-          placeholderTextColor={"#CED2D1"}
+          style={styles?.textBar}
+          placeholderTextColor={"#7F8483"}
           placeholder="Send a message..."
           selectionColor={"#5188E3"}
           multiline
@@ -82,12 +86,12 @@ const ChatScreen = ({ name }) => {
 
 export default ChatScreen;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet?.create({
   container: {
     flex: 1,
   },
   textBar: {
-    backgroundColor: "#F0F1F1",
+    backgroundColor: "#DADFDF",
     paddingVertical: 10,
     paddingHorizontal: 15,
     marginHorizontal: 5,
@@ -99,5 +103,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
     marginVertical: 10,
+  },
+  flatlistHeader: {
+    textAlign: "center",
+    color: "grey",
+    marginBottom: 10,
   },
 });

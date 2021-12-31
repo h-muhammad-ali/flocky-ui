@@ -4,11 +4,11 @@ import { Ionicons } from "@expo/vector-icons";
 
 const ReceivedMessage = ({ text, time }) => {
   return (
-    <View style={styles.container}>
+    <View style={styles?.container}>
       <Ionicons name="person-circle" color={"#5188E3"} size={40} />
       <View>
-        <Text style={styles.text}>{text}</Text>
-        <Text style={styles.status}>{time}</Text>
+        <Text style={styles?.text}>{text}</Text>
+        <Text style={styles?.status}>{time}</Text>
       </View>
     </View>
   );
@@ -16,7 +16,7 @@ const ReceivedMessage = ({ text, time }) => {
 
 export default ReceivedMessage;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet?.create({
   container: {
     flexDirection: "row",
     marginStart: 10,

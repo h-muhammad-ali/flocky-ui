@@ -3,10 +3,10 @@ import { StyleSheet, Text, View } from "react-native";
 
 const SentMessage = ({ text, time }) => {
   return (
-    <View style={styles.container}>
+    <View style={styles?.container}>
       <View>
-        <Text style={styles.text}>{text}</Text>
-        <Text style={styles.status}>{time}</Text>
+        <Text style={styles?.text}>{text}</Text>
+        <Text style={styles?.status}>{time}</Text>
       </View>
     </View>
   );
@@ -14,7 +14,7 @@ const SentMessage = ({ text, time }) => {
 
 export default SentMessage;
 
-const styles = StyleSheet.create({
+const styles = StyleSheet?.create({
   container: {
     flexDirection: "row-reverse",
     marginStart: 10,
