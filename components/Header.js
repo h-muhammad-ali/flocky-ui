@@ -23,7 +23,7 @@ const styles = StyleSheet?.create({
   container: {
     flexDirection: "row",
     marginTop: Constants.statusBarHeight,
-    marginBottom: 25,
+    marginBottom: 20,
   },
   backArrow: {
     marginLeft: 10,

@@ -2,6 +2,7 @@ import React from "react";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import StackNavigator from "./navigators/StackNavigator";
+import ChatScreen from "./screens/ChatScreen";
 
 const App = () => {
   const [loaded] = useFonts({

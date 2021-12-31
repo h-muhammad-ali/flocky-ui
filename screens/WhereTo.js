@@ -7,10 +7,11 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Header from "../components/Header";
-import MapView from "react-native-maps";
+import Map from "../components/Map";
+import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
 
-const WhereToHitcher = ({ navigation, route }) => {
+const WhereTo = ({ navigation, route }) => {
   const CURRENT_LOCATION = "Current Location";
   const DESTINATION = "Company Location";
 
@@ -80,23 +81,23 @@ const WhereToHitcher = ({ navigation, route }) => {
         <></>
       )}
 
-      <MapView style={styles?.mapView} />
-      <TouchableOpacity
-        style={styles?.continue}
+      <Map />
+      <Button
+        text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
-          navigation?.navigate("MatchingRidesHitcher", {
-            source: route.params?.source,
-            destination: route.params?.destination,
-          });
+          !route.params?.isPatron
+            ? navigation?.navigate("MatchingRidesHitcher", {
+                source: route.params?.source,
+                destination: route.params?.destination,
+              })
+            : navigation?.navigate("RideDetails");
         }}
-      >
-        <Text style={styles?.continueText}>Find Matching Rides</Text>
-      </TouchableOpacity>
+      />
     </View>
   );
 };
 
-export default WhereToHitcher;
+export default WhereTo;
 
 const styles = StyleSheet?.create({
   container: {

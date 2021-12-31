@@ -10,12 +10,13 @@ import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 
-const SignIn = () => {
+const SignIn = ({ navigation }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -25,6 +26,13 @@ const SignIn = () => {
   });
   const onSubmit = (data) => {
     console.log("data", data);
+    if (data.email === "user@gmail.com") {
+      navigation?.navigate("Roles");
+    }
+    if (data.email === "admin@gmail.com") {
+      navigation?.navigate("AdminPanel");
+    }
+    reset();
   };
   return (
     <View style={styles?.container}>
@@ -77,8 +85,13 @@ const SignIn = () => {
       </TouchableOpacity>
       <Button text="Log In" onPress={handleSubmit(onSubmit)} />
 
-      <TouchableOpacity style={styles?.logIn}>
-        <Text style={styles?.links}>I have an account</Text>
+      <TouchableOpacity
+        style={styles?.logIn}
+        onPress={() => {
+          navigation?.navigate("SignUp");
+        }}
+      >
+        <Text style={styles?.links}>I don't have an account</Text>
       </TouchableOpacity>
     </View>
   );

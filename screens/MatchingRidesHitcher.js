@@ -1,7 +1,7 @@
 import React from "react";
 import {
   StyleSheet,
-  TextInput,
+  Text,
   View,
   FlatList,
   TouchableOpacity,
@@ -51,16 +51,8 @@ const MatchingRidesHitcher = ({ navigation, route }) => {
   return (
     <View style={styles?.container}>
       <Header text="Matching Rides" navigation={navigation} />
-      <TextInput
-        value={route.params?.source}
-        style={styles?.input}
-        showSoftInputOnFocus={false}
-      />
-      <TextInput
-        value={route.params?.destination}
-        style={styles?.input}
-        showSoftInputOnFocus={false}
-      />
+      <Text style={styles?.input}>Source: {route.params?.source}</Text>
+      <Text style={styles?.input}>Destination: {route.params?.destination}</Text>
       <View style={styles?.patrons}>
         <FlatList
           data={dummyPatrons}
@@ -103,6 +95,7 @@ const styles = StyleSheet?.create({
     paddingStart: 10,
     marginBottom: 15,
     color: "#758580",
+    textAlignVertical: "center",
   },
   patrons: {
     width: "100%",

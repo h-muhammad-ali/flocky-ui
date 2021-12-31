@@ -13,7 +13,7 @@ import moment from "moment";
 import ReceivedMessage from "../components/ReceivedMessage";
 import { Ionicons } from "@expo/vector-icons";
 
-const ChatScreen = ({ name }) => {
+const ChatScreen = ({ route }) => {
   const dummyTextMessages = [
     {
       type: "sent",
@@ -36,15 +36,17 @@ const ChatScreen = ({ name }) => {
       time: "11:00 pm",
     },
   ];
-  const [messages, setMessages] = useState(dummyTextMessages);
+  const [messages, setMessages] = useState(dummyTextMessages.reverse());
   const [text, setText] = useState("");
   return (
     <View style={styles?.container}>
-      <Header text={name} />
+      <Header text={route.params?.name} />
       <FlatList
         data={messages}
         ListFooterComponent={
-          <Text style={styles.flatlistHeader}>{moment()?.format("MMMM DD, YYYY")}</Text>
+          <Text style={styles.flatlistHeader}>
+            {moment()?.format("MMMM DD, YYYY")}
+          </Text>
         }
         keyExtractor={(item, index) => index}
         renderItem={({ item }) => (

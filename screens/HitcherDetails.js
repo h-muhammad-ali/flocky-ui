@@ -6,7 +6,7 @@ import TimeLine from "../components/TimeLine";
 import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
 
-const HitcherDetails = ({ route }) => {
+const HitcherDetails = ({ route, navigation }) => {
   const dummyHitcherDetails = [
     {
       id: 1,
@@ -55,7 +55,12 @@ const HitcherDetails = ({ route }) => {
           <View style={{ flex: 6 }}>
             <Map />
           </View>
-          <Button text="Continue" />
+          <Button
+            text="Message"
+            onPress={() => {
+              navigation?.navigate("Chat", { name: hitcher?.name });
+            }}
+          />
         </View>
       ) : (
         <></>

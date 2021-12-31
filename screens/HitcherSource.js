@@ -74,7 +74,7 @@ const HitcherSource = ({ navigation, route }) => {
             <TouchableOpacity
               onPressOut={() =>
                 navigation.navigate({
-                  name: "WhereToHitcher",
+                  name: "WhereTo",
                   params:
                     route.params?.origin === "From"
                       ? { source: item?.short_name }

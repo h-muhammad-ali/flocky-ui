@@ -9,8 +9,9 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
+import Button from "../components/Button";
 
-const Sign = () => {
+const SignUp = ({ navigation }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [genderOpen, setGenderOpen] = useState(false);
@@ -38,6 +39,7 @@ const Sign = () => {
   const {
     handleSubmit,
     control,
+    reset,
     formState: { errors },
   } = useForm({
     defaultValues: {
@@ -51,10 +53,13 @@ const Sign = () => {
   });
   const onSubmit = (data) => {
     console.log("data", data);
+    reset();
+    setGenderValue(null);
+    setCompanyValue(null);
   };
   return (
     <View style={styles?.container}>
-      <Header text="Sign In" />
+      <Header text="Sign Up" />
       <Text style={styles?.label}>Name</Text>
       {errors?.name && (
         <Text style={styles?.error}>{errors?.name?.message}</Text>
@@ -127,6 +132,8 @@ const Sign = () => {
                 placeholderStyle={styles?.placeholderStyles}
                 onOpen={onGenderOpen}
                 onChangeValue={onChange}
+                zIndex={3000}
+                zIndexInverse={1000}
               />
             </View>
           )}
@@ -160,6 +167,8 @@ const Sign = () => {
                 searchPlaceholder="Search your company here..."
                 onOpen={onCompanyOpen}
                 onChangeValue={onChange}
+                zIndex={1000}
+                zIndexInverse={3000}
               />
             </View>
           )}
@@ -209,16 +218,18 @@ const Sign = () => {
           />
         )}
       />
-      <TouchableOpacity onPress={handleSubmit(onSubmit)}>
-        <Text style={styles?.getStarted}>Get Started</Text>
-      </TouchableOpacity>
-
+      <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
       <Text style={styles?.terms}>
         By continuing, you agree to Flocky’s{" "}
         <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
         <Text style={styles?.links}>Privacy Policy</Text>
       </Text>
-      <TouchableOpacity style={styles?.logIn}>
+      <TouchableOpacity
+        style={styles?.logIn}
+        onPress={() => {
+          navigation?.navigate("LogIn");
+        }}
+      >
         <Text style={styles?.links}>I have an account</Text>
       </TouchableOpacity>
     </View>
@@ -258,7 +269,8 @@ const styles = StyleSheet?.create({
   },
   dropdown: {
     borderColor: "#B7B7B7",
-    height: 50,
+    height: 45,
+    backgroundColor: "#f2f2f2",
   },
   getStarted: {
     backgroundColor: "#5188E3",
@@ -296,4 +308,4 @@ const styles = StyleSheet?.create({
   },
 });
 
-export default Sign;
+export default SignUp;

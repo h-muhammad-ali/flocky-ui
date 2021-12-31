@@ -61,7 +61,6 @@ const styles = StyleSheet?.create({
   stats: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
     flexWrap: "wrap",
   },
 });

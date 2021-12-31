@@ -12,8 +12,18 @@ const VehicleDetails = ({ id }) => {
       plateNumber: "LXW 1234",
       color: "Red",
       year: "2017",
-      type: "bike",
+      type: "car",
       name: "Honda CR-V",
+    },
+    {
+      id: 2,
+      model: "CD-70",
+      make: "Honda",
+      plateNumber: "LXW 1234",
+      color: "Red",
+      year: "2017",
+      type: "bike",
+      name: "Honda CD-70",
     },
   ];
   const [vehicle, setVehicle] = useState(null);

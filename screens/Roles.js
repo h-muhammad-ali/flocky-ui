@@ -18,7 +18,7 @@ const Roles = ({ navigation }) => {
           <View style={styles?.imageContainer}>
             <TouchableOpacity
               onPress={() =>
-                navigation?.navigate("WhereToHitcher", { isPatron: false })
+                navigation?.navigate("WhereTo", { isPatron: false })
               }
             >
               <Text style={styles?.roles}>Hitcher</Text>
@@ -36,7 +36,7 @@ const Roles = ({ navigation }) => {
           <View style={styles?.imageContainer}>
             <TouchableOpacity
               onPress={() =>
-                navigation?.navigate("WhereToHitcher", { isPatron: true })
+                navigation?.navigate("WhereTo", { isPatron: true })
               }
             >
               <Text style={styles?.roles}>Patron</Text>

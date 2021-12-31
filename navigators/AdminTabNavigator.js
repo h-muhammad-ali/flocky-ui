@@ -7,12 +7,17 @@ import AdminUsers from "../screens/AdminUsers";
 
 const Tab = createBottomTabNavigator();
 
-const AdminTabNavigator = () => {
+const AdminTabNavigator = ({ navigation }) => {
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerRight: () => (
-          <TouchableOpacity style={{ marginEnd: 10 }}>
+          <TouchableOpacity
+            style={{ marginEnd: 10 }}
+            onPress={() => {
+              navigation?.navigate("LogIn");
+            }}
+          >
             <Ionicons name="log-out-outline" size={30} />
           </TouchableOpacity>
         ),

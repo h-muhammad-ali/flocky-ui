@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, Image } from "react-native";
 import Constants from "expo-constants";
 import Button from "../components/Button";
 
-const RideRequested = () => (
+const RideRequested = ({ navigation }) => (
   <View style={styles?.container}>
     <View style={styles?.imageContainer}>
       <Image
@@ -19,7 +19,12 @@ const RideRequested = () => (
       </Text>
     </View>
     <View style={styles?.buttonFlex}>
-      <Button text="Patron Details" />
+      <Button
+        text="Patron Details"
+        onPress={() => {
+          navigation?.navigate("PatronDetails", { isBooked: true });
+        }}
+      />
     </View>
   </View>
 );
@@ -30,6 +35,7 @@ const styles = StyleSheet?.create({
   container: {
     flex: 1,
     marginTop: Constants?.statusBarHeight,
+    backgroundColor: "white",
   },
   imageContainer: { flex: 2, alignSelf: "center" },
   image: { width: 380, height: 400 },

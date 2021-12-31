@@ -28,14 +28,14 @@ const PatronDetails = ({ navigation, route }) => {
       id: 2,
       name: "John Doe",
       rides: 17,
-      availableSeats: 4,
+      availableSeats: 2,
       totalSeats: 4,
       departureTime: "8:00 PM",
       source: "Sanda, Lahore",
       destination: "PUCIT, Lahore",
       stopsCount: 2,
       stops: ["MAO College", "New Anarkali"],
-      selectedVehicleID: 1,
+      selectedVehicleID: 2,
     },
   ];
   const [patron, setPatron] = useState(null);
@@ -82,7 +82,21 @@ const PatronDetails = ({ navigation, route }) => {
           <View style={{ flex: 2, marginHorizontal: 12 }}>
             <Map />
           </View>
-          <Button text="Request Ride" />
+          {route.params?.isBooked ? (
+            <Button
+              text="Message"
+              onPress={() => {
+                navigation?.navigate("Chat", { name: patron?.name });
+              }}
+            />
+          ) : (
+            <Button
+              text="Request Ride"
+              onPress={() => {
+                navigation?.navigate("RideRequested");
+              }}
+            />
+          )}
         </>
       ) : (
         <></>

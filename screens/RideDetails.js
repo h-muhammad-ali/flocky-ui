@@ -7,7 +7,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AddVehicleDialog from "../components/AddVehicleDialog";
 import Button from "../components/Button";
 
-const RideDetails = () => {
+const RideDetails = ({ navigation }) => {
   const dummyVehicleDetails = [
     {
       id: 1,
@@ -172,7 +172,12 @@ const RideDetails = () => {
         </View>
       </View>
       <View style={{ flex: 1 }}>
-        <Button text="Post Ride" />
+        <Button
+          text="Post Ride"
+          onPress={() => {
+            navigation?.navigate("RidePosted");
+          }}
+        />
       </View>
     </View>
   );
