@@ -18,7 +18,7 @@ const AdminTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 15 }}
               onPress={() => {
-                navigation?.navigate("Roles");
+                navigation?.navigate("Roles", { isAdmin: true });
               }}
             >
               <MaterialCommunityIcons
@@ -37,9 +37,7 @@ const AdminTabNavigator = ({ navigation }) => {
             </TouchableOpacity>
           </View>
         ),
-        headerTitle: (props) => (
-          <Text style={styles?.heading}>{route?.name}</Text>
-        ),
+        headerTitle: () => <Text style={styles?.heading}>{route?.name}</Text>,
         tabBarIcon: ({ focused, color, size }) => {
           let iconName;
 
