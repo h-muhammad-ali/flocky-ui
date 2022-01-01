@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-native-community/datetimepicker": "^5.1.0",
     "@react-navigation/bottom-tabs": "^6.0.9",
+    "@react-navigation/drawer": "^6.1.8",
     "@react-navigation/native": "^6.0.6",
     "@react-navigation/native-stack": "^6.2.5",
     "expo": "~44.0.0",
@@ -31,7 +32,9 @@
     "react-native-shadow-2": "^6.0.0-beta.0",
     "react-native-svg": "12.1.1",
     "react-native-timeline-flatlist": "^0.7.6",
-    "react-native-web": "0.17.1"
+    "react-native-web": "0.17.1",
+    "react-native-gesture-handler": "~2.1.0",
+    "react-native-reanimated": "~2.3.1"
   },
   "devDependencies": {
     "@babel/core": "^7.12.9"

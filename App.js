@@ -2,7 +2,7 @@ import React from "react";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import StackNavigator from "./navigators/StackNavigator";
-import ChatScreen from "./screens/ChatScreen";
+import UserDrawerNavigator from "./navigators/UserDrawerNavigator";
 
 const App = () => {
   const [loaded] = useFonts({
@@ -21,7 +21,7 @@ const App = () => {
   }
   return (
     <NavigationContainer>
-      <StackNavigator />
+      <UserDrawerNavigator />
     </NavigationContainer>
   );
 };

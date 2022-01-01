@@ -20,6 +20,7 @@ import AdminTabNavigator from "../navigators/AdminTabNavigator";
 import MainMenu from "../screens/MainMenu";
 import AdminSignUp from "../screens/AdminSignUp";
 import VerificationFinished from "../screens/VerificationFinished";
+import { DrawerActions } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -37,11 +38,11 @@ const StackNavigator = () => {
         options={({ navigation, route }) => ({
           headerShown: true,
           headerBackVisible: false,
-          headerRight: (props) => (
-            <View style={{ flexDirection: "row", alignItems: "center" }}>
+          headerRight: () => (
+            <View style={styles?.headerRight}>
               {route.params?.isAdmin ? (
                 <TouchableOpacity
-                  style={{ marginEnd: 15 }}
+                  style={styles?.adminPanelLogo}
                   onPress={() => {
                     navigation?.navigate("AdminPanel");
                   }}
@@ -63,6 +64,16 @@ const StackNavigator = () => {
                 <Ionicons name="log-out-outline" size={30} />
               </TouchableOpacity>
             </View>
+          ),
+          headerLeft: () => (
+            <TouchableOpacity
+              style={styles.menuLogo}
+              onPress={() => {
+                navigation?.dispatch(DrawerActions?.toggleDrawer());
+              }}
+            >
+              <Ionicons name="menu-sharp" size={30} color="#5188E3" />
+            </TouchableOpacity>
           ),
           headerTitle: () => (
             <Text style={styles?.heading}>Welcome to Flocky!</Text>
@@ -102,4 +113,7 @@ const styles = StyleSheet?.create({
     fontFamily: "Kanit-Medium",
     fontSize: 20,
   },
+  headerRight: { flexDirection: "row", alignItems: "center" },
+  adminPanelLogo: { marginEnd: 15 },
+  menuLogo: { marginEnd: 10 },
 });
