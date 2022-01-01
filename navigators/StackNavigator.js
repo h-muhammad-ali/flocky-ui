@@ -14,14 +14,16 @@ import RidePosted from "../screens/RidePosted";
 import RideDetails from "../screens/RideDetails";
 import ChatScreen from "../screens/ChatScreen";
 import AdminTabNavigator from "../navigators/AdminTabNavigator";
+import MainMenu from "../screens/MainMenu";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="SignUp"
+      initialRouteName="MainMenu"
       screenOptions={{ headerShown: false }}
     >
+      <Stack.Screen name="MainMenu" component={MainMenu} />
       <Stack.Screen name="SignUp" component={Sign} />
       <Stack.Screen name="LogIn" component={SignIn} />
       <Stack.Screen name="Roles" component={Roles} />
