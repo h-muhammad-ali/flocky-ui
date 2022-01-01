@@ -2,22 +2,17 @@ import React from "react";
 import { FlatList, TouchableOpacity } from "react-native";
 import AdminUserCard from "../components/AdminUserCard";
 
-const AdminUsers = () => {
+const AdminBlockedUsers = () => {
   const dummyUsers = [
     {
-      id: 1,
-      name: "Suleman Sohail",
-      email: "bcsf18m002@pucit.edu.pk",
+      id: 4,
+      name: "John Doe",
+      email: "john@gmail.com",
     },
     {
-      id: 2,
-      name: "Muhammad Ahsan",
-      email: "bcsf18m007@pucit.edu.pk",
-    },
-    {
-      id: 3,
-      name: "Muhammad Ali",
-      email: "bcsf18m016@pucit.edu.pk",
+      id: 5,
+      name: "John Doe",
+      email: "doe@gmail.com",
     },
   ];
   return (
@@ -26,7 +21,11 @@ const AdminUsers = () => {
       keyExtractor={(item) => item?.id}
       renderItem={({ item }) => (
         <TouchableOpacity>
-          <AdminUserCard name={item?.name} email={item?.email} />
+          <AdminUserCard
+            name={item?.name}
+            email={item?.email}
+            isBlocked={true}
+          />
         </TouchableOpacity>
       )}
       showsVerticalScrollIndicator={false}
@@ -34,4 +33,4 @@ const AdminUsers = () => {
   );
 };
 
-export default AdminUsers;
+export default AdminBlockedUsers;

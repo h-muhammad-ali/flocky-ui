@@ -1,9 +1,11 @@
 import React from "react";
-import { StyleSheet, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AdminNotifications from "../screens/AdminNotifications";
 import AdminUsers from "../screens/AdminUsers";
+import AdminBlockedUsers from "../screens/AdminBlockedUsers";
 
 const Tab = createBottomTabNavigator();
 
@@ -12,14 +14,28 @@ const AdminTabNavigator = ({ navigation }) => {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerRight: () => (
-          <TouchableOpacity
-            style={{ marginEnd: 10 }}
-            onPress={() => {
-              navigation?.navigate("LogIn");
-            }}
-          >
-            <Ionicons name="log-out-outline" size={30} />
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <TouchableOpacity
+              style={{ marginEnd: 15 }}
+              onPress={() => {
+                navigation?.navigate("Roles");
+              }}
+            >
+              <MaterialCommunityIcons
+                name="account-switch-outline"
+                size={30}
+                color="black"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ marginEnd: 10 }}
+              onPress={() => {
+                navigation?.navigate("LogIn");
+              }}
+            >
+              <Ionicons name="log-out-outline" size={30} />
+            </TouchableOpacity>
+          </View>
         ),
         headerTitle: (props) => (
           <Text style={styles?.heading}>{route?.name}</Text>
@@ -31,6 +47,8 @@ const AdminTabNavigator = ({ navigation }) => {
             iconName = focused ? "notifications" : "notifications-outline";
           } else if (route?.name === "Users") {
             iconName = focused ? "people" : "people-outline";
+          } else if (route?.name === "Blocked Users") {
+            iconName = focused ? "remove-circle" : "remove-circle-outline";
           }
 
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -43,6 +61,7 @@ const AdminTabNavigator = ({ navigation }) => {
     >
       <Tab.Screen name="Notifications" component={AdminNotifications} />
       <Tab.Screen name="Users" component={AdminUsers} />
+      <Tab.Screen name="Blocked Users" component={AdminBlockedUsers} />
     </Tab.Navigator>
   );
 };

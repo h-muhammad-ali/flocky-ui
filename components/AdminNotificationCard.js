@@ -2,16 +2,11 @@ import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const AdminNotificationCard = ({ text, userID }) => {
+const AdminNotificationCard = ({ text }) => {
   return (
     <View style={styles?.container}>
+      <Ionicons name="notifications-circle" size={18} />
       <Text style={styles?.notification}>{text}</Text>
-      <View style={styles?.showDetailsButton}>
-        <TouchableOpacity style={{ flexDirection: "row" }}>
-          <Text style={styles?.showDetailsText}>Show Details</Text>
-          <Ionicons name="arrow-forward" size={20} />
-        </TouchableOpacity>
-      </View>
     </View>
   );
 };
@@ -26,18 +21,10 @@ const styles = StyleSheet?.create({
     borderRadius: 10,
     paddingHorizontal: 10,
     paddingVertical: 10,
+    flexDirection: "row",
   },
   notification: {
     fontFamily: "NunitoSans-SemiBold",
-  },
-  showDetailsText: {
-    color: "#5188E3",
-    marginEnd: 5,
-  },
-  showDetailsButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "flex-end",
-    marginTop: 10,
+    paddingStart: 10,
   },
 });

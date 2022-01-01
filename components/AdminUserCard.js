@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const AdminUserCard = ({ name, id, email }) => {
+const AdminUserCard = ({ name, email, isBlocked }) => {
   return (
     <View style={styles?.container}>
       <Ionicons name="person-circle" size={70} />
@@ -12,7 +12,11 @@ const AdminUserCard = ({ name, id, email }) => {
           <Text style={styles?.email}>{email}</Text>
         </View>
         <TouchableOpacity>
-          <Ionicons name="close-circle-outline" color="#5188E3" size={30} />
+          <Ionicons
+            name={isBlocked ? "add-circle-outline" : "remove-circle-outline"}
+            color="#5188E3"
+            size={30}
+          />
         </TouchableOpacity>
       </View>
     </View>

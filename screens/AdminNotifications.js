@@ -7,17 +7,14 @@ const AdminNotifications = () => {
     {
       id: 1,
       description: "Ahsan has recently joined Flocky.",
-      userID: 1,
     },
     {
       id: 2,
       description: "Suleman just hopped in!",
-      userID: 2,
     },
     {
       id: 3,
       description: "Ali has recently joined Flocky.",
-      userID: 3,
     },
   ];
   return (
@@ -28,7 +25,6 @@ const AdminNotifications = () => {
         renderItem={({ item }) => (
           <AdminNotificationCard
             text={item?.description}
-            userID={item?.userID}
           />
         )}
         showsVerticalScrollIndicator={false}
