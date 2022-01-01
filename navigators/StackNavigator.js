@@ -15,6 +15,8 @@ import RideDetails from "../screens/RideDetails";
 import ChatScreen from "../screens/ChatScreen";
 import AdminTabNavigator from "../navigators/AdminTabNavigator";
 import MainMenu from "../screens/MainMenu";
+import AdminSignUp from "../screens/AdminSignUp";
+import VerificationFinished from "../screens/VerificationFinished";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -43,7 +45,9 @@ const StackNavigator = () => {
       <Stack.Screen name="RidePosted" component={RidePosted} />
       <Stack.Screen name="RideDetails" component={RideDetails} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="AdminSignUp" component={AdminSignUp} />
       <Stack.Screen name="AdminPanel" component={AdminTabNavigator} />
+      <Stack.Screen name="VerificationFinished" component={VerificationFinished} />
     </Stack.Navigator>
   );
 };
