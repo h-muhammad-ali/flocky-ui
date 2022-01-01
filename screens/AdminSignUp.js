@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
+import DropDownPicker from "react-native-dropdown-picker";
 import Button from "../components/Button";
 
 const AdminSignUp = ({ navigation }) => {
@@ -15,6 +16,13 @@ const AdminSignUp = ({ navigation }) => {
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const DOMAIN_REGEX =
     /^@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const [genderOpen, setGenderOpen] = useState(false);
+  const [genderValue, setGenderValue] = useState(null);
+  const [gender, setGender] = useState([
+    { label: "Male", value: "male" },
+    { label: "Female", value: "female" },
+    { label: "Prefer Not to Say", value: "neutral" },
+  ]);
   const {
     handleSubmit,
     control,
@@ -24,6 +32,7 @@ const AdminSignUp = ({ navigation }) => {
     defaultValues: {
       name: "",
       password: "",
+      gender: "",
       company: "",
       email: "",
       domain: "",
@@ -83,6 +92,35 @@ const AdminSignUp = ({ navigation }) => {
           />
         )}
       />
+
+      <Text style={styles?.label}>Gender</Text>
+      {errors?.gender && (
+        <Text style={styles?.error}>{errors?.gender?.message}</Text>
+      )}
+      <Controller
+        name="gender"
+        control={control}
+        rules={{
+          required: { value: true, message: "This field is required" },
+        }}
+        render={({ field: { onChange, value } }) => (
+          <View style={styles?.dropdownGender}>
+            <DropDownPicker
+              style={styles?.dropdown}
+              open={genderOpen}
+              value={genderValue}
+              items={gender}
+              setOpen={setGenderOpen}
+              setValue={setGenderValue}
+              setItems={setGender}
+              placeholder="Select Gender"
+              placeholderStyle={styles?.placeholderStyles}
+              onChangeValue={onChange}
+            />
+          </View>
+        )}
+      />
+
       <Text style={styles?.label}>Institute/Organization</Text>
       {errors?.company && (
         <Text style={styles?.error}>{errors?.company?.message}</Text>
