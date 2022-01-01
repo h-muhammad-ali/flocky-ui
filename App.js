@@ -1,8 +1,7 @@
 import React from "react";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
-import StackNavigator from "./navigators/StackNavigator";
-import UserDrawerNavigator from "./navigators/UserDrawerNavigator";
+import MainStackNavigator from "./navigators/MainStackNavigator";
 
 const App = () => {
   const [loaded] = useFonts({
@@ -21,7 +20,7 @@ const App = () => {
   }
   return (
     <NavigationContainer>
-      <UserDrawerNavigator />
+      <MainStackNavigator />
     </NavigationContainer>
   );
 };

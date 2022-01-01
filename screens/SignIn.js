@@ -27,10 +27,10 @@ const SignIn = ({ navigation }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     if (data.email === "user@gmail.com") {
-      navigation?.navigate("Roles");
+      navigation?.navigate("User Panel");
     }
     if (data.email === "admin@gmail.com") {
-      navigation?.navigate("AdminPanel");
+      navigation?.navigate("Admin Panel");
     }
     reset();
   };

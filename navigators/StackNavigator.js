@@ -10,28 +10,19 @@ import MatchingRidesHitcher from "../screens/MatchingRidesHitcher";
 import PatronDetails from "../screens/PatronDetails";
 import HitcherDetails from "../screens/HitcherDetails";
 import MatchingRidesPatron from "../screens/MatchingRidesPatron";
-import Sign from "../screens/SignUp";
-import SignIn from "../screens/SignIn";
 import RideRequested from "../screens/RideRequested";
 import RidePosted from "../screens/RidePosted";
 import RideDetails from "../screens/RideDetails";
 import ChatScreen from "../screens/ChatScreen";
-import AdminTabNavigator from "../navigators/AdminTabNavigator";
-import MainMenu from "../screens/MainMenu";
-import AdminSignUp from "../screens/AdminSignUp";
-import VerificationFinished from "../screens/VerificationFinished";
 import { DrawerActions } from "@react-navigation/native";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
   return (
     <Stack.Navigator
-      initialRouteName="MainMenu"
+      initialRouteName="Roles"
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen name="MainMenu" component={MainMenu} />
-      <Stack.Screen name="SignUp" component={Sign} />
-      <Stack.Screen name="LogIn" component={SignIn} />
       <Stack.Screen
         name="Roles"
         component={Roles}
@@ -44,7 +35,7 @@ const StackNavigator = () => {
                 <TouchableOpacity
                   style={styles?.adminPanelLogo}
                   onPress={() => {
-                    navigation?.navigate("AdminPanel");
+                    navigation?.navigate("Admin Panel");
                   }}
                 >
                   <MaterialCommunityIcons
@@ -58,7 +49,7 @@ const StackNavigator = () => {
               )}
               <TouchableOpacity
                 onPress={() => {
-                  navigation?.navigate("LogIn");
+                  navigation?.navigate("MainMenu");
                 }}
               >
                 <Ionicons name="log-out-outline" size={30} />
@@ -96,12 +87,6 @@ const StackNavigator = () => {
       <Stack.Screen name="RidePosted" component={RidePosted} />
       <Stack.Screen name="RideDetails" component={RideDetails} />
       <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="AdminSignUp" component={AdminSignUp} />
-      <Stack.Screen name="AdminPanel" component={AdminTabNavigator} />
-      <Stack.Screen
-        name="VerificationFinished"
-        component={VerificationFinished}
-      />
     </Stack.Navigator>
   );
 };
