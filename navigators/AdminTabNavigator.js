@@ -6,6 +6,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import AdminNotifications from "../screens/AdminNotifications";
 import AdminUsers from "../screens/AdminUsers";
 import AdminBlockedUsers from "../screens/AdminBlockedUsers";
+import { DrawerActions } from "@react-navigation/native";
 
 const Tab = createBottomTabNavigator();
 
@@ -30,12 +31,22 @@ const AdminTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 10 }}
               onPress={() => {
-                navigation?.navigate("LogIn");
+                navigation?.navigate("MainMenu");
               }}
             >
               <Ionicons name="log-out-outline" size={30} />
             </TouchableOpacity>
           </View>
+        ),
+        headerLeft: () => (
+          <TouchableOpacity
+            style={styles.menuLogo}
+            onPress={() => {
+              navigation?.dispatch(DrawerActions?.toggleDrawer());
+            }}
+          >
+            <Ionicons name="menu-sharp" size={30} color="#5188E3" />
+          </TouchableOpacity>
         ),
         headerTitle: () => <Text style={styles?.heading}>{route?.name}</Text>,
         tabBarIcon: ({ focused, color, size }) => {
@@ -72,4 +83,5 @@ const styles = StyleSheet?.create({
     fontFamily: "Kanit-Medium",
     fontSize: 20,
   },
+  menuLogo: { paddingStart: 10 },
 });
