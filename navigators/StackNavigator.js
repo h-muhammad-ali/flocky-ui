@@ -15,6 +15,8 @@ import RidePosted from "../screens/RidePosted";
 import RideDetails from "../screens/RideDetails";
 import ChatScreen from "../screens/ChatScreen";
 import { DrawerActions } from "@react-navigation/native";
+import Map from "../screens/Map";
+import FullScreenMap from "../screens/FullScreenMap";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -87,6 +89,8 @@ const StackNavigator = () => {
       <Stack.Screen name="RidePosted" component={RidePosted} />
       <Stack.Screen name="RideDetails" component={RideDetails} />
       <Stack.Screen name="Chat" component={ChatScreen} />
+      <Stack.Screen name="Map" component={Map} />
+      <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
     </Stack.Navigator>
   );
 };

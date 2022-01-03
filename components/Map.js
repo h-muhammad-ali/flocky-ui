@@ -3,11 +3,11 @@ import { StyleSheet, TouchableOpacity, View } from "react-native";
 import MapView from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 
-const Map = () => {
+const Map = ({ navigation }) => {
   return (
     <View style={{ flex: 1 }}>
       <MapView style={styles?.mapView} />
-      <TouchableOpacity style={styles?.fullScreen}>
+      <TouchableOpacity style={styles?.fullScreen} onPress={navigation}>
         <Ionicons name="expand" size={25} />
       </TouchableOpacity>
     </View>

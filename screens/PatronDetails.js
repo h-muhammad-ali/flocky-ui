@@ -80,7 +80,11 @@ const PatronDetails = ({ navigation, route }) => {
           )}
           <VehicleDetails id={patron?.selectedVehicleID} />
           <View style={{ flex: 2, marginHorizontal: 12 }}>
-            <Map />
+            <Map
+              navigation={() => {
+                navigation?.navigate("Full Screen Map");
+              }}
+            />
           </View>
           {route.params?.isBooked ? (
             <Button

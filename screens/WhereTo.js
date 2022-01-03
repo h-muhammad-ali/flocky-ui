@@ -81,7 +81,11 @@ const WhereTo = ({ navigation, route }) => {
         <></>
       )}
 
-      <Map />
+      <Map
+        navigation={() => {
+          navigation?.navigate("Full Screen Map");
+        }}
+      />
       <Button
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {

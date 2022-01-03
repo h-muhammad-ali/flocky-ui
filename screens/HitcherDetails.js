@@ -52,8 +52,12 @@ const HitcherDetails = ({ route, navigation }) => {
               <Text style={styles?.time}>5 minutes</Text>
             </View>
           </View>
-          <View style={{ flex: 6 }}>
-            <Map />
+          <View style={{ flex: 6, marginHorizontal: 10 }}>
+            <Map
+              navigation={() => {
+                navigation?.navigate("Full Screen Map");
+              }}
+            />
           </View>
           <Button
             text="Message"

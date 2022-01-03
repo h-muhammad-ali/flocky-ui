@@ -9,6 +9,7 @@ import {
 import Bookmark from "../components/Bookmark";
 import Header from "../components/Header";
 import Place from "../components/Place";
+import { Ionicons } from "@expo/vector-icons";
 
 const HitcherSource = ({ navigation, route }) => {
   const dummyPlaces = [
@@ -46,17 +47,27 @@ const HitcherSource = ({ navigation, route }) => {
         }
         navigation={() => navigation?.goBack()}
       />
-      <TextInput
-        style={styles?.input}
-        selectionColor={"#5188E3"}
-        placeholder={
-          route.params?.origin === "From"
-            ? "Enter Source"
-            : route.params?.origin === "To"
-            ? "Enter Destination"
-            : "Enter Way-Point"
-        }
-      />
+      <View style={styles.inputContainer}>
+        <TextInput
+          style={styles?.input}
+          selectionColor={"#5188E3"}
+          placeholder={
+            route.params?.origin === "From"
+              ? "Enter Source"
+              : route.params?.origin === "To"
+              ? "Enter Destination"
+              : "Enter Way-Point"
+          }
+        />
+        <TouchableOpacity
+          style={{ flex: 0.1 }}
+          onPress={() => {
+            navigation?.navigate("Map");
+          }}
+        >
+          <Ionicons name="map" size={25} />
+        </TouchableOpacity>
+      </View>
       {route.params?.origin === "Stop" ? (
         <></>
       ) : (
@@ -100,15 +111,20 @@ const styles = StyleSheet?.create({
   container: {
     flex: 1,
   },
-  input: {
+  inputContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 15,
+    marginHorizontal: 10,
     borderStyle: "solid",
-    height: 50,
     borderWidth: 1,
     borderRadius: 20,
+  },
+  input: {
+    height: 50,
     fontSize: 15,
-    marginHorizontal: 10,
-    paddingStart: 15,
-    marginBottom: 15,
+    paddingHorizontal: 15,
+    flex: 0.9,
   },
   line: {
     alignSelf: "center",
