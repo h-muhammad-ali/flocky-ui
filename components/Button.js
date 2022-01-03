@@ -12,7 +12,7 @@ const Button = ({ text, onPress }) => {
 export default Button;
 
 const styles = StyleSheet?.create({
-  text: { color: "white", textAlign: "center" },
+  text: { color: "white", textAlign: "center", fontFamily: "NunitoSans-Bold" },
   button: {
     backgroundColor: "#5188E3",
     marginHorizontal: 60,

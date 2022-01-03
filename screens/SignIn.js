@@ -36,7 +36,7 @@ const SignIn = ({ navigation }) => {
   };
   return (
     <View style={styles?.container}>
-      <Header text="Log In" />
+      <Header text="Log In" navigation={() => navigation?.goBack()} />
       <Text style={styles?.label}>Email Address</Text>
       {errors?.email && (
         <Text style={styles.error}>{errors?.email?.message}</Text>
@@ -119,37 +119,7 @@ const styles = StyleSheet?.create({
   label: {
     marginBottom: 5,
     marginStart: 10,
-  },
-  placeholderStyles: {
-    color: "grey",
-  },
-  dropdownGender: {
-    marginHorizontal: 10,
-    width: "50%",
-    marginBottom: 15,
-  },
-  dropdownCompany: {
-    marginHorizontal: 10,
-    marginBottom: 15,
-  },
-  dropdown: {
-    borderColor: "#B7B7B7",
-    height: 50,
-  },
-  getStarted: {
-    backgroundColor: "#5188E3",
-    color: "white",
-    textAlign: "center",
-    marginHorizontal: 60,
-    paddingVertical: 15,
-    borderRadius: 50,
-    marginTop: 20,
-  },
-  terms: {
-    color: "#758580",
-    textAlign: "center",
-    marginTop: 10,
-    marginHorizontal: 70,
+    fontFamily: "NunitoSans-SemiBold",
   },
   logIn: {
     flex: 1,

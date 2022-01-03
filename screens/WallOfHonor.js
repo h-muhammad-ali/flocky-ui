@@ -4,7 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Header from "../components/Header";
 import RankCard from "../components/RankCard";
 
-const WallOfHonor = () => {
+const WallOfHonor = ({ navigation }) => {
   const dummyScoreCard = [
     {
       id: 4,
@@ -61,30 +61,30 @@ const WallOfHonor = () => {
   ];
   return (
     <View style={styles?.container}>
-      <Header text="Wall of Honor" />
+      <Header text="Wall of Honor" navigation={() => navigation?.goBack()} />
       <View style={styles?.positionContainer}>
         <View style={styles?.position}>
           <Ionicons name="person-circle" size={130} color={"white"} />
-          <Text>{dummyTopThree[0].name}</Text>
+          <Text style={styles.name}>{dummyTopThree[0].name}</Text>
           <View style={styles.ridesContainer}>
             <Ionicons name="disc" size={25} />
-            <Text>{dummyTopThree[0].rides}</Text>
+            <Text style={styles.rides}>{dummyTopThree[0].rides}</Text>
           </View>
         </View>
         <View style={styles?.position}>
           <Ionicons name="person-circle" size={150} color={"white"} />
-          <Text>{dummyTopThree[1].name}</Text>
+          <Text style={styles.name}>{dummyTopThree[1].name}</Text>
           <View style={styles.ridesContainer}>
             <Ionicons name="disc" size={25} />
-            <Text>{dummyTopThree[1].rides}</Text>
+            <Text style={styles.rides}>{dummyTopThree[1].rides}</Text>
           </View>
         </View>
         <View style={styles?.position}>
           <Ionicons name="person-circle" size={110} color={"white"} />
-          <Text>{dummyTopThree[2].name}</Text>
+          <Text style={styles.name}>{dummyTopThree[2].name}</Text>
           <View style={styles.ridesContainer}>
             <Ionicons name="disc" size={25} />
-            <Text>{dummyTopThree[2].rides}</Text>
+            <Text style={styles.rides}>{dummyTopThree[2].rides}</Text>
           </View>
         </View>
       </View>
@@ -123,5 +123,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginEnd: 10,
+  },
+  name: {
+    fontFamily: "Kanit-Regular",
+    fontSize: 20,
+    color: "white",
+  },
+  rides: {
+    fontFamily: "Kanit-Light",
   },
 });

@@ -14,7 +14,7 @@ const PatronDetailsHeader = ({ name, rides, filledSeats, availableSeats }) => {
             <Ionicons
               key={index}
               name="person-circle-outline"
-              color={"#5188E3"} //#5188E3
+              color={"#666666"}
               size={20}
             />
           ))}
@@ -22,7 +22,7 @@ const PatronDetailsHeader = ({ name, rides, filledSeats, availableSeats }) => {
             <Ionicons
               key={index}
               name="person-circle-outline"
-              color={"#666666"} //#666666
+              color={"#5188E3"}
               size={20}
             />
           ))}

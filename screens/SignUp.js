@@ -59,7 +59,10 @@ const SignUp = ({ navigation, route }) => {
   };
   return (
     <View style={styles?.container}>
-      <Header text={route.params?.isEdit ? "Edit Profile" : "Sign Up"} />
+      <Header
+        text={route.params?.isEdit ? "Edit Profile" : "Sign Up"}
+        navigation={() => navigation?.goBack()}
+      />
       <Text style={styles?.label}>Name</Text>
       {errors?.name && (
         <Text style={styles?.error}>{errors?.name?.message}</Text>
@@ -260,6 +263,7 @@ const styles = StyleSheet?.create({
   label: {
     marginBottom: 5,
     marginStart: 10,
+    fontFamily: "NunitoSans-SemiBold",
   },
   placeholderStyles: {
     color: "grey",
@@ -277,15 +281,6 @@ const styles = StyleSheet?.create({
     borderColor: "#B7B7B7",
     height: 45,
     backgroundColor: "#f2f2f2",
-  },
-  getStarted: {
-    backgroundColor: "#5188E3",
-    color: "white",
-    textAlign: "center",
-    marginHorizontal: 60,
-    paddingVertical: 15,
-    borderRadius: 50,
-    marginTop: 20,
   },
   terms: {
     color: "#758580",

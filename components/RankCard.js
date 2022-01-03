@@ -7,7 +7,7 @@ const RankCard = ({ name, ridesCount }) => {
     <View style={styles.container}>
       <View style={styles.subContainer}>
         <Ionicons name="person-circle" size={50} />
-        <Text>{name}</Text>
+        <Text style={styles.name}>{name}</Text>
       </View>
       <View style={styles.ridesContainer}>
         <Ionicons name="disc" size={25} />
@@ -43,5 +43,10 @@ const styles = StyleSheet.create({
   },
   rides: {
     paddingStart: 5,
+    fontFamily: "Kanit-Light",
+  },
+  name: {
+    fontFamily: "Kanit-Regular",
+    color: "black",
   },
 });

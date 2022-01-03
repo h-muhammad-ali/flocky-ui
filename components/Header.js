@@ -6,10 +6,7 @@ import Constants from "expo-constants";
 const Header = ({ text, navigation }) => {
   return (
     <View style={styles?.container}>
-      <TouchableOpacity
-        style={styles?.backArrow}
-        onPress={() => navigation?.goBack()}
-      >
+      <TouchableOpacity style={styles?.backArrow} onPress={navigation}>
         <Ionicons name="arrow-back-outline" size={30} />
       </TouchableOpacity>
       <View style={styles?.title}>

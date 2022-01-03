@@ -81,7 +81,7 @@ const RideDetails = ({ navigation }) => {
 
   return (
     <View style={styles?.container}>
-      <Header text="Ride Details" />
+      <Header text="Ride Details" navigation={() => navigation?.goBack()} />
       <View style={styles?.timePickerContainer}>
         <Text style={styles?.containerTitle}>When?</Text>
         <View style={styles?.timePickerSubContainer}>

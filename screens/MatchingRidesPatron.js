@@ -20,7 +20,7 @@ const MatchingRidesPatron = ({ navigation }) => {
   ];
   return (
     <View style={styles?.container}>
-      <Header text="Matching Rides" />
+      <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
       <Text style={styles?.text}>Source</Text>
       <Text style={styles?.text}>Destination</Text>
       <View style={styles?.hitchers}>

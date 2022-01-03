@@ -47,6 +47,7 @@ const AdminSignUp = ({ navigation, route }) => {
     <View style={styles?.container}>
       <Header
         text={route.params?.isEdit ? "Edit Profile" : "Company Registeration"}
+        navigation={() => navigation?.goBack()}
       />
       <Text style={styles?.label}>Name</Text>
       {errors?.name && (
@@ -228,6 +229,7 @@ const styles = StyleSheet?.create({
   label: {
     marginBottom: 5,
     marginStart: 10,
+    fontFamily: "NunitoSans-SemiBold",
   },
   placeholderStyles: {
     color: "grey",
@@ -237,23 +239,10 @@ const styles = StyleSheet?.create({
     width: "50%",
     marginBottom: 15,
   },
-  dropdownCompany: {
-    marginHorizontal: 10,
-    marginBottom: 15,
-  },
   dropdown: {
     borderColor: "#B7B7B7",
     height: 45,
     backgroundColor: "#f2f2f2",
-  },
-  getStarted: {
-    backgroundColor: "#5188E3",
-    color: "white",
-    textAlign: "center",
-    marginHorizontal: 60,
-    paddingVertical: 15,
-    borderRadius: 50,
-    marginTop: 20,
   },
   terms: {
     color: "#758580",

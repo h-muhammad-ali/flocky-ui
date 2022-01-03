@@ -48,7 +48,7 @@ const PatronDetails = ({ navigation, route }) => {
 
   return (
     <View style={styles?.container}>
-      <Header text="Ride Details" navigation={navigation} />
+      <Header text="Ride Details" navigation={() => navigation?.goBack()} />
       {patron ? (
         <>
           <PatronDetailsHeader

@@ -33,7 +33,7 @@ const HitcherDetails = ({ route, navigation }) => {
     <>
       {hitcher ? (
         <View style={styles?.container}>
-          <Header text="Ride Details" />
+          <Header text="Ride Details" navigation={() => navigation?.goBack()} />
           <View style={styles?.headerContainer}>
             <Ionicons name="person-circle" size={100} color={"#5188E3"} />
             <View style={styles?.semiContainer}>

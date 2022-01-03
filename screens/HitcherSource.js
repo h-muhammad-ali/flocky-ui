@@ -44,7 +44,7 @@ const HitcherSource = ({ navigation, route }) => {
             ? "Enter Destination"
             : "Enter Way-Point"
         }
-        navigation={navigation}
+        navigation={() => navigation?.goBack()}
       />
       <TextInput
         style={styles?.input}
@@ -121,32 +121,6 @@ const styles = StyleSheet?.create({
     width: "95%",
     alignSelf: "center",
     flex: 1,
-  },
-  setOnMap: {
-    borderStyle: "solid",
-    borderBottomWidth: 1,
-    borderBottomColor: "#999595",
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-  },
-  setOnMapText: {
-    fontFamily: "NunitoSans-SemiBold",
-    fontSize: 15,
-    color: "#666666",
-  },
-  waypoint: {
-    backgroundColor: "#5188E3",
-    marginHorizontal: 20,
-    paddingVertical: 8,
-    borderRadius: 50,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingEnd: 10,
-    paddingStart: 10,
-  },
-  waypointText: {
-    color: "white",
   },
   bookmarkContainer: { flexDirection: "row", marginStart: 10 },
 });

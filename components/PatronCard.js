@@ -8,10 +8,10 @@ const PatronCard = ({ name, rides, time, availableSeats }) => {
       <Ionicons name="person-circle" size={80} color={"#5188E3"} />
       <View style={styles?.subContainer}>
         <View style={styles?.introContainer}>
-          <Text>{name}</Text>
+          <Text style={styles.name}>{name}</Text>
           <View style={styles?.rides}>
             <Ionicons name="car" size={32} color={"#5188E3"} />
-            <Text>{rides}</Text>
+            <Text style={styles.ridesText}>{rides}</Text>
           </View>
         </View>
         <View style={styles?.stats}>
@@ -80,4 +80,11 @@ const styles = StyleSheet?.create({
     flexWrap: "wrap",
   },
   availableSeatsText: { alignItems: "center", justifyContent: "center" },
+  name: {
+    fontFamily: "Kanit-Medium",
+    fontSize: 16,
+  },
+  ridesText: {
+    fontFamily: "Kanit-Light",
+  },
 });

@@ -21,7 +21,7 @@ const WhereTo = ({ navigation, route }) => {
       {route.params?.stop &&
         !wayPoints?.some((item) => item === route.params?.stop) &&
         setWayPoints((prevState) => [...prevState, route.params?.stop])}
-      <Header text="Where to?" navigation={navigation} />
+      <Header text="Where to?" navigation={() => navigation?.goBack()} />
       <Text style={styles.label}>From</Text>
       <TextInput
         value={route.params?.source ?? CURRENT_LOCATION}
@@ -106,6 +106,7 @@ const styles = StyleSheet?.create({
   label: {
     marginBottom: 7,
     marginStart: 10,
+    fontFamily: "NunitoSans-SemiBold",
   },
   input: {
     borderStyle: "solid",
@@ -117,21 +118,6 @@ const styles = StyleSheet?.create({
     marginHorizontal: 10,
     paddingStart: 10,
     marginBottom: 15,
-  },
-  continue: {
-    backgroundColor: "#5188E3",
-    marginHorizontal: 60,
-    paddingVertical: 15,
-    borderRadius: 50,
-    marginTop: 20,
-  },
-  continueText: { color: "white", textAlign: "center" },
-  fullScreen: { position: "absolute", top: 350, left: 10 },
-  mapView: {
-    flex: 0.9,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 20,
   },
   waypoint: {
     backgroundColor: "#5188E3",

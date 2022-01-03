@@ -52,14 +52,4 @@ const styles = StyleSheet?.create({
   },
   imageContainer: { justifyContent: "center", alignItems: "center" },
   image: { width: 300, height: 250 },
-  exit: {
-    backgroundColor: "#5188E3",
-    color: "white",
-    textAlign: "center",
-    marginHorizontal: 60,
-    paddingVertical: 15,
-    borderRadius: 50,
-    marginTop: 20,
-  },
-  buttonFlex: { flex: 1, justifyContent: "center" },
 });

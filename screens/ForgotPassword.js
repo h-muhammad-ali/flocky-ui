@@ -24,7 +24,7 @@ const ForgotPassword = ({ navigation }) => {
   };
   return (
     <View style={styles.container}>
-      <Header text="Forgot Password?" />
+      <Header text="Forgot Password?" navigation={() => navigation?.goBack()} />
       <Text style={styles?.label}>Email Address</Text>
       {errors?.email && (
         <Text style={styles.error}>{errors?.email?.message}</Text>

@@ -13,7 +13,7 @@ import moment from "moment";
 import ReceivedMessage from "../components/ReceivedMessage";
 import { Ionicons } from "@expo/vector-icons";
 
-const ChatScreen = ({ route }) => {
+const ChatScreen = ({ navigation, route }) => {
   const dummyTextMessages = [
     {
       type: "sent",
@@ -40,7 +40,10 @@ const ChatScreen = ({ route }) => {
   const [text, setText] = useState("");
   return (
     <View style={styles?.container}>
-      <Header text={route.params?.name} />
+      <Header
+        text={route.params?.name}
+        navigation={() => navigation?.goBack()}
+      />
       <FlatList
         data={messages}
         ListFooterComponent={
