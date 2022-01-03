@@ -197,14 +197,15 @@ const AdminSignUp = ({ navigation, route }) => {
             <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
             <Text style={styles?.links}>Privacy Policy</Text>
           </Text>
-          <TouchableOpacity
-            style={styles?.logIn}
-            onPress={() => {
-              navigation?.navigate("LogIn");
-            }}
-          >
-            <Text style={styles?.links}>I have an account</Text>
-          </TouchableOpacity>
+          <View style={styles.logIn}>
+            <TouchableOpacity
+              onPress={() => {
+                navigation?.navigate("LogIn");
+              }}
+            >
+              <Text style={styles?.links}>I have an account</Text>
+            </TouchableOpacity>
+          </View>
         </>
       )}
     </View>
@@ -253,6 +254,7 @@ const styles = StyleSheet?.create({
   logIn: {
     flex: 1,
     justifyContent: "flex-end",
+    alignItems: "center",
     marginBottom: 10,
   },
   links: {

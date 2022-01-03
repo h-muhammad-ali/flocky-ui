@@ -81,6 +81,7 @@ const SignIn = ({ navigation }) => {
         )}
       />
       <TouchableOpacity
+        style={{ alignSelf: "center" }}
         onPress={() => {
           navigation?.navigate("Forgot Password");
         }}
@@ -88,15 +89,15 @@ const SignIn = ({ navigation }) => {
         <Text style={styles.links}>Forgot Password</Text>
       </TouchableOpacity>
       <Button text="Log In" onPress={handleSubmit(onSubmit)} />
-
-      <TouchableOpacity
-        style={styles?.logIn}
-        onPress={() => {
-          navigation?.navigate("SignUp");
-        }}
-      >
-        <Text style={styles?.links}>I don't have an account</Text>
-      </TouchableOpacity>
+      <View style={styles?.logIn}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation?.navigate("SignUp");
+          }}
+        >
+          <Text style={styles?.links}>I don't have an account</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -124,6 +125,7 @@ const styles = StyleSheet?.create({
   logIn: {
     flex: 1,
     justifyContent: "flex-end",
+    alignItems: "center",
     marginBottom: 10,
   },
   links: {
