@@ -11,21 +11,21 @@ const Drawer = createDrawerNavigator();
 const UserDrawerNavigator = ({ navigation }) => {
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      initialRouteName="User Panel"
       screenOptions={({ route }) => ({
         headerShown: false,
         drawerIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route?.name === "Home") {
+          if (route?.name === "User Panel") {
             iconName = focused ? "md-home" : "md-home-outline";
-          } else if (route?.name === "Edit Profile") {
+          } else if (route?.name === "Edit User Profile") {
             iconName = focused ? "account-edit" : "account-edit-outline";
           } else if (route?.name === "Wall of Honor") {
             iconName = focused ? "account-group" : "account-group-outline";
           }
 
-          return route?.name === "Home" ? (
+          return route?.name === "User Panel" ? (
             <Ionicons name={iconName} size={size} color={color} />
           ) : (
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
@@ -38,8 +38,21 @@ const UserDrawerNavigator = ({ navigation }) => {
       })}
       drawerContent={(props) => <CustomDrawer {...props} />}
     >
-      <Drawer.Screen name="Home" component={StackNavigator} />
-      <Drawer.Screen name="Edit Profile" component={SignUp} />
+      <Drawer.Screen
+        name="User Panel"
+        component={StackNavigator}
+        options={{
+          drawerLabel: "Home",
+        }}
+      />
+      <Drawer.Screen
+        name="Edit User Profile"
+        component={SignUp}
+        initialParams={{ isEdit: true }}
+        options={{
+          drawerLabel: "Edit Profile",
+        }}
+      />
       <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />
     </Drawer.Navigator>
   );

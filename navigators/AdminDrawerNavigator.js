@@ -4,6 +4,8 @@ import CustomDrawer from "../components/CustomDrawer";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AdminTabNavigator from "./AdminTabNavigator";
+import AdminSignUp from "../screens/AdminSignUp";
+import WallOfHonor from "../screens/WallOfHonor";
 
 const Drawer = createDrawerNavigator();
 const AdminDrawerNavigator = () => {
@@ -15,15 +17,15 @@ const AdminDrawerNavigator = () => {
         drawerIcon: ({ focused, color, size }) => {
           let iconName;
 
-          if (route?.name === "Admin Home") {
+          if (route?.name === "Admin Panel") {
             iconName = focused ? "md-home" : "md-home-outline";
-          } else if (route?.name === "Edit Profile") {
+          } else if (route?.name === "Edit Admin Profile") {
             iconName = focused ? "account-edit" : "account-edit-outline";
           } else if (route?.name === "Wall of Honor") {
             iconName = focused ? "account-group" : "account-group-outline";
           }
 
-          return route?.name === "Admin Home" ? (
+          return route?.name === "Admin Panel" ? (
             <Ionicons name={iconName} size={size} color={color} />
           ) : (
             <MaterialCommunityIcons name={iconName} size={size} color={color} />
@@ -36,7 +38,22 @@ const AdminDrawerNavigator = () => {
       })}
       drawerContent={(props) => <CustomDrawer {...props} isAdmin={true} />}
     >
-      <Drawer.Screen name="Admin Home" component={AdminTabNavigator} />
+      <Drawer.Screen
+        name="Admin Panel"
+        component={AdminTabNavigator}
+        options={{
+          drawerLabel: "Home",
+        }}
+      />
+      <Drawer.Screen
+        name="Edit Admin Profile"
+        component={AdminSignUp}
+        initialParams={{ isEdit: true }}
+        options={{
+          drawerLabel: "Edit Profile",
+        }}
+      />
+      <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />
     </Drawer.Navigator>
   );
 };

@@ -11,7 +11,7 @@ import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 
-const SignUp = ({ navigation }) => {
+const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [genderOpen, setGenderOpen] = useState(false);
@@ -59,7 +59,7 @@ const SignUp = ({ navigation }) => {
   };
   return (
     <View style={styles?.container}>
-      <Header text="Sign Up" />
+      <Header text={route.params?.isEdit ? "Edit Profile" : "Sign Up"} />
       <Text style={styles?.label}>Name</Text>
       {errors?.name && (
         <Text style={styles?.error}>{errors?.name?.message}</Text>
@@ -218,20 +218,26 @@ const SignUp = ({ navigation }) => {
           />
         )}
       />
-      <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
-      <Text style={styles?.terms}>
-        By continuing, you agree to Flocky’s{" "}
-        <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
-        <Text style={styles?.links}>Privacy Policy</Text>
-      </Text>
-      <TouchableOpacity
-        style={styles?.logIn}
-        onPress={() => {
-          navigation?.navigate("LogIn");
-        }}
-      >
-        <Text style={styles?.links}>I have an account</Text>
-      </TouchableOpacity>
+      {route.params?.isEdit ? (
+        <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
+      ) : (
+        <>
+          <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
+          <Text style={styles?.terms}>
+            By continuing, you agree to Flocky’s{" "}
+            <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
+            <Text style={styles?.links}>Privacy Policy</Text>
+          </Text>
+          <TouchableOpacity
+            style={styles?.logIn}
+            onPress={() => {
+              navigation?.navigate("LogIn");
+            }}
+          >
+            <Text style={styles?.links}>I have an account</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };

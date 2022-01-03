@@ -11,7 +11,7 @@ import { useForm, Controller } from "react-hook-form";
 import DropDownPicker from "react-native-dropdown-picker";
 import Button from "../components/Button";
 
-const AdminSignUp = ({ navigation }) => {
+const AdminSignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const DOMAIN_REGEX =
@@ -45,7 +45,9 @@ const AdminSignUp = ({ navigation }) => {
   };
   return (
     <View style={styles?.container}>
-      <Header text="Company Registeration" />
+      <Header
+        text={route.params?.isEdit ? "Edit Profile" : "Company Registeration"}
+      />
       <Text style={styles?.label}>Name</Text>
       {errors?.name && (
         <Text style={styles?.error}>{errors?.name?.message}</Text>
@@ -182,20 +184,28 @@ const AdminSignUp = ({ navigation }) => {
           />
         )}
       />
-      <Button text="Continue" onPress={handleSubmit(onSubmit)} />
-      <Text style={styles?.terms}>
-        By continuing, you agree to Flocky’s{" "}
-        <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
-        <Text style={styles?.links}>Privacy Policy</Text>
-      </Text>
-      <TouchableOpacity
-        style={styles?.logIn}
-        onPress={() => {
-          navigation?.navigate("LogIn");
-        }}
-      >
-        <Text style={styles?.links}>I have an account</Text>
-      </TouchableOpacity>
+      {route.params?.isEdit ? (
+        <>
+          <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
+        </>
+      ) : (
+        <>
+          <Button text="Continue" onPress={handleSubmit(onSubmit)} />
+          <Text style={styles?.terms}>
+            By continuing, you agree to Flocky’s{" "}
+            <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
+            <Text style={styles?.links}>Privacy Policy</Text>
+          </Text>
+          <TouchableOpacity
+            style={styles?.logIn}
+            onPress={() => {
+              navigation?.navigate("LogIn");
+            }}
+          >
+            <Text style={styles?.links}>I have an account</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
