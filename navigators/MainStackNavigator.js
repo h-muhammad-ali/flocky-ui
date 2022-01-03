@@ -7,6 +7,8 @@ import AdminSignUp from "../screens/AdminSignUp";
 import UserDrawerNavigator from "./UserDrawerNavigator";
 import VerificationFinished from "../screens/VerificationFinished";
 import AdminDrawerNavigator from "./AdminDrawerNavigator";
+import ForgotPassword from "../screens/ForgotPassword";
+import ResetPassword from "../screens/ResetPassword";
 
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
@@ -21,12 +23,14 @@ const MainStackNavigator = () => {
       <Stack.Screen name="SignUp" component={SignUp} />
       <Stack.Screen name="LogIn" component={SignIn} />
       <Stack.Screen name="AdminSignUp" component={AdminSignUp} />
-      <Stack.Screen name="User Panel" component={UserDrawerNavigator} />
-      <Stack.Screen name="Admin Panel" component={AdminDrawerNavigator} />
+      <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
+      <Stack.Screen name="Admin Tab" component={AdminDrawerNavigator} />
       <Stack.Screen
         name="VerificationFinished"
         component={VerificationFinished}
       />
+      <Stack.Screen name="Forgot Password" component={ForgotPassword} />
+      <Stack.Screen name="Reset Password" component={ResetPassword} />
     </Stack.Navigator>
   );
 };

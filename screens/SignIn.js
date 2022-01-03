@@ -27,10 +27,10 @@ const SignIn = ({ navigation }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     if (data.email === "user@gmail.com") {
-      navigation?.navigate("User Panel");
+      navigation?.navigate("User Stack");
     }
     if (data.email === "admin@gmail.com") {
-      navigation?.navigate("Admin Panel");
+      navigation?.navigate("Admin Tab");
     }
     reset();
   };
@@ -80,7 +80,11 @@ const SignIn = ({ navigation }) => {
           />
         )}
       />
-      <TouchableOpacity>
+      <TouchableOpacity
+        onPress={() => {
+          navigation?.navigate("Forgot Password");
+        }}
+      >
         <Text style={styles.links}>Forgot Password</Text>
       </TouchableOpacity>
       <Button text="Log In" onPress={handleSubmit(onSubmit)} />
