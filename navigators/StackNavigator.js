@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import Roles from "../screens/Roles";
 import WhereTo from "../screens/WhereTo";
-import HitcherSource from "../screens/HitcherSource";
 import MatchingRidesHitcher from "../screens/MatchingRidesHitcher";
 import PatronDetails from "../screens/PatronDetails";
 import HitcherDetails from "../screens/HitcherDetails";
@@ -17,6 +16,7 @@ import ChatScreen from "../screens/ChatScreen";
 import { DrawerActions } from "@react-navigation/native";
 import Map from "../screens/Map";
 import FullScreenMap from "../screens/FullScreenMap";
+import SelectLocation from "../screens/SelectLocation";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -74,7 +74,7 @@ const StackNavigator = () => {
         })}
       />
       <Stack.Screen name="WhereTo" component={WhereTo} />
-      <Stack.Screen name="HitcherSource" component={HitcherSource} />
+      <Stack.Screen name="SelectLocation" component={SelectLocation} />
       <Stack.Screen
         name="MatchingRidesHitcher"
         component={MatchingRidesHitcher}
