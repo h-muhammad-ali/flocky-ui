@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -34,6 +34,16 @@ const SignIn = ({ navigation }) => {
     }
     reset();
   };
+  const [focusEmail, setFocusEmail] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
+  const focusHandler = (set) => {
+    set(true);
+  };
+
+  const blurHandler = (onBlur, set) => {
+    set(false);
+    onBlur();
+  };
   return (
     <View style={styles?.container}>
       <Header text="Log In" navigation={() => navigation?.goBack()} />
@@ -50,10 +60,15 @@ const SignIn = ({ navigation }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.email && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.email && styles?.errorBorder,
+              focusEmail && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusEmail)}
+            onBlur={() => blurHandler(onBlur, setFocusEmail)}
             value={value}
           />
         )}
@@ -71,11 +86,16 @@ const SignIn = ({ navigation }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.password && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.password && styles?.errorBorder,
+              focusPassword && { borderColor: "#5188E3" },
+            ]}
             secureTextEntry={true}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusPassword)}
+            onBlur={() => blurHandler(onBlur, setFocusPassword)}
             value={value}
           />
         )}

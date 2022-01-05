@@ -10,6 +10,7 @@ import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import DropDownPicker from "react-native-dropdown-picker";
 import Button from "../components/Button";
+import { Ionicons } from "@expo/vector-icons";
 
 const AdminSignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
@@ -43,6 +44,20 @@ const AdminSignUp = ({ navigation, route }) => {
     reset();
     navigation?.navigate("VerificationFinished");
   };
+  const [focusName, setFocusName] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
+  const [focusEmail, setFocusEmail] = useState(false);
+  const [focusCompany, setFocusCompany] = useState(false);
+  const [focusDomain, setFocusDomain] = useState(false);
+  const [checked, setChecked] = useState(false);
+  const focusHandler = (set) => {
+    set(true);
+  };
+
+  const blurHandler = (onBlur, set) => {
+    set(false);
+    onBlur();
+  };
   return (
     <View style={styles?.container}>
       <Header
@@ -65,10 +80,15 @@ const AdminSignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.name && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.name && styles?.errorBorder,
+              focusName && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusName)}
+            onBlur={() => blurHandler(onBlur, setFocusName)}
             value={value}
           />
         )}
@@ -86,11 +106,16 @@ const AdminSignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.password && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.password && styles?.errorBorder,
+              focusPassword && { borderColor: "#5188E3" },
+            ]}
             secureTextEntry={true}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusPassword)}
+            onBlur={() => blurHandler(onBlur, setFocusPassword)}
             value={value}
           />
         )}
@@ -136,10 +161,15 @@ const AdminSignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.company && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.company && styles?.errorBorder,
+              focusCompany && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusCompany)}
+            onBlur={() => blurHandler(onBlur, setFocusCompany)}
             value={value}
           />
         )}
@@ -157,10 +187,15 @@ const AdminSignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.email && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.email && styles?.errorBorder,
+              focusEmail && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusEmail)}
+            onBlur={() => blurHandler(onBlur, setFocusEmail)}
             value={value}
           />
         )}
@@ -177,14 +212,33 @@ const AdminSignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.domain && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.domain && styles?.errorBorder,
+              focusDomain && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusDomain)}
+            onBlur={() => blurHandler(onBlur, setFocusDomain)}
             value={value}
           />
         )}
       />
+      <View style={styles?.checkboxContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setChecked(!checked);
+          }}
+        >
+          <Ionicons
+            name={checked ? "checkbox" : "square-outline"}
+            size={25}
+            color={"#5188E3"}
+          />
+        </TouchableOpacity>
+        <Text>Travel Only with Same Gender</Text>
+      </View>
       {route.params?.isEdit ? (
         <>
           <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
@@ -270,6 +324,11 @@ const styles = StyleSheet?.create({
   },
   errorBorder: {
     borderColor: "red",
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginStart: 10,
   },
 });
 

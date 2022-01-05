@@ -10,6 +10,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
+import { Ionicons } from "@expo/vector-icons";
 
 const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
@@ -57,8 +58,24 @@ const SignUp = ({ navigation, route }) => {
     setGenderValue(null);
     setCompanyValue(null);
   };
+
+  const [focusName, setFocusName] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
+  const [focusEmail, setFocusEmail] = useState(false);
+  const [focusCode, setFocusCode] = useState(false);
+  const [checked, setChecked] = useState(false);
+
+  const focusHandler = (set) => {
+    set(true);
+  };
+
+  const blurHandler = (onBlur, set) => {
+    set(false);
+    onBlur();
+  };
+
   return (
-    <View style={styles?.container}>
+    <View style={styles.container}>
       <Header
         text={route.params?.isEdit ? "Edit Profile" : "Sign Up"}
         navigation={() => navigation?.goBack()}
@@ -79,10 +96,15 @@ const SignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.name && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.name && styles?.errorBorder,
+              focusName && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusName)}
+            onBlur={() => blurHandler(onBlur, setFocusName)}
             value={value}
           />
         )}
@@ -96,15 +118,23 @@ const SignUp = ({ navigation, route }) => {
         control={control}
         rules={{
           required: { value: true, message: "This field is required" },
-          minLength: { value: 8, message: "Password must be >= 8 characters" },
+          minLength: {
+            value: 8,
+            message: "Password must be >= 8 characters",
+          },
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.password && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.password && styles?.errorBorder,
+              focusPassword && { borderColor: "#5188E3" },
+            ]}
             secureTextEntry={true}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusPassword)}
+            onBlur={() => blurHandler(onBlur, setFocusPassword)}
             value={value}
           />
         )}
@@ -190,10 +220,15 @@ const SignUp = ({ navigation, route }) => {
         }}
         render={({ field: { onChange, onBlur, value } }) => (
           <TextInput
-            style={[styles?.input, errors?.email && styles?.errorBorder]}
+            style={[
+              styles?.input,
+              errors?.email && styles?.errorBorder,
+              focusEmail && { borderColor: "#5188E3" },
+            ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusEmail)}
+            onBlur={() => blurHandler(onBlur, setFocusEmail)}
             value={value}
           />
         )}
@@ -213,14 +248,30 @@ const SignUp = ({ navigation, route }) => {
             style={[
               styles?.input,
               errors?.invitationCode && styles?.errorBorder,
+              focusCode && { borderColor: "#5188E3" },
             ]}
             selectionColor={"#5188E3"}
             onChangeText={onChange}
-            onBlur={onBlur}
+            onFocus={() => focusHandler(setFocusCode)}
+            onBlur={() => blurHandler(onBlur, setFocusCode)}
             value={value}
           />
         )}
       />
+      <View style={styles?.checkboxContainer}>
+        <TouchableOpacity
+          onPress={() => {
+            setChecked(!checked);
+          }}
+        >
+          <Ionicons
+            name={checked ? "checkbox" : "square-outline"}
+            size={25}
+            color={"#5188E3"}
+          />
+        </TouchableOpacity>
+        <Text>Travel Only with Same Gender</Text>
+      </View>
       {route.params?.isEdit ? (
         <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
       ) : (
@@ -308,6 +359,11 @@ const styles = StyleSheet?.create({
   },
   errorBorder: {
     borderColor: "red",
+  },
+  checkboxContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginStart: 10,
   },
 });
 
