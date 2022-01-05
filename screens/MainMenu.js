@@ -19,9 +19,11 @@ const MainMenu = ({ navigation }) => {
           style={{ width: 130, height: 100 }}
         />
         <Text style={styles?.title}>Flocky</Text>
+      </View>
+      <View style={styles.imageContainer}>
         <Image
           source={require("../assets/flocky-assets/mainmenu.png")}
-          style={{ width: width, height: 300 }}
+          style={styles.image}
         />
       </View>
       <View style={styles.menu}>
@@ -69,6 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     borderTopRightRadius: 50,
     borderTopLeftRadius: 50,
+    paddingVertical: 30,
   },
   menuItemsButtonText: {
     color: "#5188E3",
@@ -103,4 +106,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
+  imageContainer: { flex: 1, aspectRatio: 1 * 1, alignSelf: "center" },
+  image: { resizeMode: "cover", width: "100%", height: "100%" },
 });

@@ -37,8 +37,8 @@ const styles = StyleSheet?.create({
     marginTop: Constants?.statusBarHeight,
     backgroundColor: "white",
   },
-  imageContainer: { flex: 2, alignSelf: "center" },
-  image: { width: 380, height: 400 },
+  imageContainer: { flex: 2, aspectRatio: 1 * 1, alignSelf: "center" },
+  image: { resizeMode: "cover", width: "100%", height: "100%" },
   textContainer: {
     flex: 1,
     justifyContent: "space-evenly",
