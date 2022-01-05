@@ -11,7 +11,11 @@ Installation:
 
 In the project directory, you can run:
 
-#### `npm start` or #### `expo start`
+#### `npm start` or `expo start`
+
+OR
+
+You can run the project simply by typing `./scripts/run.sh` command in the project directory.
 
 ## Opening the app on your phone/tablet
 
