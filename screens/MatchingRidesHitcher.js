@@ -8,8 +8,10 @@ import {
 } from "react-native";
 import Header from "../components/Header";
 import PatronCard from "../components/PatronCard";
+import { useSelector } from "react-redux";
 
-const MatchingRidesHitcher = ({ navigation, route }) => {
+const MatchingRidesHitcher = ({ navigation }) => {
+  const { source, destination } = useSelector((state) => state?.locations);
   const dummyPatrons = [
     {
       id: 1,
@@ -51,10 +53,8 @@ const MatchingRidesHitcher = ({ navigation, route }) => {
   return (
     <View style={styles?.container}>
       <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
-      <Text style={styles?.input}>Source: {route.params?.source}</Text>
-      <Text style={styles?.input}>
-        Destination: {route.params?.destination}
-      </Text>
+      <Text style={styles?.input}>Source: {source}</Text>
+      <Text style={styles?.input}>Destination: {destination}</Text>
       <View style={styles?.patrons}>
         <FlatList
           data={dummyPatrons}

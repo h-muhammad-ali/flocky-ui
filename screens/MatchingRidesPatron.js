@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, FlatList } from "react-native";
 import Header from "../components/Header";
 import HitcherCard from "../components/HitcherCard";
+import { useSelector } from "react-redux";
 
 const MatchingRidesPatron = ({ navigation }) => {
   const dummyHitchers = [
@@ -18,11 +19,12 @@ const MatchingRidesPatron = ({ navigation }) => {
       name: "Ali",
     },
   ];
+  const { source, destination } = useSelector((state) => state?.locations);
   return (
     <View style={styles?.container}>
       <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
-      <Text style={styles?.text}>Source</Text>
-      <Text style={styles?.text}>Destination</Text>
+      <Text style={styles?.text}>Source: {source}</Text>
+      <Text style={styles?.text}>Destination: {destination}</Text>
       <View style={styles?.hitchers}>
         <FlatList
           data={dummyHitchers}

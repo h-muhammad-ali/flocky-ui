@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,30 +6,41 @@ import {
   TextInput,
   TouchableOpacity,
 } from "react-native";
+import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
 import Map from "../components/Map";
 import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
+import {
+  setSource,
+  setDestination,
+  removeWayPoint,
+  emptyWayPoints,
+} from "../redux/locations/locationsActions";
 
 const WhereTo = ({ navigation, route }) => {
   const CURRENT_LOCATION = "Current Location";
   const DESTINATION = "Company Location";
-
-  const [wayPoints, setWayPoints] = useState([]);
+  const { source, destination, wayPoints } = useSelector(
+    (state) => state?.locations
+  );
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(setSource(CURRENT_LOCATION));
+    dispatch(setDestination(DESTINATION));
+    dispatch(emptyWayPoints());
+  }, []);
   return (
     <View style={styles?.container}>
-      {route.params?.stop &&
-        !wayPoints?.some((item) => item === route.params?.stop) &&
-        setWayPoints((prevState) => [...prevState, route.params?.stop])}
       <Header text="Where to?" navigation={() => navigation?.goBack()} />
       <Text style={styles.label}>From</Text>
       <TextInput
-        value={route.params?.source ?? CURRENT_LOCATION}
+        value={source}
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
         onPressOut={() =>
-          navigation?.navigate("HitcherSource", { origin: "From" })
+          navigation?.navigate("SelectLocation", { origin: "From" })
         }
         showSoftInputOnFocus={false}
       />
@@ -47,9 +58,7 @@ const WhereTo = ({ navigation, route }) => {
           />
           <TouchableOpacity
             onPress={() => {
-              setWayPoints((prevState) =>
-                prevState?.filter((element, i) => i === index)
-              );
+              dispatch(removeWayPoint(value));
             }}
           >
             <Ionicons name="close" size={30} />
@@ -58,12 +67,12 @@ const WhereTo = ({ navigation, route }) => {
       ))}
       <Text style={styles?.label}>To</Text>
       <TextInput
-        value={route.params?.destination ?? DESTINATION}
+        value={destination}
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
         onPressOut={() =>
-          navigation?.navigate("HitcherSource", { origin: "To" })
+          navigation?.navigate("SelectLocation", { origin: "To" })
         }
         showSoftInputOnFocus={false}
       />
@@ -71,7 +80,7 @@ const WhereTo = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles?.waypoint}
           onPress={() => {
-            navigation?.navigate("HitcherSource", { origin: "Stop" });
+            navigation?.navigate("SelectLocation", { origin: "Stop" });
           }}
         >
           <Text style={styles?.waypointText}>Add Way-Points</Text>
@@ -90,10 +99,7 @@ const WhereTo = ({ navigation, route }) => {
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
           !route.params?.isPatron
-            ? navigation?.navigate("MatchingRidesHitcher", {
-                source: route.params?.source,
-                destination: route.params?.destination,
-              })
+            ? navigation?.navigate("MatchingRidesHitcher")
             : navigation?.navigate("RideDetails");
         }}
       />

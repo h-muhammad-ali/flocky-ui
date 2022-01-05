@@ -10,8 +10,15 @@ import Bookmark from "../components/Bookmark";
 import Header from "../components/Header";
 import Place from "../components/Place";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
+import {
+  setSource,
+  setDestination,
+  setWayPoint,
+} from "../redux/locations/locationsActions";
 
-const HitcherSource = ({ navigation, route }) => {
+const SelectLocation = ({ navigation, route }) => {
+  const dispatch = useDispatch();
   const dummyPlaces = [
     {
       id: 1,
@@ -83,18 +90,14 @@ const HitcherSource = ({ navigation, route }) => {
           keyExtractor={(item) => item?.id}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPressOut={() =>
-                navigation.navigate({
-                  name: "WhereTo",
-                  params:
-                    route.params?.origin === "From"
-                      ? { source: item?.short_name }
-                      : route.params?.origin === "To"
-                      ? { destination: item?.short_name }
-                      : { stop: item?.short_name },
-                  merge: true,
-                })
-              }
+              onPress={() => {
+                route.params?.origin === "From"
+                  ? dispatch(setSource(item?.short_name))
+                  : route.params?.origin === "To"
+                  ? dispatch(setDestination(item?.short_name))
+                  : dispatch(setWayPoint(item?.short_name));
+                navigation?.navigate({ name: "WhereTo", merge: true });
+              }}
             >
               <Place title={item?.short_name} subtitle={item?.long_name} />
             </TouchableOpacity>
@@ -105,7 +108,7 @@ const HitcherSource = ({ navigation, route }) => {
   );
 };
 
-export default HitcherSource;
+export default SelectLocation;
 
 const styles = StyleSheet?.create({
   container: {
