@@ -11,7 +11,12 @@ Execute following command:
 ```bash
 ./scripts/run.sh
 ```
-This will show you the QR code and you can scan it by following the instructions below.   
+This will show you the QR code and you can scan it by following the instructions below. 
+
+If you're getting permission issue, then run following command:
+```bash
+chmod +x ./scripts/run.sh
+```
 
 ### Opening the app on your phone/tablet
 
