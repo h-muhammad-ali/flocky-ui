@@ -1,23 +1,19 @@
 # fyp-prototype
-## Available Scripts
 
-### Installation and Setup Instructions
+## Running project
 
-Clone down this repository. You will need `node` and `npm` installed globally on your machine.  
+Pre-requisites:
 
-Installation:
+- node _(follow [this link](https://nodejs.org/en/download/) to install)_
 
-#### `npm install`  
+Execute following command:
 
-In the project directory, you can run:
+```bash
+./scripts/run.sh
+```
+This will show you the QR code and you can scan it by following the instructions below.   
 
-#### `npm start` or `expo start`
-
-OR
-
-You can run the project simply by typing `./scripts/run.sh` command in the project directory.
-
-## Opening the app on your phone/tablet
+### Opening the app on your phone/tablet
 
 - 🍎 On your iPhone or iPad, open the default Apple "Camera" app and scan the QR code you see in the terminal or in Expo Dev Tools.
 - 🤖 On your Android device, press "Scan QR Code" on the "Projects" tab of the Expo Go app and scan the QR code you see in the terminal or in Expo Dev Tools.
