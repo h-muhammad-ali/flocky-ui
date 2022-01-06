@@ -5,6 +5,9 @@ import {
   TextInput,
   Text,
   TouchableOpacity,
+  Keyboard,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
@@ -58,209 +61,220 @@ const AdminSignUp = ({ navigation, route }) => {
     onBlur();
   };
   return (
-    <View style={styles?.container}>
-      <Header
-        text={route.params?.isEdit ? "Edit Profile" : "Company Registeration"}
-        navigation={() => navigation?.goBack()}
-      />
-      <Text style={styles?.label}>Name</Text>
-      {errors?.name && (
-        <Text style={styles?.error}>{errors?.name?.message}</Text>
-      )}
-      <Controller
-        name="name"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-          pattern: {
-            value: /^[A-Za-z]+( [A-Za-z]+)*$/,
-            message: "Name can only include Alphabets",
-          },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[
-              styles?.input,
-              errors?.name && styles?.errorBorder,
-              focusName && { borderColor: "#5188E3" },
-            ]}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onFocus={() => focusHandler(setFocusName)}
-            onBlur={() => blurHandler(onBlur, setFocusName)}
-            value={value}
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
+      <View style={styles?.container}>
+        <Header
+          text={route.params?.isEdit ? "Edit Profile" : "Company Registeration"}
+          navigation={() => navigation?.goBack()}
+        />
+        <KeyboardAvoidingView behavior="padding">
+          <Text style={styles?.label}>Name</Text>
+          {errors?.name && (
+            <Text style={styles?.error}>{errors?.name?.message}</Text>
+          )}
+          <Controller
+            name="name"
+            control={control}
+            rules={{
+              required: { value: true, message: "This field is required" },
+              pattern: {
+                value: /^[A-Za-z]+( [A-Za-z]+)*$/,
+                message: "Name can only include Alphabets",
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[
+                  styles?.input,
+                  errors?.name && styles?.errorBorder,
+                  focusName && { borderColor: "#5188E3" },
+                ]}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                onFocus={() => focusHandler(setFocusName)}
+                onBlur={() => blurHandler(onBlur, setFocusName)}
+                value={value}
+              />
+            )}
           />
-        )}
-      />
-      <Text style={styles?.label}>Password</Text>
-      {errors?.password && (
-        <Text style={styles?.error}>{errors?.password?.message}</Text>
-      )}
-      <Controller
-        name="password"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-          minLength: { value: 8, message: "Password must be >= 8 characters" },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[
-              styles?.input,
-              errors?.password && styles?.errorBorder,
-              focusPassword && { borderColor: "#5188E3" },
-            ]}
-            secureTextEntry={true}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onFocus={() => focusHandler(setFocusPassword)}
-            onBlur={() => blurHandler(onBlur, setFocusPassword)}
-            value={value}
+          <Text style={styles?.label}>Password</Text>
+          {errors?.password && (
+            <Text style={styles?.error}>{errors?.password?.message}</Text>
+          )}
+          <Controller
+            name="password"
+            control={control}
+            rules={{
+              required: { value: true, message: "This field is required" },
+              minLength: {
+                value: 8,
+                message: "Password must be >= 8 characters",
+              },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[
+                  styles?.input,
+                  errors?.password && styles?.errorBorder,
+                  focusPassword && { borderColor: "#5188E3" },
+                ]}
+                secureTextEntry={true}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                onFocus={() => focusHandler(setFocusPassword)}
+                onBlur={() => blurHandler(onBlur, setFocusPassword)}
+                value={value}
+              />
+            )}
           />
-        )}
-      />
 
-      <Text style={styles?.label}>Gender</Text>
-      {errors?.gender && (
-        <Text style={styles?.error}>{errors?.gender?.message}</Text>
-      )}
-      <Controller
-        name="gender"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-        }}
-        render={({ field: { onChange, value } }) => (
-          <View style={styles?.dropdownGender}>
-            <DropDownPicker
-              style={styles?.dropdown}
-              open={genderOpen}
-              value={value}
-              items={gender}
-              setOpen={setGenderOpen}
-              setValue={onChange}
-              setItems={setGender}
-              placeholder="Select Gender"
-              placeholderStyle={styles?.placeholderStyles}
+          <Text style={styles?.label}>Gender</Text>
+          {errors?.gender && (
+            <Text style={styles?.error}>{errors?.gender?.message}</Text>
+          )}
+          <Controller
+            name="gender"
+            control={control}
+            rules={{
+              required: { value: true, message: "This field is required" },
+            }}
+            render={({ field: { onChange, value } }) => (
+              <View style={styles?.dropdownGender}>
+                <DropDownPicker
+                  style={styles?.dropdown}
+                  open={genderOpen}
+                  value={value}
+                  items={gender}
+                  setOpen={setGenderOpen}
+                  setValue={onChange}
+                  setItems={setGender}
+                  placeholder="Select Gender"
+                  placeholderStyle={styles?.placeholderStyles}
+                />
+              </View>
+            )}
+          />
+
+          <Text style={styles?.label}>Institute/Organization</Text>
+          {errors?.company && (
+            <Text style={styles?.error}>{errors?.company?.message}</Text>
+          )}
+          <Controller
+            name="company"
+            control={control}
+            rules={{
+              required: { value: true, message: "This field is required" },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[
+                  styles?.input,
+                  errors?.company && styles?.errorBorder,
+                  focusCompany && { borderColor: "#5188E3" },
+                ]}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                onFocus={() => focusHandler(setFocusCompany)}
+                onBlur={() => blurHandler(onBlur, setFocusCompany)}
+                value={value}
+              />
+            )}
+          />
+          <Text style={styles?.label}>Email Address</Text>
+          {errors?.email && (
+            <Text style={styles.error}>{errors?.email?.message}</Text>
+          )}
+          <Controller
+            name="email"
+            control={control}
+            rules={{
+              required: { value: true, message: "This field is required" },
+              pattern: { value: EMAIL_REGEX, message: "Not a valid email" },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[
+                  styles?.input,
+                  errors?.email && styles?.errorBorder,
+                  focusEmail && { borderColor: "#5188E3" },
+                ]}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                onFocus={() => focusHandler(setFocusEmail)}
+                onBlur={() => blurHandler(onBlur, setFocusEmail)}
+                value={value}
+              />
+            )}
+          />
+          <Text style={styles?.label}>Company's Domain(Optional)</Text>
+          {errors?.domain && (
+            <Text style={styles?.error}>{errors?.domain?.message}</Text>
+          )}
+          <Controller
+            name="domain"
+            control={control}
+            rules={{
+              pattern: { value: DOMAIN_REGEX, message: "Not a valid domain." },
+            }}
+            render={({ field: { onChange, onBlur, value } }) => (
+              <TextInput
+                style={[
+                  styles?.input,
+                  errors?.domain && styles?.errorBorder,
+                  focusDomain && { borderColor: "#5188E3" },
+                ]}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                onFocus={() => focusHandler(setFocusDomain)}
+                onBlur={() => blurHandler(onBlur, setFocusDomain)}
+                value={value}
+              />
+            )}
+          />
+        </KeyboardAvoidingView>
+        <View style={styles?.checkboxContainer}>
+          <TouchableOpacity
+            onPress={() => {
+              setChecked(!checked);
+            }}
+          >
+            <Ionicons
+              name={checked ? "checkbox" : "square-outline"}
+              size={25}
+              color={"#5188E3"}
             />
-          </View>
+          </TouchableOpacity>
+          <Text>Travel Only with Same Gender</Text>
+        </View>
+        {route.params?.isEdit ? (
+          <>
+            <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
+          </>
+        ) : (
+          <>
+            <Button text="Continue" onPress={handleSubmit(onSubmit)} />
+            <Text style={styles?.terms}>
+              By continuing, you agree to Flocky’s{" "}
+              <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
+              <Text style={styles?.links}>Privacy Policy</Text>
+            </Text>
+            <View style={styles.logIn}>
+              <TouchableOpacity
+                onPress={() => {
+                  navigation?.navigate("LogIn");
+                }}
+              >
+                <Text style={styles?.links}>I have an account</Text>
+              </TouchableOpacity>
+            </View>
+          </>
         )}
-      />
-
-      <Text style={styles?.label}>Institute/Organization</Text>
-      {errors?.company && (
-        <Text style={styles?.error}>{errors?.company?.message}</Text>
-      )}
-      <Controller
-        name="company"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[
-              styles?.input,
-              errors?.company && styles?.errorBorder,
-              focusCompany && { borderColor: "#5188E3" },
-            ]}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onFocus={() => focusHandler(setFocusCompany)}
-            onBlur={() => blurHandler(onBlur, setFocusCompany)}
-            value={value}
-          />
-        )}
-      />
-      <Text style={styles?.label}>Email Address</Text>
-      {errors?.email && (
-        <Text style={styles.error}>{errors?.email?.message}</Text>
-      )}
-      <Controller
-        name="email"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-          pattern: { value: EMAIL_REGEX, message: "Not a valid email" },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[
-              styles?.input,
-              errors?.email && styles?.errorBorder,
-              focusEmail && { borderColor: "#5188E3" },
-            ]}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onFocus={() => focusHandler(setFocusEmail)}
-            onBlur={() => blurHandler(onBlur, setFocusEmail)}
-            value={value}
-          />
-        )}
-      />
-      <Text style={styles?.label}>Company's Domain(Optional)</Text>
-      {errors?.domain && (
-        <Text style={styles?.error}>{errors?.domain?.message}</Text>
-      )}
-      <Controller
-        name="domain"
-        control={control}
-        rules={{
-          pattern: { value: DOMAIN_REGEX, message: "Not a valid domain." },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[
-              styles?.input,
-              errors?.domain && styles?.errorBorder,
-              focusDomain && { borderColor: "#5188E3" },
-            ]}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onFocus={() => focusHandler(setFocusDomain)}
-            onBlur={() => blurHandler(onBlur, setFocusDomain)}
-            value={value}
-          />
-        )}
-      />
-      <View style={styles?.checkboxContainer}>
-        <TouchableOpacity
-          onPress={() => {
-            setChecked(!checked);
-          }}
-        >
-          <Ionicons
-            name={checked ? "checkbox" : "square-outline"}
-            size={25}
-            color={"#5188E3"}
-          />
-        </TouchableOpacity>
-        <Text>Travel Only with Same Gender</Text>
       </View>
-      {route.params?.isEdit ? (
-        <>
-          <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
-        </>
-      ) : (
-        <>
-          <Button text="Continue" onPress={handleSubmit(onSubmit)} />
-          <Text style={styles?.terms}>
-            By continuing, you agree to Flocky’s{" "}
-            <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
-            <Text style={styles?.links}>Privacy Policy</Text>
-          </Text>
-          <View style={styles.logIn}>
-            <TouchableOpacity
-              onPress={() => {
-                navigation?.navigate("LogIn");
-              }}
-            >
-              <Text style={styles?.links}>I have an account</Text>
-            </TouchableOpacity>
-          </View>
-        </>
-      )}
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 
