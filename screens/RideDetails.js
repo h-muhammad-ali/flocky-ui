@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  useWindowDimensions,
+} from "react-native";
 import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -89,22 +95,24 @@ const RideDetails = ({ navigation }) => {
             <Ionicons name="time-outline" size={30} color={"white"} />
             <Text style={styles?.timeText}>{formatAMPM(time)}</Text>
           </View>
-          <TouchableOpacity
-            onPress={() => {
-              setTime(new Date(Date.now()));
-            }}
-            style={styles?.timeOptionContainer}
-          >
-            <Text style={styles?.timeOptionText}>Right Now</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => {
-              showTimePicker();
-            }}
-            style={styles?.timeOptionContainer}
-          >
-            <Text style={styles?.timeOptionText}>Set Custom Time</Text>
-          </TouchableOpacity>
+          <View style={{ flexDirection: "row" }}>
+            <TouchableOpacity
+              onPress={() => {
+                setTime(new Date(Date.now()));
+              }}
+              style={styles?.timeOptionContainer}
+            >
+              <Text style={styles?.timeOptionText}>Right Now</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                showTimePicker();
+              }}
+              style={styles?.timeOptionContainer}
+            >
+              <Text style={styles?.timeOptionText}>Set Custom Time</Text>
+            </TouchableOpacity>
+          </View>
           {show && (
             <DateTimePicker
               testID="dateTimePicker"
@@ -157,9 +165,17 @@ const RideDetails = ({ navigation }) => {
               }
             }}
           >
-            <Ionicons name="add-circle" color={"#5188E3"} size={50} />
+            <Ionicons name="add-circle" color={"#5188E3"} size={40} />
           </TouchableOpacity>
-          <Text style={styles?.availableSeatsCount}>{seatsCount}</Text>
+          <Text
+            adjustsFontSizeToFit
+            style={[
+              styles?.availableSeatsCount,
+              { fontSize: 0.15 * useWindowDimensions()?.height },
+            ]}
+          >
+            {seatsCount}
+          </Text>
           <TouchableOpacity
             onPress={() => {
               if (seatsCount > 1) {
@@ -167,11 +183,11 @@ const RideDetails = ({ navigation }) => {
               }
             }}
           >
-            <Ionicons name="remove-circle" color={"#5188E3"} size={50} />
+            <Ionicons name="remove-circle" color={"#5188E3"} size={40} />
           </TouchableOpacity>
         </View>
       </View>
-      <View style={{ flex: 1 }}>
+      <View style={{ flex: 1, justifyContent: "center" }}>
         <Button
           text="Post Ride"
           onPress={() => {
@@ -189,19 +205,50 @@ const styles = StyleSheet?.create({
   container: {
     flex: 1,
   },
+  timePickerContainer: {
+    marginHorizontal: 15,
+    justifyContent: "flex-start",
+  },
+  timePickerSubContainer: {
+    backgroundColor: "#5188E3",
+    borderRadius: 20,
+    paddingTop: 20,
+    paddingBottom: 10,
+  },
+  timeDisplayContainer: {
+    flexDirection: "row",
+    borderBottomWidth: 1,
+    marginHorizontal: 20,
+    alignItems: "center",
+    marginBottom: 10,
+    paddingBottom: 5,
+  },
   timeOptionContainer: {
-    width: "50%",
+    flex: 1,
+    height: 30,
     borderRadius: 30,
     paddingHorizontal: 8,
     paddingVertical: 5,
-    backgroundColor: "#E0E0E0",
+    backgroundColor: "white",
     borderColor: "#666666",
-    marginHorizontal: 20,
-    marginBottom: 10,
+    marginHorizontal: 15,
+    marginBottom: 5,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  timeText: {
+    marginStart: 15,
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "white",
   },
   timeOptionText: {
     textAlign: "center",
     fontWeight: "bold",
+  },
+  vehicleContainer: {
+    marginVertical: 10,
+    justifyContent: "center",
   },
   dropdownVehicle: {
     marginHorizontal: 15,
@@ -221,45 +268,27 @@ const styles = StyleSheet?.create({
     alignItems: "center",
     paddingEnd: 10,
     paddingStart: 10,
-    marginBottom: 25,
+    marginBottom: 10,
   },
   addVehicleText: {
     color: "white",
   },
-  timePickerContainer: { marginHorizontal: 15, flex: 1 },
-  timePickerSubContainer: {
-    backgroundColor: "#5188E3",
-    borderRadius: 20,
-    paddingVertical: 20,
-    marginVertical: 10,
-  },
-  timeDisplayContainer: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    marginHorizontal: 20,
-    alignItems: "center",
-    marginBottom: 10,
-    paddingBottom: 5,
-  },
-  timeText: {
-    marginStart: 15,
-    fontSize: 20,
-    fontWeight: "bold",
-    color: "white",
-  },
-  vehicleContainer: {
-    marginVertical: 20,
-    height: "20%",
+  availableSeatsContainer: {
+    flex: 1,
+    flexDirection: "column",
+    marginHorizontal: 15,
     justifyContent: "center",
   },
-  availableSeatsContainer: { marginHorizontal: 15, flex: 1 },
   containerTitle: {
     fontWeight: "bold",
+    marginBottom: 10,
   },
   availableSeatsSubContainer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
   },
-  availableSeatsCount: { fontSize: 100, marginHorizontal: 15 },
+  availableSeatsCount: {
+    marginHorizontal: 15,
+  },
 });
