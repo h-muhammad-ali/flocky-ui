@@ -16,14 +16,12 @@ const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [genderOpen, setGenderOpen] = useState(false);
-  const [genderValue, setGenderValue] = useState(null);
   const [gender, setGender] = useState([
     { label: "Male", value: "male" },
     { label: "Female", value: "female" },
     { label: "Prefer Not to Say", value: "neutral" },
   ]);
   const [companyOpen, setCompanyOpen] = useState(false);
-  const [companyValue, setCompanyValue] = useState(null);
   const [company, setComapny] = useState([
     { label: "PUCIT", value: "pucit" },
     { label: "UCP", value: "ucp" },
@@ -55,8 +53,6 @@ const SignUp = ({ navigation, route }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    setGenderValue(null);
-    setCompanyValue(null);
   };
 
   const [focusName, setFocusName] = useState(false);
@@ -90,7 +86,7 @@ const SignUp = ({ navigation, route }) => {
         rules={{
           required: { value: true, message: "This field is required" },
           pattern: {
-            value: /^[A-Za-z]+$/,
+            value: /^[A-Za-z]+( [A-Za-z]+)*$/,
             message: "Name can only include Alphabets",
           },
         }}
@@ -156,15 +152,15 @@ const SignUp = ({ navigation, route }) => {
               <DropDownPicker
                 style={styles?.dropdown}
                 open={genderOpen}
-                value={genderValue}
+                value={value}
                 items={gender}
                 setOpen={setGenderOpen}
-                setValue={setGenderValue}
+                setValue={onChange}
                 setItems={setGender}
                 placeholder="Select Gender"
                 placeholderStyle={styles?.placeholderStyles}
                 onOpen={onGenderOpen}
-                onChangeValue={onChange}
+                //onChangeValue={onChange}
                 zIndex={3000}
                 zIndexInverse={1000}
               />
@@ -187,10 +183,10 @@ const SignUp = ({ navigation, route }) => {
               <DropDownPicker
                 style={styles?.dropdown}
                 open={companyOpen}
-                value={companyValue}
+                value={value}
                 items={company}
                 setOpen={setCompanyOpen}
-                setValue={setCompanyValue}
+                setValue={onChange}
                 setItems={setComapny}
                 placeholder="Select Company"
                 placeholderStyle={styles?.placeholderStyles}
@@ -199,7 +195,7 @@ const SignUp = ({ navigation, route }) => {
                 searchable={true}
                 searchPlaceholder="Search your company here..."
                 onOpen={onCompanyOpen}
-                onChangeValue={onChange}
+                //onChangeValue={onChange}
                 zIndex={1000}
                 zIndexInverse={3000}
               />

@@ -18,7 +18,6 @@ const AdminSignUp = ({ navigation, route }) => {
   const DOMAIN_REGEX =
     /^@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [genderOpen, setGenderOpen] = useState(false);
-  const [genderValue, setGenderValue] = useState(null);
   const [gender, setGender] = useState([
     { label: "Male", value: "male" },
     { label: "Female", value: "female" },
@@ -74,7 +73,7 @@ const AdminSignUp = ({ navigation, route }) => {
         rules={{
           required: { value: true, message: "This field is required" },
           pattern: {
-            value: /^[A-Za-z]+$/,
+            value: /^[A-Za-z]+( [A-Za-z]+)*$/,
             message: "Name can only include Alphabets",
           },
         }}
@@ -136,14 +135,13 @@ const AdminSignUp = ({ navigation, route }) => {
             <DropDownPicker
               style={styles?.dropdown}
               open={genderOpen}
-              value={genderValue}
+              value={value}
               items={gender}
               setOpen={setGenderOpen}
-              setValue={setGenderValue}
+              setValue={onChange}
               setItems={setGender}
               placeholder="Select Gender"
               placeholderStyle={styles?.placeholderStyles}
-              onChangeValue={onChange}
             />
           </View>
         )}
