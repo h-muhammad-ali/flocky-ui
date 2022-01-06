@@ -11,40 +11,36 @@ const Roles = ({ navigation }) => {
       </View>
       <View style={styles?.mainBody}>
         <View>
-          <Image
-            source={require("../assets/flocky-assets/hitcher.png")}
-            style={styles?.image}
-          />
-          <View style={styles?.imageContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation?.navigate("WhereTo", { isPatron: false })
-              }
-            >
+          <TouchableOpacity
+            onPress={() => navigation?.navigate("WhereTo", { isPatron: false })}
+          >
+            <Image
+              source={require("../assets/flocky-assets/hitcher.png")}
+              style={styles?.image}
+            />
+            <View style={styles?.imageContainer}>
               <Text style={styles?.roles}>Hitcher</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Ionicons name="help-circle" size={20} color="black" />
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity>
+                <Ionicons name="help-circle" size={20} color="black" />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         </View>
         <View>
-          <Image
-            source={require("../assets/flocky-assets/patron.png")}
-            style={styles?.image}
-          />
-          <View style={styles?.imageContainer}>
-            <TouchableOpacity
-              onPress={() =>
-                navigation?.navigate("WhereTo", { isPatron: true })
-              }
-            >
+          <TouchableOpacity
+            onPress={() => navigation?.navigate("WhereTo", { isPatron: true })}
+          >
+            <Image
+              source={require("../assets/flocky-assets/patron.png")}
+              style={styles?.image}
+            />
+            <View style={styles?.imageContainer}>
               <Text style={styles?.roles}>Patron</Text>
-            </TouchableOpacity>
-            <TouchableOpacity>
-              <Ionicons name="help-circle" size={20} color="black" />
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity>
+                <Ionicons name="help-circle" size={20} color="black" />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
