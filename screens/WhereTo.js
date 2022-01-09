@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -13,21 +13,46 @@ import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
 import {
   setSource,
-  setDestination,
+  emptyDestination,
   removeWayPoint,
   emptyWayPoints,
 } from "../redux/locations/locationsActions";
+import * as Location from "expo-location";
 
 const WhereTo = ({ navigation, route }) => {
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
   const CURRENT_LOCATION = "Current Location";
-  const DESTINATION = "Company Location";
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
   const dispatch = useDispatch();
   useEffect(() => {
-    dispatch(setSource(CURRENT_LOCATION));
-    dispatch(setDestination(DESTINATION));
+    Location.requestForegroundPermissionsAsync()
+      .then((response) => {
+        if (response?.status === "granted") {
+          Location.getCurrentPositionAsync({})
+            .then((response) => {
+              setLocation(response);
+              dispatch(
+                setSource({
+                  latitude: response?.coords?.latitude,
+                  longitude: response?.coords?.longitude,
+                })
+              );
+            })
+            .catch((error) => {
+              Alert?.alert(error?.message);
+            });
+        } else {
+          setErrorMsg("Permission to access location was denied");
+          dispatch(setSource(CURRENT_LOCATION));
+        }
+      })
+      .catch((error) => {
+        Alert?.alert(error?.message);
+      });
+    dispatch(emptyDestination());
     dispatch(emptyWayPoints());
   }, []);
   return (
@@ -35,7 +60,13 @@ const WhereTo = ({ navigation, route }) => {
       <Header text="Where to?" navigation={() => navigation?.goBack()} />
       <Text style={styles.label}>From</Text>
       <TextInput
-        value={source}
+        value={
+          location
+            ? typeof source === "object"
+              ? `${source?.latitude} °N ${source?.longitude} °E`
+              : source
+            : errorMsg ?? "Loading..."
+        }
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
@@ -91,11 +122,17 @@ const WhereTo = ({ navigation, route }) => {
       )}
 
       <Map
+        latitude={source?.latitude}
+        longitude={source?.longitude}
         navigation={() => {
-          navigation?.navigate("Full Screen Map");
+          navigation?.navigate("Full Screen Map", {
+            latitude: source?.latitude,
+            longitude: source?.longitude,
+          });
         }}
       />
       <Button
+        isDisabled={destination ? false : true}
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
           !route.params?.isPatron

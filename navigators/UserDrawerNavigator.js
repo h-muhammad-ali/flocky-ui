@@ -2,10 +2,10 @@ import React from "react";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import CustomDrawer from "../components/CustomDrawer";
 import { Ionicons } from "@expo/vector-icons";
-import SignUp from "../screens/SignUp";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import StackNavigator from "./StackNavigator";
 import WallOfHonor from "../screens/WallOfHonor";
+import EditProfile from "../screens/EditProfile";
 
 const Drawer = createDrawerNavigator();
 const UserDrawerNavigator = ({ navigation }) => {
@@ -47,8 +47,7 @@ const UserDrawerNavigator = ({ navigation }) => {
       />
       <Drawer.Screen
         name="Edit User Profile"
-        component={SignUp}
-        initialParams={{ isEdit: true }}
+        component={EditProfile}
         options={{
           drawerLabel: "Edit Profile",
         }}

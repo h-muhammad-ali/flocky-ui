@@ -46,7 +46,7 @@ const MainMenu = ({ navigation }) => {
         <TouchableOpacity
           style={styles?.menuItemLink}
           onPress={() => {
-            navigation?.navigate("AdminSignUp");
+            navigation?.navigate("Company Registeration");
           }}
         >
           <Text style={styles?.menuItemLinkText}>Register your Company</Text>

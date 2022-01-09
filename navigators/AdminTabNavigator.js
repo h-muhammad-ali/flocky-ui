@@ -19,7 +19,13 @@ const AdminTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 15 }}
               onPress={() => {
-                navigation?.navigate("Roles", { isAdmin: true });
+                navigation?.navigate("User Stack", {
+                  screen: "User Panel",
+                  params: {
+                    screen: "Roles",
+                    params: { isAdmin: true },
+                  },
+                });
               }}
             >
               <MaterialCommunityIcons
@@ -27,14 +33,6 @@ const AdminTabNavigator = ({ navigation }) => {
                 size={30}
                 color="black"
               />
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={{ marginEnd: 10 }}
-              onPress={() => {
-                navigation?.navigate("MainMenu");
-              }}
-            >
-              <Ionicons name="log-out-outline" size={30} />
             </TouchableOpacity>
           </View>
         ),

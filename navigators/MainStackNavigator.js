@@ -3,12 +3,14 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SignUp from "../screens/SignUp";
 import SignIn from "../screens/SignIn";
 import MainMenu from "../screens/MainMenu";
-import AdminSignUp from "../screens/AdminSignUp";
 import UserDrawerNavigator from "./UserDrawerNavigator";
 import VerificationFinished from "../screens/VerificationFinished";
 import AdminDrawerNavigator from "./AdminDrawerNavigator";
 import ForgotPassword from "../screens/ForgotPassword";
 import ResetPassword from "../screens/ResetPassword";
+import AddPhoto from "../screens/AddPhoto";
+import CompanyRegisteration from "../screens/CompanyRegisteration";
+import AdminSignUp from "../screens/AdminSignUp";
 
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
@@ -22,15 +24,20 @@ const MainStackNavigator = () => {
       <Stack.Screen name="MainMenu" component={MainMenu} />
       <Stack.Screen name="SignUp" component={SignUp} />
       <Stack.Screen name="LogIn" component={SignIn} />
-      <Stack.Screen name="AdminSignUp" component={AdminSignUp} />
+      <Stack.Screen
+        name="Company Registeration"
+        component={CompanyRegisteration}
+      />
       <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
       <Stack.Screen name="Admin Tab" component={AdminDrawerNavigator} />
+      <Stack.Screen name="AdminSignUp" component={AdminSignUp} />
       <Stack.Screen
         name="VerificationFinished"
         component={VerificationFinished}
       />
       <Stack.Screen name="Forgot Password" component={ForgotPassword} />
       <Stack.Screen name="Reset Password" component={ResetPassword} />
+      <Stack.Screen name="Add Photo" component={AddPhoto} />
     </Stack.Navigator>
   );
 };

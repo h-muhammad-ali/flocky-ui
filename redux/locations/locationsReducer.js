@@ -4,6 +4,8 @@ import {
   SET_WAYPOINT,
   REMOVE_WAYPOINT,
   EMPTY_WAYPOINTS,
+  EMPTY_SOURCE,
+  EMPTY_DESTINATION,
 } from "./locationsTypes";
 
 const initialState = {
@@ -38,6 +40,16 @@ const locationsReducer = (state = initialState, { type, payload }) => {
       return {
         ...state,
         wayPoints: [],
+      };
+    case EMPTY_SOURCE:
+      return {
+        ...state,
+        source: "",
+      };
+    case EMPTY_DESTINATION:
+      return {
+        ...state,
+        destination: "",
       };
 
     default:

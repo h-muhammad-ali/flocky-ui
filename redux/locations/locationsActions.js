@@ -4,6 +4,8 @@ import {
   SET_WAYPOINT,
   REMOVE_WAYPOINT,
   EMPTY_WAYPOINTS,
+  EMPTY_SOURCE,
+  EMPTY_DESTINATION,
 } from "./locationsTypes";
 
 export const setSource = (source) => ({
@@ -28,4 +30,12 @@ export const removeWayPoint = (wayPoint) => ({
 
 export const emptyWayPoints = () => ({
   type: EMPTY_WAYPOINTS,
-})
+});
+
+export const emptySource = () => ({
+  type: EMPTY_SOURCE,
+});
+
+export const emptyDestination = () => ({
+  type: EMPTY_DESTINATION,
+});

@@ -17,6 +17,7 @@ import { DrawerActions } from "@react-navigation/native";
 import Map from "../screens/Map";
 import FullScreenMap from "../screens/FullScreenMap";
 import SelectLocation from "../screens/SelectLocation";
+import EditProfile from "../screens/EditProfile";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -35,9 +36,10 @@ const StackNavigator = () => {
             <View style={styles?.headerRight}>
               {route.params?.isAdmin ? (
                 <TouchableOpacity
-                  style={styles?.adminPanelLogo}
                   onPress={() => {
-                    navigation?.navigate("Admin Panel");
+                    navigation?.navigate("Admin Tab", {
+                      screen: "Admin Panel",
+                    });
                   }}
                 >
                   <MaterialCommunityIcons
@@ -49,13 +51,6 @@ const StackNavigator = () => {
               ) : (
                 <></>
               )}
-              <TouchableOpacity
-                onPress={() => {
-                  navigation?.navigate("MainMenu");
-                }}
-              >
-                <Ionicons name="log-out-outline" size={30} />
-              </TouchableOpacity>
             </View>
           ),
           headerLeft: () => (
@@ -91,6 +86,7 @@ const StackNavigator = () => {
       <Stack.Screen name="Chat" component={ChatScreen} />
       <Stack.Screen name="Map" component={Map} />
       <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
+      <Stack.Screen name="Edit Profile" component={EditProfile} />
     </Stack.Navigator>
   );
 };
@@ -103,6 +99,5 @@ const styles = StyleSheet?.create({
     fontSize: 20,
   },
   headerRight: { flexDirection: "row", alignItems: "center" },
-  adminPanelLogo: { marginEnd: 15 },
   menuLogo: { marginEnd: 10 },
 });

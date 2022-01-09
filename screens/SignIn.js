@@ -33,7 +33,13 @@ const SignIn = ({ navigation }) => {
       navigation?.navigate("User Stack");
     }
     if (data.email === "admin@gmail.com") {
-      navigation?.navigate("Admin Tab");
+      navigation?.navigate("User Stack", {
+        screen: "User Panel",
+        params: {
+          screen: "Roles",
+          params: { isAdmin: true },
+        },
+      });
     }
     reset();
   };

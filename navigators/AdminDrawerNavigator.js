@@ -11,7 +11,7 @@ const Drawer = createDrawerNavigator();
 const AdminDrawerNavigator = () => {
   return (
     <Drawer.Navigator
-      initialRouteName="Admin Home"
+      initialRouteName="Admin Panel"
       screenOptions={({ route }) => ({
         headerShown: false,
         drawerIcon: ({ focused, color, size }) => {
@@ -43,14 +43,6 @@ const AdminDrawerNavigator = () => {
         component={AdminTabNavigator}
         options={{
           drawerLabel: "Home",
-        }}
-      />
-      <Drawer.Screen
-        name="Edit Admin Profile"
-        component={AdminSignUp}
-        initialParams={{ isEdit: true }}
-        options={{
-          drawerLabel: "Edit Profile",
         }}
       />
       <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />

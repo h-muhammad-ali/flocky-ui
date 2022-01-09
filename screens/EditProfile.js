@@ -15,29 +15,13 @@ import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
 
-const SignUp = ({ navigation, route }) => {
-  const EMAIL_REGEX =
-    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+const EditProfile = ({ navigation }) => {
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
     { label: "Male", value: "male" },
     { label: "Female", value: "female" },
     { label: "Prefer Not to Say", value: "neutral" },
   ]);
-  const [companyOpen, setCompanyOpen] = useState(false);
-  const [company, setComapny] = useState([
-    { label: "PUCIT", value: "pucit" },
-    { label: "UCP", value: "ucp" },
-    { label: "UET", value: "uet" },
-  ]);
-  const [loading, setLoading] = useState(false);
-  const onGenderOpen = useCallback(() => {
-    setCompanyOpen(false);
-  }, []);
-
-  const onCompanyOpen = useCallback(() => {
-    setGenderOpen(false);
-  }, []);
   const {
     handleSubmit,
     control,
@@ -48,21 +32,16 @@ const SignUp = ({ navigation, route }) => {
       name: "",
       password: "",
       gender: "",
-      company: "",
-      email: "",
-      invitationCode: "",
     },
   });
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    navigation?.navigate("Add Photo");
+    navigation?.navigate("Add Photo", { isEdit: true });
   };
 
   const [focusName, setFocusName] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
-  const [focusEmail, setFocusEmail] = useState(false);
-  const [focusCode, setFocusCode] = useState(false);
   const [checked, setChecked] = useState(false);
 
   const focusHandler = (set) => {
@@ -81,7 +60,7 @@ const SignUp = ({ navigation, route }) => {
       }}
     >
       <View style={styles.container}>
-        <Header text="Sign Up" navigation={() => navigation?.goBack()} />
+        <Header text="Edit Profile" navigation={() => navigation?.goBack()} />
         <KeyboardAvoidingView behavior="padding">
           <Text style={styles?.label}>Name</Text>
           {errors?.name && (
@@ -166,7 +145,6 @@ const SignUp = ({ navigation, route }) => {
                     setItems={setGender}
                     placeholder="Select Gender"
                     placeholderStyle={styles?.placeholderStyles}
-                    onOpen={onGenderOpen}
                     zIndex={3000}
                     zIndexInverse={1000}
                   />
@@ -174,89 +152,26 @@ const SignUp = ({ navigation, route }) => {
               )}
             />
             <Text style={styles?.label}>Institute/Organization</Text>
-            {errors?.company && (
-              <Text style={styles?.error}>{errors?.company?.message}</Text>
-            )}
-            <Controller
-              name="company"
-              control={control}
-              rules={{
-                required: { value: true, message: "This field is required" },
-              }}
-              render={({ field: { onChange, value } }) => (
-                <View style={styles?.dropdownCompany}>
-                  <DropDownPicker
-                    style={styles?.dropdown}
-                    open={companyOpen}
-                    value={value}
-                    items={company}
-                    setOpen={setCompanyOpen}
-                    setValue={onChange}
-                    setItems={setComapny}
-                    placeholder="Select Company"
-                    placeholderStyle={styles?.placeholderStyles}
-                    loading={loading}
-                    activityIndicatorColor="#5188E3"
-                    searchable={true}
-                    searchPlaceholder="Search your company here..."
-                    onOpen={onCompanyOpen}
-                    zIndex={1000}
-                    zIndexInverse={3000}
-                  />
-                </View>
-              )}
+            <TextInput
+              style={styles?.input}
+              //value={}
+              editable={false}
+              selectTextOnFocus={false}
             />
           </View>
           <Text style={styles?.label}>Email Address</Text>
-          {errors?.email && (
-            <Text style={styles.error}>{errors?.email?.message}</Text>
-          )}
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: { value: true, message: "This field is required" },
-              pattern: { value: EMAIL_REGEX, message: "Not a valid email" },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles?.input,
-                  errors?.email && styles?.errorBorder,
-                  focusEmail && { borderColor: "#5188E3" },
-                ]}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
-                onFocus={() => focusHandler(setFocusEmail)}
-                onBlur={() => blurHandler(onBlur, setFocusEmail)}
-                value={value}
-              />
-            )}
+          <TextInput
+            style={styles?.input}
+            //value={value}
+            editable={false}
+            selectTextOnFocus={false}
           />
           <Text style={styles?.label}>Invitation Code</Text>
-          {errors?.invitationCode && (
-            <Text style={styles?.error}>{errors?.invitationCode?.message}</Text>
-          )}
-          <Controller
-            name="invitationCode"
-            control={control}
-            rules={{
-              required: { value: true, message: "This field is required" },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles?.input,
-                  errors?.invitationCode && styles?.errorBorder,
-                  focusCode && { borderColor: "#5188E3" },
-                ]}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
-                onFocus={() => focusHandler(setFocusCode)}
-                onBlur={() => blurHandler(onBlur, setFocusCode)}
-                value={value}
-              />
-            )}
+          <TextInput
+            style={styles?.input}
+            //value={value}
+            editable={false}
+            selectTextOnFocus={false}
           />
         </KeyboardAvoidingView>
         <View style={styles?.checkboxContainer}>
@@ -273,21 +188,7 @@ const SignUp = ({ navigation, route }) => {
           </TouchableOpacity>
           <Text>Travel Only with Same Gender</Text>
         </View>
-        <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
-        <Text style={styles?.terms}>
-          By continuing, you agree to Flocky’s{" "}
-          <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
-          <Text style={styles?.links}>Privacy Policy</Text>
-        </Text>
-        <View style={styles?.logIn}>
-          <TouchableOpacity
-            onPress={() => {
-              navigation?.navigate("LogIn");
-            }}
-          >
-            <Text style={styles?.links}>I have an account</Text>
-          </TouchableOpacity>
-        </View>
+        <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
       </View>
     </TouchableWithoutFeedback>
   );
@@ -321,10 +222,6 @@ const styles = StyleSheet?.create({
     width: "50%",
     marginBottom: 15,
   },
-  dropdownCompany: {
-    marginHorizontal: 10,
-    marginBottom: 15,
-  },
   dropdown: {
     borderColor: "#B7B7B7",
     height: 45,
@@ -335,17 +232,6 @@ const styles = StyleSheet?.create({
     textAlign: "center",
     marginTop: 10,
     marginHorizontal: 70,
-  },
-  logIn: {
-    flex: 1,
-    justifyContent: "flex-end",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  links: {
-    textAlign: "center",
-    textDecorationLine: "underline",
-    color: "#758580",
   },
   error: {
     color: "red",
@@ -363,4 +249,4 @@ const styles = StyleSheet?.create({
   },
 });
 
-export default SignUp;
+export default EditProfile;

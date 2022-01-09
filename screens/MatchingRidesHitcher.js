@@ -53,7 +53,12 @@ const MatchingRidesHitcher = ({ navigation }) => {
   return (
     <View style={styles?.container}>
       <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
-      <Text style={styles?.input}>Source: {source}</Text>
+      <Text style={styles?.input}>
+        Source:{" "}
+        {typeof source === "object"
+          ? `${source?.latitude} °N ${source?.longitude} °E`
+          : source}
+      </Text>
       <Text style={styles?.input}>Destination: {destination}</Text>
       <View style={styles?.patrons}>
         <FlatList
