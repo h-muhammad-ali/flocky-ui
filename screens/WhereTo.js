@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
   TouchableOpacity,
+  FlatList,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
@@ -26,7 +27,9 @@ const WhereTo = ({ navigation, route }) => {
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
+
   const dispatch = useDispatch();
+  const ref = useRef(null);
   useEffect(() => {
     Location.requestForegroundPermissionsAsync()
       .then((response) => {
@@ -55,6 +58,15 @@ const WhereTo = ({ navigation, route }) => {
     dispatch(emptyDestination());
     dispatch(emptyWayPoints());
   }, []);
+
+  useEffect(() => {
+    if (destination !== "" && ref?.current) {
+      ref?.current?.setNativeProps({
+        borderColor: "#B7B7B7",
+      });
+    }
+  }, [destination]);
+
   return (
     <View style={styles?.container}>
       <Header text="Where to?" navigation={() => navigation?.goBack()} />
@@ -76,28 +88,38 @@ const WhereTo = ({ navigation, route }) => {
         showSoftInputOnFocus={false}
       />
       {wayPoints?.length != 0 && <Text style={styles?.label}>Way-Points</Text>}
-      {wayPoints?.map((value, index) => (
-        <View
-          key={index}
-          style={{ flexDirection: "row", alignItems: "center" }}
-        >
-          <TextInput
-            value={"Way-Point " + ++index + ": " + value}
-            style={[styles?.input, { flex: 0.9 }]}
-            selectionColor={"#5188E3"}
-            showSoftInputOnFocus={false}
-          />
-          <TouchableOpacity
-            onPress={() => {
-              dispatch(removeWayPoint(value));
-            }}
-          >
-            <Ionicons name="close" size={30} />
-          </TouchableOpacity>
-        </View>
-      ))}
+      {route.params?.isPatron && wayPoints?.length != 0 ? (
+        <FlatList
+          style={{ flexGrow: 0, height: 60 }}
+          data={wayPoints}
+          keyExtractor={(item, index) => index}
+          renderItem={({ item, index }) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <Text style={[styles?.input, { flex: 0.9 }]}>
+                {"Way-Point " + ++index + ": " + item}
+              </Text>
+              <TouchableOpacity
+                onPress={() => {
+                  dispatch(removeWayPoint(item));
+                }}
+              >
+                <Ionicons name="close" size={25} />
+              </TouchableOpacity>
+            </View>
+          )}
+        />
+      ) : (
+        <></>
+      )}
       <Text style={styles?.label}>To</Text>
       <TextInput
+        ref={ref}
         value={destination}
         style={styles?.input}
         selectionColor={"#5188E3"}
@@ -107,7 +129,7 @@ const WhereTo = ({ navigation, route }) => {
         }
         showSoftInputOnFocus={false}
       />
-      {route.params?.isPatron && wayPoints?.length < 2 ? (
+      {route.params?.isPatron && wayPoints?.length < 10 ? (
         <TouchableOpacity
           style={styles?.waypoint}
           onPress={() => {
@@ -132,12 +154,17 @@ const WhereTo = ({ navigation, route }) => {
         }}
       />
       <Button
-        isDisabled={destination ? false : true}
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
-          !route.params?.isPatron
-            ? navigation?.navigate("MatchingRidesHitcher")
-            : navigation?.navigate("RideDetails");
+          if (destination === "" && ref.current) {
+            ref.current.setNativeProps({
+              borderColor: "red",
+            });
+          } else {
+            !route.params?.isPatron
+              ? navigation?.navigate("MatchingRidesHitcher")
+              : navigation?.navigate("RideDetails");
+          }
         }}
       />
     </View>
@@ -163,8 +190,9 @@ const styles = StyleSheet?.create({
     fontSize: 15,
     height: 50,
     marginHorizontal: 10,
-    paddingStart: 10,
+    paddingHorizontal: 10,
     marginBottom: 15,
+    textAlignVertical: "center",
   },
   waypoint: {
     backgroundColor: "#5188E3",
