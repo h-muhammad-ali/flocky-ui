@@ -34,7 +34,7 @@ const CompanyRegisteration = ({ navigation, route }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    navigation?.navigate("AdminSignUp");
+    navigation?.navigate("AddCode");
   };
   const [focusPassword, setFocusPassword] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);

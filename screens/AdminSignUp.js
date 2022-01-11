@@ -60,7 +60,7 @@ const AdminSignUp = ({ navigation, route }) => {
       <View style={styles.container}>
         <Header
           text="Admin Information"
-          navigation={() => navigation?.goBack()}
+          navigation={() => navigation?.navigate("Company Registeration")}
         />
         <KeyboardAvoidingView behavior="padding">
           <Text style={styles?.label}>Name</Text>
