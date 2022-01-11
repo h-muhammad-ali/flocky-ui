@@ -11,6 +11,8 @@ import ResetPassword from "../screens/ResetPassword";
 import AddPhoto from "../screens/AddPhoto";
 import CompanyRegisteration from "../screens/CompanyRegisteration";
 import AdminSignUp from "../screens/AdminSignUp";
+import CompaniesManagementTabNavigator from "./CompaniesManagementTabNavigator";
+import AddCode from "../screens/AddCode";
 
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
@@ -38,6 +40,11 @@ const MainStackNavigator = () => {
       <Stack.Screen name="Forgot Password" component={ForgotPassword} />
       <Stack.Screen name="Reset Password" component={ResetPassword} />
       <Stack.Screen name="Add Photo" component={AddPhoto} />
+      <Stack.Screen
+        name="Companies Management"
+        component={CompaniesManagementTabNavigator}
+      />
+      <Stack.Screen name="AddCode" component={AddCode} />
     </Stack.Navigator>
   );
 };

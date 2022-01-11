@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   Keyboard,
   TouchableWithoutFeedback,
-  Touchable,
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
@@ -29,10 +28,10 @@ const SignIn = ({ navigation }) => {
   });
   const onSubmit = (data) => {
     console.log("data", data);
-    if (data.email === "user@gmail.com") {
+    if (data?.email === "user@gmail.com") {
       navigation?.navigate("User Stack");
     }
-    if (data.email === "admin@gmail.com") {
+    if (data?.email === "admin@gmail.com") {
       navigation?.navigate("User Stack", {
         screen: "User Panel",
         params: {
@@ -40,6 +39,9 @@ const SignIn = ({ navigation }) => {
           params: { isAdmin: true },
         },
       });
+    }
+    if (data?.email === "flocky@gmail.com") {
+      navigation?.navigate("Companies Management");
     }
     reset();
   };
