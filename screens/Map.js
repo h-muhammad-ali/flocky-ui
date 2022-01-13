@@ -2,11 +2,18 @@ import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import MapView from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
+import Header from "../components/Header";
 
-const Map = () => {
+const Map = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <MapView style={styles?.mapView} />
+      <View style={styles?.heading}>
+        <Header
+          text="Select Custom Location"
+          navigation={() => navigation?.navigate("SelectLocation")}
+        />
+      </View>
       <View style={styles.textView}>
         <Text>Location</Text>
       </View>
@@ -28,7 +35,7 @@ const styles = StyleSheet.create({
   },
   textView: {
     position: "absolute",
-    top: 50,
+    top: 70,
     left: 0,
     right: 0,
     bottom: 0,
@@ -52,4 +59,5 @@ const styles = StyleSheet.create({
     height: 80,
     width: 80,
   },
+  heading: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
 });
