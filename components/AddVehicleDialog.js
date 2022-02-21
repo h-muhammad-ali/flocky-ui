@@ -21,7 +21,6 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
     defaultValues: {
       model: "",
       make: "",
-      year: "",
       color: "",
       plateNumber: "",
       type: "",
@@ -42,8 +41,8 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
 
   return (
     <View>
-      <Dialog.Container visible={visible}>
-        <Dialog.Title>Add Vehicle</Dialog.Title>
+      <Dialog.Container visible={visible} headerStyle={styles?.container}>
+        <Dialog.Title style={styles.headerText}>Add Vehicle</Dialog.Title>
         <Controller
           name="type"
           control={control}
@@ -67,22 +66,6 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           )}
         />
         <Controller
-          name="model"
-          control={control}
-          rules={{
-            required: { value: true, message: "This field is required" },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Dialog.Input
-              selectionColor={"#5188E3"}
-              placeholder="Model Name"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-            />
-          )}
-        />
-        <Controller
           name="make"
           control={control}
           rules={{
@@ -99,6 +82,23 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           )}
         />
         <Controller
+          name="model"
+          control={control}
+          rules={{
+            required: { value: true, message: "This field is required" },
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <Dialog.Input
+              selectionColor={"#5188E3"}
+              placeholder="Model Name"
+              onChangeText={onChange}
+              onBlur={onBlur}
+              value={value}
+            />
+          )}
+        />
+
+        {/* <Controller
           name="year"
           control={control}
           rules={{
@@ -114,7 +114,8 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
               value={value}
             />
           )}
-        />
+        /> */}
+
         <Controller
           name="color"
           control={control}
@@ -169,11 +170,16 @@ export default AddVehicleDialog;
 const styles = StyleSheet?.create({
   dropdownType: {
     marginHorizontal: 7,
-    width: "50%",
+    width: "55%",
     marginBottom: 10,
   },
   dropdown: {
     borderColor: "#B7B7B7",
     height: 50,
+  },
+  containerStyle: {},
+  headerText: {
+    color: "#5188E3",
+    textAlign: "center",
   },
 });
