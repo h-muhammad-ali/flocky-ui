@@ -6,6 +6,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import StackNavigator from "./StackNavigator";
 import WallOfHonor from "../screens/WallOfHonor";
 import EditProfile from "../screens/EditProfile";
+import ChangePassword from "../screens/ChangePassword";
 
 const Drawer = createDrawerNavigator();
 const UserDrawerNavigator = ({ navigation }) => {
@@ -23,6 +24,10 @@ const UserDrawerNavigator = ({ navigation }) => {
             iconName = focused ? "account-edit" : "account-edit-outline";
           } else if (route?.name === "Wall of Honor") {
             iconName = focused ? "account-group" : "account-group-outline";
+          } else if (route?.name === "Change Password") {
+            iconName = focused
+              ? "keyboard-settings"
+              : "keyboard-settings-outline";
           }
 
           return route?.name === "User Panel" ? (
@@ -50,6 +55,15 @@ const UserDrawerNavigator = ({ navigation }) => {
         component={EditProfile}
         options={{
           drawerLabel: "Edit Profile",
+          unmountOnBlur: true,
+        }}
+      />
+      <Drawer.Screen
+        name="Change Password"
+        component={ChangePassword}
+        options={{
+          drawerLabel: "Change Password",
+          unmountOnBlur: true,
         }}
       />
       <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />

@@ -34,7 +34,6 @@ const SignUp = ({ navigation, route }) => {
   const onGenderOpen = useCallback(() => {
     setCompanyOpen(false);
   }, []);
-
   const onCompanyOpen = useCallback(() => {
     setGenderOpen(false);
   }, []);

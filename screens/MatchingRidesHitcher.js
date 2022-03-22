@@ -73,7 +73,6 @@ const MatchingRidesHitcher = ({ navigation }) => {
               <PatronCard
                 name={item?.name}
                 rides={item?.rides}
-                availableSeats={item?.availableSeats}
                 time={item?.departureTime}
               />
             </TouchableOpacity>

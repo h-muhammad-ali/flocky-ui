@@ -16,7 +16,7 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
           <View style={styles.headerContainer}>
             <Ionicons name="person-circle" size={100} />
             <Text style={[styles?.headerText, { fontSize: 30 }]}>John Doe</Text>
-            <Text style={styles?.headerText}>Total Rides: 75</Text>
+            {/* <Text style={styles?.headerText}>Total Rides: 75</Text> */}
           </View>
         ) : (
           <View>

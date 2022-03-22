@@ -30,7 +30,6 @@ const EditProfile = ({ navigation }) => {
   } = useForm({
     defaultValues: {
       name: "",
-      password: "",
       gender: "",
     },
   });
@@ -41,7 +40,6 @@ const EditProfile = ({ navigation }) => {
   };
 
   const [focusName, setFocusName] = useState(false);
-  const [focusPassword, setFocusPassword] = useState(false);
   const [checked, setChecked] = useState(false);
 
   const focusHandler = (set) => {
@@ -60,8 +58,8 @@ const EditProfile = ({ navigation }) => {
       }}
     >
       <View style={styles.container}>
-        <Header text="Edit Profile" navigation={() => navigation?.goBack()} />
         <KeyboardAvoidingView behavior="padding">
+          <Header text="Edit Profile" navigation={() => navigation?.goBack()} />
           <Text style={styles?.label}>Name</Text>
           {errors?.name && (
             <Text style={styles?.error}>{errors?.name?.message}</Text>
@@ -91,37 +89,6 @@ const EditProfile = ({ navigation }) => {
               />
             )}
           />
-          <Text style={styles?.label}>Password</Text>
-          {errors?.password && (
-            <Text style={styles?.error}>{errors?.password?.message}</Text>
-          )}
-          <Controller
-            name="password"
-            control={control}
-            rules={{
-              required: { value: true, message: "This field is required" },
-              minLength: {
-                value: 8,
-                message: "Password must be >= 8 characters",
-              },
-            }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles?.input,
-                  errors?.password && styles?.errorBorder,
-                  focusPassword && { borderColor: "#5188E3" },
-                ]}
-                secureTextEntry={true}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
-                onFocus={() => focusHandler(setFocusPassword)}
-                onBlur={() => blurHandler(onBlur, setFocusPassword)}
-                value={value}
-              />
-            )}
-          />
-
           <View>
             <Text style={styles?.label}>Gender</Text>
             {errors?.gender && (
@@ -166,29 +133,24 @@ const EditProfile = ({ navigation }) => {
             editable={false}
             selectTextOnFocus={false}
           />
-          <Text style={styles?.label}>Invitation Code</Text>
-          <TextInput
-            style={styles?.input}
-            //value={value}
-            editable={false}
-            selectTextOnFocus={false}
-          />
+          <View style={styles?.checkboxContainer}>
+            <TouchableOpacity
+              onPress={() => {
+                setChecked(!checked);
+              }}
+            >
+              <Ionicons
+                name={checked ? "checkbox" : "square-outline"}
+                size={25}
+                color={"#5188E3"}
+              />
+            </TouchableOpacity>
+            <Text>Travel Only with Same Gender</Text>
+          </View>
         </KeyboardAvoidingView>
-        <View style={styles?.checkboxContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setChecked(!checked);
-            }}
-          >
-            <Ionicons
-              name={checked ? "checkbox" : "square-outline"}
-              size={25}
-              color={"#5188E3"}
-            />
-          </TouchableOpacity>
-          <Text>Travel Only with Same Gender</Text>
+        <View style={{ flex: 1, justifyContent: "center" }}>
+          <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
         </View>
-        <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
       </View>
     </TouchableWithoutFeedback>
   );

@@ -2,7 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const PatronCard = ({ name, rides, time, availableSeats }) => {
+const PatronCard = ({ name, rides, time }) => {
   return (
     <View style={styles?.container}>
       <Ionicons name="person-circle" size={80} color={"#5188E3"} />
@@ -17,9 +17,9 @@ const PatronCard = ({ name, rides, time, availableSeats }) => {
         <View style={styles?.stats}>
           <View style={styles?.timeContainer}>
             <Ionicons name="time-outline" size={22} color={"#758580"} />
-            <Text>{time}</Text>
+            <Text style={{marginStart: 5}}>{time}</Text>
           </View>
-          <View style={styles?.availableSeatsContainer}>
+          {/* <View style={styles?.availableSeatsContainer}>
             {[...Array(availableSeats)]?.map((element, index) => (
               <Ionicons
                 key={index}
@@ -31,7 +31,7 @@ const PatronCard = ({ name, rides, time, availableSeats }) => {
           </View>
           <View style={styles?.availableSeatsText}>
             <Text>Available Seats</Text>
-          </View>
+          </View> */}
         </View>
       </View>
     </View>

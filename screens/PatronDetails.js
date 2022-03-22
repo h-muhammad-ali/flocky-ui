@@ -48,7 +48,12 @@ const PatronDetails = ({ navigation, route }) => {
 
   return (
     <View style={styles?.container}>
-      <Header text="Ride Details" navigation={() => navigation?.goBack()} />
+      <Header
+        text="Ride Details"
+        navigation={() => navigation?.goBack()}
+        isCancel={route.params?.isBooked}
+        onCancel={() => {}}
+      />
       {patron ? (
         <>
           <PatronDetailsHeader
@@ -56,6 +61,7 @@ const PatronDetails = ({ navigation, route }) => {
             rides={patron?.rides}
             filledSeats={patron?.totalSeats - patron?.availableSeats}
             availableSeats={patron?.availableSeats}
+            showSeats={!route.params?.isBooked}
           />
 
           <TimeLine

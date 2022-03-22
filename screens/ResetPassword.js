@@ -23,7 +23,7 @@ const ResetPassword = ({ navigation }) => {
   };
   return (
     <View style={styles.container}>
-      <Header text="Forgot Password?" navigation={() => navigation?.goBack()} />
+      <Header text="New Password" navigation={() => navigation?.goBack()} />
       <Text style={styles?.label}>New Password</Text>
       {errors?.password && (
         <Text style={styles.error}>{errors?.password?.message}</Text>

@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet, Text, View, FlatList } from "react-native";
 import Header from "../components/Header";
 import HitcherCard from "../components/HitcherCard";
+import Button from "../components/Button";
 import { useSelector } from "react-redux";
 
 const MatchingRidesPatron = ({ navigation }) => {
@@ -18,11 +19,20 @@ const MatchingRidesPatron = ({ navigation }) => {
       id: 3,
       name: "Ali",
     },
+    {
+      id: 4,
+      name: "Ali",
+    },
   ];
   const { source, destination } = useSelector((state) => state?.locations);
   return (
     <View style={styles?.container}>
-      <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
+      <Header
+        text="Matching Rides"
+        navigation={() => navigation?.goBack()}
+        isCancel={true}
+        onCancel={() => {}}
+      />
       <Text style={styles?.text}>
         Source:{" "}
         {typeof source === "object"
@@ -37,11 +47,14 @@ const MatchingRidesPatron = ({ navigation }) => {
           renderItem={({ item }) => (
             <HitcherCard
               onPress={() => {
-                navigation.navigate("HitcherDetails", { id: item?.id });
+                navigation?.navigate("HitcherDetails", { id: item?.id });
               }}
             />
           )}
         />
+      </View>
+      <View>
+        <Button text="Start Ride" onPress={() => {}} />
       </View>
     </View>
   );
