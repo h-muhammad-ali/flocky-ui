@@ -3,56 +3,20 @@ import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 
-const VehicleDetails = ({ id }) => {
-  const dummyVehicleDetails = [
-    {
-      id: 1,
-      model: "CR-V",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "car",
-      name: "Honda CR-V",
-    },
-    {
-      id: 2,
-      model: "CD-70",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "bike",
-      name: "Honda CD-70",
-    },
-  ];
-  const [vehicle, setVehicle] = useState(null);
-  useEffect(() => {
-    setVehicle(dummyVehicleDetails?.find((element) => element?.id === id));
-  }, []);
-  return (
-    <>
-      {vehicle ? (
-        <View style={styles?.container}>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <Text style={styles?.titleText}>Vehicle Details</Text>
-            {vehicle?.type === "car" ? (
-              <Ionicons name="car-sport-sharp" size={24} color="black" />
-            ) : (
-              <FontAwesome5 name="motorcycle" size={24} color="black" />
-            )}
-          </View>
-          <Text
-            style={styles?.detailValue}
-          >{`${vehicle?.color} ${vehicle?.name} ${vehicle?.year}`}</Text>
-          <Text style={styles?.detailValue}>{`${vehicle?.plateNumber}`}</Text>
-        </View>
+const VehicleDetails = ({ make, model, registeration_no, type }) => (
+  <View style={styles?.container}>
+    <View style={{ flexDirection: "row", alignItems: "center" }}>
+      <Text style={styles?.titleText}>Vehicle Details</Text>
+      {type === "car" ? (
+        <Ionicons name="car-sport-sharp" size={24} color="black" />
       ) : (
-        <></>
+        <FontAwesome5 name="motorcycle" size={24} color="black" />
       )}
-    </>
-  );
-};
+    </View>
+    <Text style={styles?.detailValue}>{`${make} ${model}`}</Text>
+    <Text style={styles?.detailValue}>{`${registeration_no}`}</Text>
+  </View>
+);
 
 export default VehicleDetails;
 

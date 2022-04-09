@@ -1,9 +1,7 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
 
 const Place = ({ title, subtitle }) => {
-  const [bookmark, setBookmark] = useState(false);
   return (
     <View style={styles?.container}>
       <View>
@@ -14,14 +12,6 @@ const Place = ({ title, subtitle }) => {
           {subtitle}
         </Text>
       </View>
-      <TouchableOpacity
-        style={styles.bookmark}
-        onPress={() => {
-          setBookmark(!bookmark);
-        }}
-      >
-        <Ionicons name={bookmark ? "bookmark" : "bookmark-outline"} size={25} />
-      </TouchableOpacity>
     </View>
   );
 };
@@ -46,8 +36,5 @@ const styles = StyleSheet?.create({
     fontFamily: "NunitoSans-SemiBold",
     fontSize: 14,
     color: "#999999",
-  },
-  bookmark: {
-    alignSelf: "center",
   },
 });

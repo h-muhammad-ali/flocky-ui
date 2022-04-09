@@ -6,12 +6,15 @@ import {
   EMPTY_WAYPOINTS,
   EMPTY_SOURCE,
   EMPTY_DESTINATION,
+  SET_OVERVIEW_POLYLINE,
+  RESET_LOCATION_STATE,
 } from "./locationsTypes";
 
 const initialState = {
-  source: "",
-  destination: "",
+  source: null,
+  destination: null,
   wayPoints: [],
+  overview_polyline: "",
 };
 
 const locationsReducer = (state = initialState, { type, payload }) => {
@@ -34,7 +37,9 @@ const locationsReducer = (state = initialState, { type, payload }) => {
     case REMOVE_WAYPOINT:
       return {
         ...state,
-        wayPoints: state?.wayPoints?.filter((item) => item !== payload),
+        wayPoints: state?.wayPoints?.filter(
+          (item) => item?.place_id !== payload
+        ),
       };
     case EMPTY_WAYPOINTS:
       return {
@@ -44,14 +49,25 @@ const locationsReducer = (state = initialState, { type, payload }) => {
     case EMPTY_SOURCE:
       return {
         ...state,
-        source: "",
+        source: null,
       };
     case EMPTY_DESTINATION:
       return {
         ...state,
-        destination: "",
+        destination: null,
       };
-
+    case SET_OVERVIEW_POLYLINE:
+      return {
+        ...state,
+        overview_polyline: payload,
+      };
+    case RESET_LOCATION_STATE:
+      return {
+        source: null,
+        destination: null,
+        wayPoints: [],
+        overview_polyline: "",
+      };
     default:
       return state;
   }

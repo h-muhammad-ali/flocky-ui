@@ -6,6 +6,8 @@ import {
   EMPTY_WAYPOINTS,
   EMPTY_SOURCE,
   EMPTY_DESTINATION,
+  SET_OVERVIEW_POLYLINE,
+  RESET_LOCATION_STATE,
 } from "./locationsTypes";
 
 export const setSource = (source) => ({
@@ -23,9 +25,9 @@ export const setWayPoint = (wayPoint) => ({
   payload: wayPoint,
 });
 
-export const removeWayPoint = (wayPoint) => ({
+export const removeWayPoint = (place_id) => ({
   type: REMOVE_WAYPOINT,
-  payload: wayPoint,
+  payload: place_id,
 });
 
 export const emptyWayPoints = () => ({
@@ -38,4 +40,13 @@ export const emptySource = () => ({
 
 export const emptyDestination = () => ({
   type: EMPTY_DESTINATION,
+});
+
+export const setOverViewPolyline = (overview_polyline) => ({
+  type: SET_OVERVIEW_POLYLINE,
+  payload: overview_polyline,
+});
+
+export const resetLocationState = () => ({
+  type: RESET_LOCATION_STATE,
 });

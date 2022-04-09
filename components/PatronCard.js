@@ -1,8 +1,8 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 
-const PatronCard = ({ name, rides, time }) => {
+const PatronCard = ({ name, rides, time, vehicle_type }) => {
   return (
     <View style={styles?.container}>
       <Ionicons name="person-circle" size={80} color={"#5188E3"} />
@@ -10,14 +10,18 @@ const PatronCard = ({ name, rides, time }) => {
         <View style={styles?.introContainer}>
           <Text style={styles.name}>{name}</Text>
           <View style={styles?.rides}>
-            <Ionicons name="car" size={32} color={"#5188E3"} />
-            <Text style={styles.ridesText}>{rides}</Text>
+            {vehicle_type === "bike" ? (
+              <FontAwesome5 name="motorcycle" size={25} color={"#5188E3"} />
+            ) : (
+              <Ionicons name="car" size={32} color={"#5188E3"} />
+            )}
+            <Text style={styles.ridesText}>{` ${rides}`}</Text>
           </View>
         </View>
         <View style={styles?.stats}>
           <View style={styles?.timeContainer}>
             <Ionicons name="time-outline" size={22} color={"#758580"} />
-            <Text style={{marginStart: 5}}>{time}</Text>
+            <Text style={{ marginStart: 5 }}>{time}</Text>
           </View>
           {/* <View style={styles?.availableSeatsContainer}>
             {[...Array(availableSeats)]?.map((element, index) => (

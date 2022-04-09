@@ -15,14 +15,6 @@ const MatchingRidesPatron = ({ navigation }) => {
       id: 2,
       name: "Ahsan",
     },
-    {
-      id: 3,
-      name: "Ali",
-    },
-    {
-      id: 4,
-      name: "Ali",
-    },
   ];
   const { source, destination } = useSelector((state) => state?.locations);
   return (
@@ -34,12 +26,11 @@ const MatchingRidesPatron = ({ navigation }) => {
         onCancel={() => {}}
       />
       <Text style={styles?.text}>
-        Source:{" "}
-        {typeof source === "object"
-          ? `${source?.latitude} °N ${source?.longitude} °E`
-          : source}
+        Source: {source && `${source?.formatted_address}`}
       </Text>
-      <Text style={styles?.text}>Destination: {destination}</Text>
+      <Text style={styles?.text}>
+        Destination: {destination && `${destination?.formatted_address}`}
+      </Text>
       <View style={styles?.hitchers}>
         <FlatList
           data={dummyHitchers}
@@ -73,12 +64,12 @@ const styles = StyleSheet?.create({
     borderWidth: 1,
     fontSize: 15,
     fontWeight: "bold",
-    height: 50,
     marginHorizontal: 10,
     paddingStart: 10,
     marginBottom: 15,
     color: "#758580",
     textAlignVertical: "center",
+    minHeight: 50,
   },
   hitchers: {
     width: "100%",

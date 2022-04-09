@@ -14,39 +14,18 @@ const MatchingRidesHitcher = ({ navigation }) => {
   const { source, destination } = useSelector((state) => state?.locations);
   const dummyPatrons = [
     {
-      id: 1,
-      name: "John Doe",
-      rides: 47,
-      availableSeats: 3,
+      ride_id: 1,
+      patron_name: "John Doe",
+      vehicle_type: "bike",
+      ride_count: 3,
       departureTime: "8:00 PM",
     },
     {
-      id: 2,
-      name: "John Doe",
-      rides: 17,
-      availableSeats: 4,
+      ride_id: 2,
+      patron_name: "John Doe",
+      vehicle_type: "car",
+      ride_count: 3,
       departureTime: "8:00 PM",
-    },
-    {
-      id: 3,
-      name: "John Doe",
-      rides: 39,
-      availableSeats: 4,
-      departureTime: "10:00 PM",
-    },
-    {
-      id: 4,
-      name: "John Doe",
-      rides: 47,
-      availableSeats: 3,
-      departureTime: "8:00 PM",
-    },
-    {
-      id: 5,
-      name: "John Doe",
-      rides: 26,
-      availableSeats: 1,
-      departureTime: "9:00 PM",
     },
   ];
 
@@ -54,12 +33,9 @@ const MatchingRidesHitcher = ({ navigation }) => {
     <View style={styles?.container}>
       <Header text="Matching Rides" navigation={() => navigation?.goBack()} />
       <Text style={styles?.input}>
-        Source:{" "}
-        {typeof source === "object"
-          ? `${source?.latitude} °N ${source?.longitude} °E`
-          : source}
+        Source: {source && `${source?.formatted_address}`}
       </Text>
-      <Text style={styles?.input}>Destination: {destination}</Text>
+      <Text style={styles?.input}>Destination: {destination && `${destination?.formatted_address}`}</Text>
       <View style={styles?.patrons}>
         <FlatList
           data={dummyPatrons}
@@ -67,13 +43,14 @@ const MatchingRidesHitcher = ({ navigation }) => {
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {
-                navigation.navigate("PatronDetails", { id: item?.id });
+                navigation?.navigate("PatronDetails", { id: item?.ride_id });
               }}
             >
               <PatronCard
-                name={item?.name}
-                rides={item?.rides}
+                name={item?.patron_name}
+                rides={item?.ride_count}
                 time={item?.departureTime}
+                vehicle_type={item?.vehicle_type}
               />
             </TouchableOpacity>
           )}
@@ -96,12 +73,12 @@ const styles = StyleSheet?.create({
     borderWidth: 1,
     fontSize: 15,
     fontWeight: "bold",
-    height: 50,
     marginHorizontal: 10,
     paddingStart: 10,
     marginBottom: 15,
     color: "#758580",
     textAlignVertical: "center",
+    minHeight: 50,
   },
   patrons: {
     width: "100%",

@@ -12,36 +12,99 @@ import { Ionicons } from "@expo/vector-icons";
 const PatronDetails = ({ navigation, route }) => {
   const dummyPatronDetails = [
     {
-      id: 1,
+      ride_id: 1,
       name: "John Doe",
-      rides: 47,
-      availableSeats: 3,
-      totalSeats: 4,
-      departureTime: "8:00 PM",
-      source: "Sanda, Lahore",
-      destination: "PUCIT, Lahore",
-      stopsCount: 2,
-      stops: ["MAO College", "New Anarkali"],
-      selectedVehicleID: 1,
+      ride_count: 3,
+      ride: {
+        available_seats: 4,
+        total_seats: 5,
+        start_location: {
+          coords: {
+            lat: 31.5788719,
+            lng: 74.30438509999999,
+          },
+          formatted_address:
+            "Main Bazaar، Data Darbar Rd, near NBP، Data Gunj Buksh Town, Lahore, Punjab 54000, Pakistan",
+          place_id: "ChIJD1_4IKIcGTkRHWJ0TD2nuiA",
+        },
+        end_location: {
+          coords: {
+            lat: 31.5641139,
+            lng: 74.318805,
+          },
+          formatted_address:
+            "Hall Rd, Garhi Shahu, Lahore, Punjab 54000, Pakistan",
+          place_id:
+            "EjRIYWxsIFJkLCBHYXJoaSBTaGFodSwgTGFob3JlLCBQdW5qYWIgNTQwMDAsIFBha2lzdGFuIi4qLAoUChIJ8eyI4VMbGTkRFeFSIB8gamsSFAoSCcW5o5cyGxk5EakCpbI5ojjK",
+        },
+        way_points: [],
+        overview_polyline:
+          "itv_EkrodMd@xC?j@E|@Mz@`CKf@MpASp@O|@Bx@e@bCgBlAs@z@]Pb@fDdFNNFw@Fa@`BgFPs@LgAb@gDbAL`@Jx@Vj@T`A^pAXz@L^Jf@PbA\\TI\\ENGn@]hAaHF_@HMAEAMBMJIv@kGf@uBpAwDNg@J_@|@wAPa@|@wCjAyDFMl@u@bEiEZ_@Gg@c@sDq@wF{@gJd@KLBf@Br@ErCg@`Dm@",
+        departure_time: "8:00 PM",
+      },
+      vehicle: {
+        make: "Honda",
+        model: "CD-70",
+        registration_no: "XYZ 1234",
+        type: "bike",
+      },
     },
     {
-      id: 2,
+      ride_id: 2,
       name: "John Doe",
-      rides: 17,
-      availableSeats: 2,
-      totalSeats: 4,
-      departureTime: "8:00 PM",
-      source: "Sanda, Lahore",
-      destination: "PUCIT, Lahore",
-      stopsCount: 2,
-      stops: ["MAO College", "New Anarkali"],
-      selectedVehicleID: 2,
+      ride_count: 3,
+      ride: {
+        available_seats: 4,
+        total_seats: 5,
+        start_location: {
+          coords: {
+            lat: 31.5788719,
+            lng: 74.30438509999999,
+          },
+          formatted_address:
+            "Main Bazaar، Data Darbar Rd, near NBP، Data Gunj Buksh Town, Lahore, Punjab 54000, Pakistan",
+          place_id: "ChIJD1_4IKIcGTkRHWJ0TD2nuiA",
+          short_address: "Main Bazaar، Data Darbar Rd",
+        },
+        end_location: {
+          coords: {
+            lat: 31.5641139,
+            lng: 74.318805,
+          },
+          formatted_address:
+            "Hall Rd, Garhi Shahu, Lahore, Punjab 54000, Pakistan",
+          place_id:
+            "EjRIYWxsIFJkLCBHYXJoaSBTaGFodSwgTGFob3JlLCBQdW5qYWIgNTQwMDAsIFBha2lzdGFuIi4qLAoUChIJ8eyI4VMbGTkRFeFSIB8gamsSFAoSCcW5o5cyGxk5EakCpbI5ojjK",
+          short_address: "Hall Rd, Garhi Shahu",
+        },
+        way_points: [
+          {
+            coords: {
+              lat: 31.5788833,
+              lng: 74.3088372,
+            },
+            formatted_address:
+              "Hakiman Bazaar, Mohalla Patrangan Kucha Faqirkhana اندرون لاہور،، Lahore, Punjab 54000, Pakistan",
+            place_id: "ChIJ2_bSuy4dGTkR7xT_GPVRBdQ",
+            short_address: "Hakiman Bazaar, Mohalla Patrangan Kucha Faqirkhana",
+          },
+        ],
+        overview_polyline:
+          "itv_EkrodMd@xC?j@E|@Mz@eCF}ELw@Ag@EeCOS?AqABaADUbA_A\\s@~@sAT}@lCqDoCMiDYDy@dBNrAJr@@b@Cn@Gn@UZWVYV{@FkADi@HYZ]r@q@DCiAcChAbCR@T@VEHEv@cAVk@Z}@~BmIRkAFaBNsB`@kEXmGGEGO@QFOFE@A`@oDf@oBTm@f@w@ZSZc@`AAxBF~BRdCJdCVfAg@h@U?A@E@CFCt@eBzAsCZU^ClBHv@DvA\\ZPTLnCYLHVBpCNzAI|@Ij@A|@Ad@KLBf@Br@ErCg@`Dm@",
+        departure_time: "8:00 PM",
+      },
+      vehicle: {
+        make: "Honda",
+        model: "City XLR",
+        registration_no: "XYZ 1234",
+        type: "car",
+      },
     },
   ];
   const [patron, setPatron] = useState(null);
   useEffect(() => {
     const obj = dummyPatronDetails?.find(
-      (element) => element?.id === route.params?.id
+      (element) => element?.ride_id === route.params?.id
     );
     setPatron(obj);
   }, []);
@@ -58,23 +121,27 @@ const PatronDetails = ({ navigation, route }) => {
         <>
           <PatronDetailsHeader
             name={patron?.name}
-            rides={patron?.rides}
-            filledSeats={patron?.totalSeats - patron?.availableSeats}
-            availableSeats={patron?.availableSeats}
+            rides={patron?.ride_count}
+            filledSeats={
+              patron?.ride?.total_seats - patron?.ride?.available_seats
+            }
+            availableSeats={patron?.ride?.available_seats}
             showSeats={!route.params?.isBooked}
           />
 
           <TimeLine
-            source={patron?.source}
-            destination={patron?.destination}
-            stops={patron?.stops}
+            source={patron?.ride?.start_location?.formatted_address}
+            destination={patron?.ride?.end_location?.formatted_address}
+            stops={patron?.ride?.way_points?.map(
+              (waypoint) => waypoint?.formatted_address
+            )}
           />
           {route.params?.isBooked ? (
             <View style={styles?.departingContainer}>
               <DepartingDetails
                 style={{ flex: 1 }}
                 showDate={false}
-                time={patron?.departureTime}
+                time={patron?.ride?.departure_time}
               />
               <TouchableOpacity style={styles?.liveLocationButton}>
                 <Text style={styles?.liveLocationText}>See Live Location</Text>
@@ -82,13 +149,30 @@ const PatronDetails = ({ navigation, route }) => {
               </TouchableOpacity>
             </View>
           ) : (
-            <DepartingDetails showDate={true} time={patron?.departureTime} />
+            <DepartingDetails
+              showDate={true}
+              time={patron?.ride?.departure_time}
+            />
           )}
-          <VehicleDetails id={patron?.selectedVehicleID} />
+          <VehicleDetails
+            make={patron?.vehicle?.make}
+            model={patron?.vehicle?.model}
+            registration_no={patron?.vehicle?.registration_no}
+            type={patron?.vehicle?.type}
+          />
           <View style={{ flex: 2, marginHorizontal: 12 }}>
             <Map
+              start={patron?.ride?.start_location}
+              end={patron?.ride?.end_location}
+              way_points={patron?.ride?.way_points}
+              overview_polyline={patron?.ride?.overview_polyline}
               navigation={() => {
-                navigation?.navigate("Full Screen Map");
+                navigation?.navigate("Full Screen Map", {
+                  start: patron?.ride?.start_location,
+                  end: patron?.ride?.end_location,
+                  way_points: patron?.ride?.way_points,
+                  overview_polyline: patron?.ride?.overview_polyline,
+                });
               }}
             />
           </View>

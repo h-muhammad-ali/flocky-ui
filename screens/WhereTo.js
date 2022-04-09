@@ -14,51 +14,61 @@ import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
 import {
   setSource,
-  emptyDestination,
   removeWayPoint,
-  emptyWayPoints,
+  resetLocationState,
 } from "../redux/locations/locationsActions";
 import * as Location from "expo-location";
+import { GOOGLE_MAPS_API_KEY } from "@env";
 
 const WhereTo = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const CURRENT_LOCATION = "Current Location";
-  const { source, destination, wayPoints } = useSelector(
+  const { source, destination, wayPoints, overview_polyline } = useSelector(
     (state) => state?.locations
   );
-
   const dispatch = useDispatch();
   const ref = useRef(null);
-  useEffect(() => {
-    Location.requestForegroundPermissionsAsync()
-      .then((response) => {
-        if (response?.status === "granted") {
-          Location.getCurrentPositionAsync({})
-            .then((response) => {
-              setLocation(response);
-              dispatch(
-                setSource({
-                  latitude: response?.coords?.latitude,
-                  longitude: response?.coords?.longitude,
-                })
-              );
-            })
-            .catch((error) => {
-              Alert?.alert(error?.message);
-            });
-        } else {
-          setErrorMsg("Permission to access location was denied");
-          dispatch(setSource(CURRENT_LOCATION));
-        }
-      })
-      .catch((error) => {
-        Alert?.alert(error?.message);
-      });
-    dispatch(emptyDestination());
-    dispatch(emptyWayPoints());
-  }, []);
+  const getCurrentPosition = async () => {
+    Location.requestForegroundPermissionsAsync().then((response) => {
+      if (response?.status === "granted") {
+        Location.getCurrentPositionAsync({})
+          .then((response) => {
+            setLocation(response);
+            fetch(
+              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
+                response?.coords?.latitude +
+                "," +
+                response?.coords?.longitude +
+                "&key=" +
+                GOOGLE_MAPS_API_KEY
+            )
+              .then((response) => response.json())
+              .then((responseJson) => {
+                let result = responseJson["results"][0];
+                dispatch(
+                  setSource({
+                    coords: result["geometry"]["location"],
+                    place_id: result["place_id"],
+                    formatted_address: result["formatted_address"],
+                    short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
+                  })
+                );
+              });
+          })
+          .catch((error) => {
+            console?.log(error?.message);
+          });
+      } else {
+        setErrorMsg("Permission to access location was denied");
+        dispatch(setSource(null));
+      }
+    });
+  };
 
+  useEffect(() => {
+    getCurrentPosition();
+    return () => dispatch(resetLocationState());
+  }, []);
   useEffect(() => {
     if (destination !== "" && ref?.current) {
       ref?.current?.setNativeProps({
@@ -70,15 +80,10 @@ const WhereTo = ({ navigation, route }) => {
   return (
     <View style={styles?.container}>
       <Header text="Where to?" navigation={() => navigation?.goBack()} />
+
       <Text style={styles.label}>From</Text>
       <TextInput
-        value={
-          location
-            ? typeof source === "object"
-              ? `${source?.latitude} °N ${source?.longitude} °E`
-              : source
-            : errorMsg ?? "Loading..."
-        }
+        value={location ? source?.short_address : errorMsg ?? "Loading..."}
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
@@ -102,11 +107,11 @@ const WhereTo = ({ navigation, route }) => {
               }}
             >
               <Text style={[styles?.input, { flex: 0.9 }]}>
-                {"Way-Point " + ++index + ": " + item}
+                {"Way-Point " + ++index + ": " + item?.short_address}
               </Text>
               <TouchableOpacity
                 onPress={() => {
-                  dispatch(removeWayPoint(item));
+                  dispatch(removeWayPoint(item?.place_id));
                 }}
               >
                 <Ionicons name="close" size={25} />
@@ -120,7 +125,7 @@ const WhereTo = ({ navigation, route }) => {
       <Text style={styles?.label}>To</Text>
       <TextInput
         ref={ref}
-        value={destination}
+        value={destination?.short_address}
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
@@ -144,19 +149,14 @@ const WhereTo = ({ navigation, route }) => {
       )}
 
       <Map
-        latitude={source?.latitude}
-        longitude={source?.longitude}
         navigation={() => {
-          navigation?.navigate("Full Screen Map", {
-            latitude: source?.latitude,
-            longitude: source?.longitude,
-          });
+          navigation?.navigate("Full Screen Map");
         }}
       />
       <Button
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
-          if (destination === "" && ref.current) {
+          if (destination === null && ref.current) {
             ref.current.setNativeProps({
               borderColor: "red",
             });

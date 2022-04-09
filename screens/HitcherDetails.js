@@ -11,14 +11,56 @@ const HitcherDetails = ({ route, navigation }) => {
     {
       id: 1,
       name: "John Doe",
-      source: "Sanda, Lahore",
-      destination: "PUCIT, Lahore",
+      pickup_location: {
+        coords: {
+          lat: 31.5788719,
+          lng: 74.30438509999999,
+        },
+        formatted_address:
+          "Main Bazaar، Data Darbar Rd, near NBP، Data Gunj Buksh Town, Lahore, Punjab 54000, Pakistan",
+        place_id: "ChIJD1_4IKIcGTkRHWJ0TD2nuiA",
+        short_address: "Main Bazaar، Data Darbar Rd",
+      },
+      dropoff_location: {
+        coords: {
+          lat: 31.5641139,
+          lng: 74.318805,
+        },
+        formatted_address:
+          "Hall Rd, Garhi Shahu, Lahore, Punjab 54000, Pakistan",
+        place_id:
+          "EjRIYWxsIFJkLCBHYXJoaSBTaGFodSwgTGFob3JlLCBQdW5qYWIgNTQwMDAsIFBha2lzdGFuIi4qLAoUChIJ8eyI4VMbGTkRFeFSIB8gamsSFAoSCcW5o5cyGxk5EakCpbI5ojjK",
+        short_address: "Hall Rd, Garhi Shahu",
+      },
+      overview_polyline:
+        "itv_EkrodMd@xC?j@E|@Mz@`CKf@MpASp@O|@Bx@e@bCgBlAs@z@]Pb@fDdFNNFw@Fa@`BgFPs@LgAb@gDbAL`@Jx@Vj@T`A^pAXz@L^Jf@PbA\\TI\\ENGn@]hAaHF_@HMAEAMBMJIv@kGf@uBpAwDNg@J_@|@wAPa@|@wCjAyDFMl@u@bEiEZ_@Gg@c@sDq@wF{@gJd@KLBf@Br@ErCg@`Dm@",
     },
     {
       id: 2,
-      name: "John Doe",
-      source: "Sanda, Lahore",
-      destination: "PUCIT, Lahore",
+      name: "Jane Dane",
+      pickup_location: {
+        coords: {
+          lat: 31.5788719,
+          lng: 74.30438509999999,
+        },
+        formatted_address:
+          "Main Bazaar، Data Darbar Rd, near NBP، Data Gunj Buksh Town, Lahore, Punjab 54000, Pakistan",
+        place_id: "ChIJD1_4IKIcGTkRHWJ0TD2nuiA",
+        short_address: "Main Bazaar، Data Darbar Rd",
+      },
+      dropoff_location: {
+        coords: {
+          lat: 31.5641139,
+          lng: 74.318805,
+        },
+        formatted_address:
+          "Hall Rd, Garhi Shahu, Lahore, Punjab 54000, Pakistan",
+        place_id:
+          "EjRIYWxsIFJkLCBHYXJoaSBTaGFodSwgTGFob3JlLCBQdW5qYWIgNTQwMDAsIFBha2lzdGFuIi4qLAoUChIJ8eyI4VMbGTkRFeFSIB8gamsSFAoSCcW5o5cyGxk5EakCpbI5ojjK",
+        short_address: "Hall Rd, Garhi Shahu",
+      },
+      overview_polyline:
+        "itv_EkrodMd@xC?j@E|@Mz@`CKf@MpASp@O|@Bx@e@bCgBlAs@z@]Pb@fDdFNNFw@Fa@`BgFPs@LgAb@gDbAL`@Jx@Vj@T`A^pAXz@L^Jf@PbA\\TI\\ENGn@]hAaHF_@HMAEAMBMJIv@kGf@uBpAwDNg@J_@|@wAPa@|@wCjAyDFMl@u@bEiEZ_@Gg@c@sDq@wF{@gJd@KLBf@Br@ErCg@`Dm@",
     },
   ];
   const [hitcher, setHitcher] = useState(null);
@@ -42,8 +84,8 @@ const HitcherDetails = ({ route, navigation }) => {
           </View>
           <View style={{ flex: 1 }}>
             <TimeLine
-              source={hitcher?.source}
-              destination={hitcher?.destination}
+              source={hitcher?.pickup_location?.formatted_address}
+              destination={hitcher?.dropoff_location?.formatted_address}
             />
           </View>
           <View style={styles?.statementContainer}>
@@ -54,8 +96,17 @@ const HitcherDetails = ({ route, navigation }) => {
           </View>
           <View style={{ flex: 6, marginHorizontal: 10 }}>
             <Map
+              start={hitcher?.pickup_location}
+              end={hitcher?.dropoff_location}
+              way_points={[]}
+              overview_polyline={hitcher?.overview_polyline}
               navigation={() => {
-                navigation?.navigate("Full Screen Map");
+                navigation?.navigate("Full Screen Map", {
+                  start: hitcher?.pickup_location,
+                  end: hitcher?.dropoff_location,
+                  way_points: [],
+                  overview_polyline: hitcher?.overview_polyline,
+                });
               }}
             />
           </View>
