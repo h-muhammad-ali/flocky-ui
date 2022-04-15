@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     justifyContent: "center",
     alignItems: "flex-start",
-    minHeight: 50,
+    height: 50,
     backgroundColor: "white",
     marginHorizontal: 20,
     paddingStart: 20,
