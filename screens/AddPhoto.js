@@ -3,8 +3,9 @@ import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "../components/Button";
 import * as ImagePicker from "expo-image-picker";
-import Header from "../components/Header";
+import { getStorage, getDownloadURL } from "firebase/storage";
 
+const storage = getStorage();
 const AddPhoto = ({ navigation, route }) => {
   const [image, setImage] = useState(null);
   const pickImage = async () => {
@@ -14,10 +15,56 @@ const AddPhoto = ({ navigation, route }) => {
       aspect: [4, 3],
       quality: 1,
     });
-    console.log(result);
     if (!result?.cancelled) {
       setImage(result?.uri);
     }
+  };
+  async function uploadImageAsync(uri) {
+    const blob = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.onload = function () {
+        resolve(xhr?.response);
+      };
+      xhr.onerror = function (e) {
+        console?.log(e);
+        reject(new TypeError("Network request failed"));
+      };
+      xhr.responseType = "blob";
+      xhr.open("GET", uri, true);
+      xhr.send(null);
+    });
+    const ref = storage().ref().child(`/userProfileImages/${Date?.now()}`);
+    const uploadTask = ref.put(blob);
+    uploadTask?.on(
+      "state_changed",
+      (snapshot) => {
+        const progress =
+          (snapshot?.bytesTransferred / snapshot?.totalBytes) * 100;
+        console?.log("Upload is " + progress + "% done");
+      },
+      (error) => {
+        alert("Error in uploading image");
+      },
+      () => {
+        blob.close();
+        getDownloadURL(uploadTask?.snapshot?.ref).then((downloadURL) => {
+          console?.log("File available at", downloadURL);
+        });
+      }
+    );
+  }
+  const logInOnPressHandler = () => {
+    const dataObj = { ...route?.params?.userData, imageURI: image };
+    // signInAnonymously(auth)
+    //   .then(() => {
+    //     console?.log("SignIn")
+    //   })
+    //   .catch((error) => {
+    //     const errorCode = error.code;
+    //     const errorMessage = error.message;
+    //     console?.log(errorCode, errorMessage);
+    //   });
+    navigation?.navigate("LogIn");
   };
   return (
     <View style={styles?.container}>
@@ -53,6 +100,7 @@ const AddPhoto = ({ navigation, route }) => {
       </View>
       <View>
         <Button
+          isDisabled={!image}
           text={route.params?.isEdit ? "Update Photo" : "Continue"}
           onPress={
             route.params?.isEdit
@@ -62,7 +110,7 @@ const AddPhoto = ({ navigation, route }) => {
                   navigation?.navigate("VerificationFinished");
                 }
               : () => {
-                  navigation?.navigate("LogIn");
+                  logInOnPressHandler();
                 }
           }
         />

@@ -11,6 +11,8 @@ import {
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
+import { useDispatch } from "react-redux";
+import { setCurrentUserID } from "../redux/currentUser/currentUserActions";
 
 const SignIn = ({ navigation }) => {
   const EMAIL_REGEX =
@@ -26,9 +28,16 @@ const SignIn = ({ navigation }) => {
       email: "",
     },
   });
+  const dispatch = useDispatch();
   const onSubmit = (data) => {
     console.log("data", data);
     if (data?.email === "user@gmail.com") {
+      dispatch(setCurrentUserID(1));
+    }
+    if (data?.email === "user1@gmail.com") {
+      dispatch(setCurrentUserID(2));
+    }
+    if (data?.email === "user@gmail.com" || data?.email === "user1@gmail.com") {
       navigation?.navigate("User Stack");
     }
     if (data?.email === "admin@gmail.com") {

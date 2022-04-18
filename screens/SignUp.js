@@ -53,9 +53,11 @@ const SignUp = ({ navigation, route }) => {
     },
   });
   const onSubmit = (data) => {
-    console.log("data", data);
+    // console.log("data", data);
     reset();
-    navigation?.navigate("Add Photo");
+    navigation?.navigate("Add Photo", {
+      userData: { ...data, gender: data?.gender(), company: data?.company() },
+    });
   };
 
   const [focusName, setFocusName] = useState(false);
