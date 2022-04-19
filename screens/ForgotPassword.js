@@ -20,7 +20,9 @@ const ForgotPassword = ({ navigation }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    navigation?.navigate("Reset Password");
+    navigation?.navigate("AddCode", {
+      resetCode: true,
+    });
   };
   return (
     <View style={styles.container}>
@@ -46,7 +48,7 @@ const ForgotPassword = ({ navigation }) => {
           />
         )}
       />
-      <Button text="Send Reset Link" onPress={handleSubmit(onSubmit)} />
+      <Button text="Send Reset Code" onPress={handleSubmit(onSubmit)} />
     </View>
   );
 };

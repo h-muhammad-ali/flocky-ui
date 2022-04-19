@@ -12,7 +12,7 @@ import Button from "../components/Button";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 
-const AddCode = ({ navigation }) => {
+const AddCode = ({ navigation, route }) => {
   const {
     handleSubmit,
     control,
@@ -26,7 +26,9 @@ const AddCode = ({ navigation }) => {
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    navigation?.navigate("AdminSignUp");
+    route?.params?.resetCode
+      ? navigation?.navigate("Reset Password")
+      : navigation?.navigate("AdminSignUp");
   };
   return (
     <TouchableWithoutFeedback
