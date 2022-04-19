@@ -65,8 +65,20 @@ const Map = ({ navigation, route }) => {
             ? dispatch(setSource(location))
             : route.params?.origin === "To"
             ? dispatch(setDestination(location))
-            : dispatch(setWayPoint(location));
-          navigation?.navigate({ name: "WhereTo", merge: true });
+            : route.params?.origin === "Stop"
+            ? dispatch(setWayPoint(location))
+            : navigation?.navigate({
+                name: "AdminSignUp",
+                params: {
+                  location: location,
+                  company: route.params?.company,
+                  password: route.params?.password,
+                  email: route.params?.email,
+                  domain: route.params?.domain,
+                },
+              });
+          if (route.params?.origin !== "CompanyLocation")
+            navigation?.navigate({ name: "WhereTo", merge: true });
         }}
       >
         <Ionicons name="checkmark-circle" size={80} color={"#5188E3"} />

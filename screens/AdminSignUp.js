@@ -34,7 +34,7 @@ const AdminSignUp = ({ navigation, route }) => {
     },
   });
   const onSubmit = (data) => {
-    console.log("data", data);
+    console.log("ADMINSIGNUP", route?.params);
     reset();
     navigation?.navigate("Add Photo", { isAdmin: true });
   };

@@ -22,7 +22,9 @@ const SelectLocation = ({ navigation, route }) => {
             ? "Enter Source"
             : route.params?.origin === "To"
             ? "Enter Destination"
-            : "Enter Way-Point"
+            : route.params?.origin === "Stop"
+            ? "Enter Way-Point"
+            : "Enter Company Location"
         }
         navigation={() => navigation?.goBack()}
       />
@@ -32,7 +34,9 @@ const SelectLocation = ({ navigation, route }) => {
             ? "Enter Source"
             : route.params?.origin === "To"
             ? "Enter Destination"
-            : "Enter Way-Point"
+            : route.params?.origin === "Stop"
+            ? "Enter Way-Point"
+            : "Enter Company Location"
         }
         renderRow={(data, index) => (
           <View style={styles?.places}>
@@ -61,15 +65,32 @@ const SelectLocation = ({ navigation, route }) => {
                   short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
                 })
               )
-            : dispatch(
+            : route.params?.origin === "Stop"
+            ? dispatch(
                 setWayPoint({
                   coords: details["geometry"]["location"],
                   place_id: details["place_id"],
                   formatted_address: details["formatted_address"],
                   short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
                 })
-              );
-          navigation?.navigate({ name: "WhereTo", merge: true });
+              )
+            : navigation?.navigate({
+                name: "AdminSignUp",
+                params: {
+                  location: {
+                    coords: details["geometry"]["location"],
+                    place_id: details["place_id"],
+                    formatted_address: details["formatted_address"],
+                    short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
+                  },
+                  company: route.params?.company,
+                  password: route.params?.password,
+                  email: route.params?.email,
+                  domain: route.params?.domain,
+                },
+              });
+          if (route.params?.origin !== "CompanyLocation")
+            navigation?.navigate({ name: "WhereTo", merge: true });
         }}
         query={{
           key: GOOGLE_MAPS_API_KEY,
@@ -80,7 +101,18 @@ const SelectLocation = ({ navigation, route }) => {
           <TouchableOpacity
             style={{ flex: 0.1 }}
             onPress={() => {
-              navigation?.navigate("Map", { origin: route?.params?.origin });
+              navigation?.navigate(
+                "Map",
+                route.params?.origin === "CompanyLocation"
+                  ? {
+                      origin: route?.params?.origin,
+                      company: route.params?.company,
+                      password: route.params?.password,
+                      email: route.params?.email,
+                      domain: route.params?.domain,
+                    }
+                  : { origin: route?.params?.origin }
+              );
             }}
           >
             <Ionicons name="map" size={25} />

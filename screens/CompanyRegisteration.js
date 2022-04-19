@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   Text,
-  TouchableOpacity,
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -32,9 +31,24 @@ const CompanyRegisteration = ({ navigation, route }) => {
     },
   });
   const onSubmit = (data) => {
-    console.log("data", data);
+    // console.log("data", data);
     reset();
-    navigation?.navigate("AddCode");
+    navigation?.navigate({
+      name: "User Stack",
+      params: {
+        screen: "User Panel",
+        params: {
+          screen: "SelectLocation",
+          params: {
+            origin: "CompanyLocation",
+            company: data?.company,
+            password: data?.password,
+            email: data?.email,
+            domain: data?.domain,
+          },
+        },
+      },
+    });
   };
   const [focusPassword, setFocusPassword] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
