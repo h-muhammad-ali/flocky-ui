@@ -2,8 +2,9 @@ import React from "react";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import MainStackNavigator from "./navigators/MainStackNavigator";
-import store from "./redux/store";
+import store, { persistor } from "./redux/store";
 import { Provider } from "react-redux";
+import { PersistGate } from "redux-persist/integration/react";
 
 const App = () => {
   const [loaded] = useFonts({
@@ -22,9 +23,11 @@ const App = () => {
   }
   return (
     <Provider store={store}>
-      <NavigationContainer>
-        <MainStackNavigator />
-      </NavigationContainer>
+      <PersistGate loading={null} persistor={persistor}>
+        <NavigationContainer>
+          <MainStackNavigator />
+        </NavigationContainer>
+      </PersistGate>
     </Provider>
   );
 };
