@@ -1,15 +1,15 @@
-import { SET_CURRENT_USER_ID } from "./currentUserTypes";
+import { SET_CURRENT_USER_JWT } from "./currentUserTypes";
 
 const initialState = {
-  id: 0,
+  jwt: 0,
 };
 
 const currentUserReducer = (state = initialState, { type, payload }) => {
   switch (type) {
-    case SET_CURRENT_USER_ID:
+    case SET_CURRENT_USER_JWT:
       return {
         ...state,
-        id: payload,
+        jwt: payload,
       };
     default:
       return state;

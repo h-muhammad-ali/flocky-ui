@@ -1,6 +1,6 @@
-import { SET_CURRENT_USER_ID } from "./currentUserTypes";
+import { SET_CURRENT_USER_JWT } from "./currentUserTypes";
 
-export const setCurrentUserID = (id) => ({
-  type: SET_CURRENT_USER_ID,
-  payload: id,
+export const setCurrentUserJWT = (jwt) => ({
+  type: SET_CURRENT_USER_JWT,
+  payload: jwt,
 });
