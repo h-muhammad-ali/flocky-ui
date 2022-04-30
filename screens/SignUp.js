@@ -8,29 +8,34 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
 
 const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-    { label: "Prefer Not to Say", value: "neutral" },
+    { label: "Male", value: "M" },
+    { label: "Female", value: "F" },
+    { label: "Prefer Not to Say", value: "N" },
   ]);
   const [companyOpen, setCompanyOpen] = useState(false);
   const [company, setComapny] = useState([
-    { label: "PUCIT", value: "pucit" },
-    { label: "UCP", value: "ucp" },
-    { label: "UET", value: "uet" },
+    { label: "PUCIT", value: 43 },
+    { label: "UCP", value: 2 },
+    { label: "UET", value: 3 },
   ]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const onGenderOpen = useCallback(() => {
     setCompanyOpen(false);
   }, []);
@@ -53,11 +58,38 @@ const SignUp = ({ navigation, route }) => {
     },
   });
   const onSubmit = (data) => {
-    // console.log("data", data);
-    reset();
-    navigation?.navigate("Add Photo", {
-      userData: { ...data, gender: data?.gender(), company: data?.company() },
-    });
+    setLoading(true);
+    const userData = {
+      name: data?.name,
+      password: data?.password,
+      gender: data?.gender(),
+      organization_id: data?.company(),
+      email: data?.email,
+      invitation_code: data?.invitationCode,
+    };
+    axios
+      .post(`${BASE_URL}/auth/signup`, userData, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        console.log(response);
+        reset();
+        navigation?.navigate("Add Photo");
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const [focusName, setFocusName] = useState(false);
@@ -74,7 +106,13 @@ const SignUp = ({ navigation, route }) => {
     set(false);
     onBlur();
   };
-
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -196,7 +234,7 @@ const SignUp = ({ navigation, route }) => {
                     setItems={setComapny}
                     placeholder="Select Company"
                     placeholderStyle={styles?.placeholderStyles}
-                    loading={loading}
+                    // loading={loading}
                     activityIndicatorColor="#5188E3"
                     searchable={true}
                     searchPlaceholder="Search your company here..."
@@ -258,6 +296,14 @@ const SignUp = ({ navigation, route }) => {
                 value={value}
               />
             )}
+          />
+          <ErrorDialog
+            visible={!!error}
+            errorHeader={"Error"}
+            errorDescription={error}
+            clearError={() => {
+              setError("");
+            }}
           />
         </KeyboardAvoidingView>
         <View style={styles?.checkboxContainer}>

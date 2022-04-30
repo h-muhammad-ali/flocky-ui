@@ -7,12 +7,16 @@ import {
   TouchableOpacity,
   Keyboard,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 import { useDispatch } from "react-redux";
-import { setCurrentUserID } from "../redux/currentUser/currentUserActions";
+import { setCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
 
 const SignIn = ({ navigation }) => {
   const EMAIL_REGEX =
@@ -30,30 +34,56 @@ const SignIn = ({ navigation }) => {
   });
   const dispatch = useDispatch();
   const onSubmit = (data) => {
-    console.log("data", data);
-    if (data?.email === "user@gmail.com") {
-      dispatch(setCurrentUserID(1));
-    }
-    if (data?.email === "user1@gmail.com") {
-      dispatch(setCurrentUserID(2));
-    }
-    if (data?.email === "user@gmail.com" || data?.email === "user1@gmail.com") {
-      navigation?.navigate("User Stack");
-    }
-    if (data?.email === "admin@gmail.com") {
-      navigation?.navigate("User Stack", {
-        screen: "User Panel",
-        params: {
-          screen: "Roles",
-          params: { isAdmin: true },
-        },
+    setLoading(true);
+    axios
+      .post(`${BASE_URL}/auth/signin`, data, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        dispatch(setCurrentUserJWT(response?.data));
+        navigation?.navigate("User Stack");
+        reset();
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
       });
-    }
-    if (data?.email === "flocky@gmail.com") {
-      navigation?.navigate("Companies Management");
-    }
-    reset();
+    // console.log("data", data);
+    // if (data?.email === "user@gmail.com") {
+    //   dispatch(setCurrentUserID(1));
+    // }
+    // if (data?.email === "user1@gmail.com") {
+    //   dispatch(setCurrentUserID(2));
+    // }
+    // if (data?.email === "user@gmail.com" || data?.email === "user1@gmail.com") {
+    //   navigation?.navigate("User Stack");
+    // }
+    // if (data?.email === "admin@gmail.com") {
+    //   navigation?.navigate("User Stack", {
+    //     screen: "User Panel",
+    //     params: {
+    //       screen: "Roles",
+    //       params: { isAdmin: true },
+    //     },
+    //   });
+    // }
+    // if (data?.email === "flocky@gmail.com") {
+    //   navigation?.navigate("Companies Management");
+    // }
+    // reset();
   };
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
   const focusHandler = (set) => {
@@ -64,6 +94,13 @@ const SignIn = ({ navigation }) => {
     set(false);
     onBlur();
   };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -145,6 +182,18 @@ const SignIn = ({ navigation }) => {
           >
             <Text style={styles?.links}>I don't have an account</Text>
           </TouchableOpacity>
+          {!!error ? (
+            <ErrorDialog
+              visible={!!error}
+              errorHeader={"Error"}
+              errorDescription={error}
+              clearError={() => {
+                setError("");
+              }}
+            />
+          ) : (
+            <></>
+          )}
         </View>
       </View>
     </TouchableWithoutFeedback>

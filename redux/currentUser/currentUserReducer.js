@@ -1,7 +1,10 @@
-import { SET_CURRENT_USER_JWT } from "./currentUserTypes";
+import {
+  SET_CURRENT_USER_JWT,
+  CLEAR_CURRENT_USER_JWT,
+} from "./currentUserTypes";
 
 const initialState = {
-  jwt: 0,
+  jwt: null,
 };
 
 const currentUserReducer = (state = initialState, { type, payload }) => {
@@ -10,6 +13,11 @@ const currentUserReducer = (state = initialState, { type, payload }) => {
       return {
         ...state,
         jwt: payload,
+      };
+    case CLEAR_CURRENT_USER_JWT:
+      return {
+        ...state,
+        jwt: null,
       };
     default:
       return state;

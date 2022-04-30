@@ -7,8 +7,11 @@ import {
 } from "@react-navigation/drawer";
 import { Ionicons } from "@expo/vector-icons";
 import { FontAwesome } from "@expo/vector-icons";
+import { useDispatch } from "react-redux";
+import { clearCurrentUserJWT } from "../redux/currentUser/currentUserActions";
 
 const CustomDrawer = ({ isAdmin, ...props }) => {
+  const dispatch = useDispatch();
   return (
     <View style={styles.container}>
       <DrawerContentScrollView {...props}>
@@ -35,7 +38,9 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
         style={styles.logout}
         labelStyle={styles.logoutText}
         label="Logout"
-        onPress={() => props?.navigation?.navigate("MainMenu")}
+        onPress={() => {
+          dispatch(clearCurrentUserJWT());
+        }}
         icon={({ focused, color, size }) => (
           <Ionicons color={color} size={size} name="exit" />
         )}
