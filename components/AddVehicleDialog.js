@@ -1,21 +1,25 @@
 import React, { useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, View, ActivityIndicator } from "react-native";
 import Dialog from "react-native-dialog";
 import { useForm, Controller } from "react-hook-form";
 import DropDownPicker from "react-native-dropdown-picker";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
 
 const AddVehicleDialog = ({ visible, setVisibility }) => {
   const [typeOpen, setTypeOpen] = useState(false);
   const [typeValue, setTypeValue] = useState(null);
   const [type, setType] = useState([
-    { label: "Bike", value: "bike" },
-    { label: "Car", value: "car" },
+    { label: "Bike", value: "B" },
+    { label: "Car", value: "C" },
   ]);
   const {
     handleSubmit,
     control,
     formState,
-    formState: { isSubmitSuccessful },
+    formState: { isSubmitSuccessful, errors },
     reset,
   } = useForm({
     defaultValues: {
@@ -26,11 +30,45 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
       type: "",
     },
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [submittedData, setSubmittedData] = useState({});
+  const { jwt } = useSelector((state) => state?.currentUser);
   const onSubmit = (data) => {
-    console.log("data", data);
-    setSubmittedData(data);
-    setVisibility(false);
+    setLoading(true);
+    const vehicleData = {
+      type: data?.type,
+      model: data?.model,
+      make: data?.make,
+      color: data?.color,
+      registration_no: data?.plateNumber,
+    };
+    axios
+      .post(`${BASE_URL}/vehicle/add`, vehicleData, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        console.log(response);
+        setSubmittedData(data);
+        setVisibility(false);
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   React.useEffect(() => {
@@ -38,11 +76,26 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
       reset({ ...submittedData });
     }
   }, [formState, submittedData, reset]);
-
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View>
       <Dialog.Container visible={visible} headerStyle={styles?.container}>
         <Dialog.Title style={styles.headerText}>Add Vehicle</Dialog.Title>
+        {(errors?.type ||
+          errors?.make ||
+          errors?.model ||
+          errors?.color ||
+          errors?.plateNumber) && (
+          <Dialog.Description style={styles.error}>
+            *Please give input for all the given fields
+          </Dialog.Description>
+        )}
         <Controller
           name="type"
           control={control}
@@ -73,6 +126,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <Dialog.Input
+              style={errors?.make && styles?.errorBorder}
               selectionColor={"#5188E3"}
               placeholder="Make"
               onChangeText={onChange}
@@ -89,6 +143,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <Dialog.Input
+              style={errors?.model && styles?.errorBorder}
               selectionColor={"#5188E3"}
               placeholder="Model Name"
               onChangeText={onChange}
@@ -98,24 +153,6 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           )}
         />
 
-        {/* <Controller
-          name="year"
-          control={control}
-          rules={{
-            required: { value: true, message: "This field is required" },
-          }}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <Dialog.Input
-              selectionColor={"#5188E3"}
-              placeholder="Year"
-              keyboardType="numeric"
-              onChangeText={onChange}
-              onBlur={onBlur}
-              value={value}
-            />
-          )}
-        /> */}
-
         <Controller
           name="color"
           control={control}
@@ -124,6 +161,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <Dialog.Input
+              style={errors?.color && styles?.errorBorder}
               selectionColor={"#5188E3"}
               placeholder="Color"
               onChangeText={onChange}
@@ -132,6 +170,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
             />
           )}
         />
+
         <Controller
           name="plateNumber"
           control={control}
@@ -140,6 +179,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           }}
           render={({ field: { onChange, onBlur, value } }) => (
             <Dialog.Input
+              style={errors?.plateNumber && styles?.errorBorder}
               selectionColor={"#5188E3"}
               placeholder="Registeration Number"
               onChangeText={onChange}
@@ -152,6 +192,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           color="red"
           label="Cancel"
           onPress={() => {
+            reset();
             setVisibility(false);
           }}
         />
@@ -161,6 +202,14 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
           onPress={handleSubmit(onSubmit)}
         />
       </Dialog.Container>
+      <ErrorDialog
+        visible={!!error}
+        errorHeader={"Error"}
+        errorDescription={error}
+        clearError={() => {
+          setError("");
+        }}
+      />
     </View>
   );
 };
@@ -181,5 +230,14 @@ const styles = StyleSheet?.create({
   headerText: {
     color: "#5188E3",
     textAlign: "center",
+  },
+  error: {
+    color: "red",
+    fontSize: 10,
+    marginStart: 10,
+    marginBottom: 1,
+  },
+  errorBorder: {
+    borderColor: "red",
   },
 });

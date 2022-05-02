@@ -12,6 +12,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import AddVehicleDialog from "../components/AddVehicleDialog";
 import Button from "../components/Button";
+import ErrorDialog from "../components/ErrorDialog";
 
 const RideDetails = ({ navigation }) => {
   const dummyVehicleDetails = [
@@ -63,6 +64,7 @@ const RideDetails = ({ navigation }) => {
   const [vehicle, setVehicle] = useState(dummyVehicleDetails);
   const [show, setShow] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
+  const [error, setError] = useState("");
 
   const onChange = (event, selectedTime) => {
     const currentTime = selectedTime || time;
@@ -187,11 +189,22 @@ const RideDetails = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Wait!"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
       <View style={{ flex: 1, justifyContent: "center" }}>
         <Button
           text="Post Ride"
           onPress={() => {
-            navigation?.navigate("RidePosted");
+            if (vehicleValue) navigation?.navigate("RidePosted");
+            else setError("Please, select a vehicle before going forward.");
           }}
         />
       </View>
