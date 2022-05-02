@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -29,13 +29,14 @@ const SignUp = ({ navigation, route }) => {
     { label: "Prefer Not to Say", value: "N" },
   ]);
   const [companyOpen, setCompanyOpen] = useState(false);
-  const [company, setComapny] = useState([
-    { label: "PUCIT", value: 43 },
-    { label: "UCP", value: 2 },
-    { label: "UET", value: 3 },
-  ]);
+  const [company, setComapny] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [focusName, setFocusName] = useState(false);
+  const [focusPassword, setFocusPassword] = useState(false);
+  const [focusEmail, setFocusEmail] = useState(false);
+  const [focusCode, setFocusCode] = useState(false);
+  const [checked, setChecked] = useState(false);
   const onGenderOpen = useCallback(() => {
     setCompanyOpen(false);
   }, []);
@@ -92,12 +93,6 @@ const SignUp = ({ navigation, route }) => {
       });
   };
 
-  const [focusName, setFocusName] = useState(false);
-  const [focusPassword, setFocusPassword] = useState(false);
-  const [focusEmail, setFocusEmail] = useState(false);
-  const [focusCode, setFocusCode] = useState(false);
-  const [checked, setChecked] = useState(false);
-
   const focusHandler = (set) => {
     set(true);
   };
@@ -106,6 +101,32 @@ const SignUp = ({ navigation, route }) => {
     set(false);
     onBlur();
   };
+
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(`${BASE_URL}/organization/`, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        setComapny(response?.data);
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Can't get all the organizations.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -225,6 +246,10 @@ const SignUp = ({ navigation, route }) => {
               render={({ field: { onChange, value } }) => (
                 <View style={styles?.dropdownCompany}>
                   <DropDownPicker
+                    schema={{
+                      label: "name",
+                      value: "id",
+                    }}
                     style={styles?.dropdown}
                     open={companyOpen}
                     value={value}
@@ -234,8 +259,6 @@ const SignUp = ({ navigation, route }) => {
                     setItems={setComapny}
                     placeholder="Select Company"
                     placeholderStyle={styles?.placeholderStyles}
-                    // loading={loading}
-                    activityIndicatorColor="#5188E3"
                     searchable={true}
                     searchPlaceholder="Search your company here..."
                     onOpen={onCompanyOpen}
@@ -305,22 +328,9 @@ const SignUp = ({ navigation, route }) => {
               setError("");
             }}
           />
+
+          <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
         </KeyboardAvoidingView>
-        <View style={styles?.checkboxContainer}>
-          <TouchableOpacity
-            onPress={() => {
-              setChecked(!checked);
-            }}
-          >
-            <Ionicons
-              name={checked ? "checkbox" : "square-outline"}
-              size={25}
-              color={"#5188E3"}
-            />
-          </TouchableOpacity>
-          <Text>Travel Only with Same Gender</Text>
-        </View>
-        <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
         <Text style={styles?.terms}>
           By continuing, you agree to Flocky’s{" "}
           <Text style={styles?.links}>Terms & Conditions</Text> and{" "}
