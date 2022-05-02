@@ -22,6 +22,8 @@ import ErrorDialog from "../components/ErrorDialog";
 const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  const EMAIL_PREFIX_REGEX =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))$/;
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
     { label: "Male", value: "M" },
@@ -36,7 +38,8 @@ const SignUp = ({ navigation, route }) => {
   const [focusPassword, setFocusPassword] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusCode, setFocusCode] = useState(false);
-  const [checked, setChecked] = useState(false);
+  const [orgID, setOrgID] = useState(0);
+  const [domain, setDomain] = useState("");
   const onGenderOpen = useCallback(() => {
     setCompanyOpen(false);
   }, []);
@@ -65,7 +68,7 @@ const SignUp = ({ navigation, route }) => {
       password: data?.password,
       gender: data?.gender(),
       organization_id: data?.company(),
-      email: data?.email,
+      email: domain ? `${data?.email}@${domain}` : data?.email,
       invitation_code: data?.invitationCode,
     };
     axios
@@ -101,6 +104,34 @@ const SignUp = ({ navigation, route }) => {
     set(false);
     onBlur();
   };
+
+  useEffect(() => {
+    if (orgID !== 0) {
+      axios
+        .get(`${BASE_URL}/organization/${orgID}/domain`, {
+          timeout: 5000,
+        })
+        .then((response) => {
+          setDomain(response?.data?.organization_domain);
+        })
+        .catch((error) => {
+          if (error?.response?.status === 400) {
+            setDomain("");
+          } else if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Network Error! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  }, [orgID]);
 
   useEffect(() => {
     setLoading(true);
@@ -264,6 +295,9 @@ const SignUp = ({ navigation, route }) => {
                     onOpen={onCompanyOpen}
                     zIndex={1000}
                     zIndexInverse={3000}
+                    onSelectItem={(item) => {
+                      setOrgID(item?.id);
+                    }}
                   />
                 </View>
               )}
@@ -273,28 +307,41 @@ const SignUp = ({ navigation, route }) => {
           {errors?.email && (
             <Text style={styles.error}>{errors?.email?.message}</Text>
           )}
-          <Controller
-            name="email"
-            control={control}
-            rules={{
-              required: { value: true, message: "This field is required" },
-              pattern: { value: EMAIL_REGEX, message: "Not a valid email" },
+          <View
+            style={{
+              flexDirection: "row",
             }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[
-                  styles?.input,
-                  errors?.email && styles?.errorBorder,
-                  focusEmail && { borderColor: "#5188E3" },
-                ]}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
-                onFocus={() => focusHandler(setFocusEmail)}
-                onBlur={() => blurHandler(onBlur, setFocusEmail)}
-                value={value}
-              />
-            )}
-          />
+          >
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: { value: true, message: "This field is required" },
+                pattern: {
+                  value: domain ? EMAIL_PREFIX_REGEX : EMAIL_REGEX,
+                  message: domain
+                    ? "Not a valid email prefix"
+                    : "Not a valid email address",
+                },
+              }}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <TextInput
+                  style={[
+                    styles?.input,
+                    { flex: 1 },
+                    errors?.email && styles?.errorBorder,
+                    focusEmail && { borderColor: "#5188E3" },
+                  ]}
+                  selectionColor={"#5188E3"}
+                  onChangeText={onChange}
+                  onFocus={() => focusHandler(setFocusEmail)}
+                  onBlur={() => blurHandler(onBlur, setFocusEmail)}
+                  value={value}
+                />
+              )}
+            />
+            {domain ? <Text style={styles?.domain}>@{domain}</Text> : <></>}
+          </View>
           <Text style={styles?.label}>Invitation Code</Text>
           {errors?.invitationCode && (
             <Text style={styles?.error}>{errors?.invitationCode?.message}</Text>
@@ -417,6 +464,19 @@ const styles = StyleSheet?.create({
     flexDirection: "row",
     alignItems: "center",
     marginStart: 10,
+  },
+  domain: {
+    marginEnd: 10,
+    color: "#5188E3",
+    fontWeight: "bold",
+    fontSize: 15,
+    textAlignVertical: "center",
+    height: 45,
+    borderStyle: "solid",
+    borderColor: "#5188E3",
+    borderRadius: 7,
+    borderWidth: 1,
+    paddingHorizontal: 5,
   },
 });
 
