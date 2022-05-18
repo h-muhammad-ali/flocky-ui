@@ -81,14 +81,27 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
     paramArray.push(
       ...wayPoints?.map((waypoint, index) => `waypoint#${index + 1}`)
     );
-    mapRef?.current?.fitToSuppliedMarkers(paramArray, {
-      edgePadding: {
-        top: 50,
-        right: 50,
-        bottom: 50,
-        left: 50,
-      },
-    });
+    if (paramArray.length === 1) {
+      const region = source ?? destination ?? wayPoints[0];
+      mapRef?.current?.animateToRegion(
+        {
+          latitude: region?.coords?.lat,
+          longitude: region?.coords?.lng,
+          latitudeDelta: 0.01,
+          longitudeDelta: 0.01,
+        },
+        2000
+      );
+    } else {
+      mapRef?.current?.fitToSuppliedMarkers(paramArray, {
+        edgePadding: {
+          top: 50,
+          right: 50,
+          bottom: 50,
+          left: 50,
+        },
+      });
+    }
   };
 
   useEffect(() => {
