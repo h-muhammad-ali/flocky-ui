@@ -35,7 +35,9 @@ const MatchingRidesHitcher = ({ navigation }) => {
       <Text style={styles?.input}>
         Source: {source && `${source?.formatted_address}`}
       </Text>
-      <Text style={styles?.input}>Destination: {destination && `${destination?.formatted_address}`}</Text>
+      <Text style={styles?.input}>
+        Destination: {destination && `${destination?.formatted_address}`}
+      </Text>
       <View style={styles?.patrons}>
         <FlatList
           data={dummyPatrons}
@@ -72,10 +74,12 @@ const styles = StyleSheet?.create({
     borderRadius: 7,
     borderWidth: 1,
     fontSize: 15,
-    fontWeight: "bold",
+    fontWeight: "200",
+    fontFamily: "NunitoSans-Bold",
     marginHorizontal: 10,
-    paddingStart: 10,
+    paddingHorizontal: 10,
     marginBottom: 15,
+    paddingVertical: 5,
     color: "#758580",
     textAlignVertical: "center",
     minHeight: 50,
