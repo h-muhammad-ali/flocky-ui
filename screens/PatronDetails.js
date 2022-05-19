@@ -143,7 +143,12 @@ const PatronDetails = ({ navigation, route }) => {
                 showDate={false}
                 time={patron?.ride?.departure_time}
               />
-              <TouchableOpacity style={styles?.liveLocationButton}>
+              <TouchableOpacity
+                style={styles?.liveLocationButton}
+                onPress={() => {
+                  navigation?.navigate("Live Location");
+                }}
+              >
                 <Text style={styles?.liveLocationText}>See Live Location</Text>
                 <Ionicons name="location" size={20} />
               </TouchableOpacity>

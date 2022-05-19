@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Ionicons } from "@expo/vector-icons";
 
-const VehicleDetails = ({ make, model, registeration_no, type }) => (
+const VehicleDetails = ({ make, model, registration_no, type }) => (
   <View style={styles?.container}>
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Text style={styles?.titleText}>Vehicle Details</Text>
@@ -14,7 +14,7 @@ const VehicleDetails = ({ make, model, registeration_no, type }) => (
       )}
     </View>
     <Text style={styles?.detailValue}>{`${make} ${model}`}</Text>
-    <Text style={styles?.detailValue}>{`${registeration_no}`}</Text>
+    <Text style={styles?.detailValue}>{`${registration_no}`}</Text>
   </View>
 );
 
