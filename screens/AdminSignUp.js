@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,19 +8,25 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
 import { Ionicons } from "@expo/vector-icons";
+import ErrorDialog from "../components/ErrorDialog";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
 
 const AdminSignUp = ({ navigation, route }) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-    { label: "Prefer Not to Say", value: "neutral" },
+    { label: "Male", value: "M" },
+    { label: "Female", value: "F" },
+    { label: "Prefer Not to Say", value: "N" },
   ]);
   const {
     handleSubmit,
@@ -34,9 +40,37 @@ const AdminSignUp = ({ navigation, route }) => {
     },
   });
   const onSubmit = (data) => {
-    console.log("ADMINSIGNUP", route?.params);
-    reset();
-    navigation?.navigate("Add Photo", { isAdmin: true });
+    setLoading(true);
+    const orgData = {
+      organization_name: route?.params?.company,
+      email_domain: route?.params?.domain?.substring(1),
+      admin: {
+        email: route?.params?.email,
+        name: data?.name,
+        gender: data?.gender(),
+        password: route?.params?.password,
+      },
+    };
+    axios
+      .post(`${BASE_URL}/organization/register`, orgData, { timeout: 5000 })
+      .then((response) => {
+        console.log(response);
+        reset();
+        navigation?.navigate("Add Photo", { isAdmin: true });
+      })
+      .catch((error) => {
+        if (error?.response) {
+          if (error?.response?.status === 500)
+            setError(`Organization with this email is already registered.`);
+        } else if (error?.request) {
+          setError(`Network Error! Please try again later.`);
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   const [focusName, setFocusName] = useState(false);
@@ -50,7 +84,13 @@ const AdminSignUp = ({ navigation, route }) => {
     set(false);
     onBlur();
   };
-
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -137,6 +177,16 @@ const AdminSignUp = ({ navigation, route }) => {
               </TouchableOpacity>
               <Text>Travel Only with Same Gender</Text>
             </View>
+          </View>
+          <View>
+            <ErrorDialog
+              visible={!!error}
+              errorHeader={"Error"}
+              errorDescription={error}
+              clearError={() => {
+                setError("");
+              }}
+            />
           </View>
         </KeyboardAvoidingView>
         <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
