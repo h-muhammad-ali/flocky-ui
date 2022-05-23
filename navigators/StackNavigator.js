@@ -18,6 +18,8 @@ import Map from "../screens/Map";
 import FullScreenMap from "../screens/FullScreenMap";
 import SelectLocation from "../screens/SelectLocation";
 import EditProfile from "../screens/EditProfile";
+import AddPhoto from "../screens/AddPhoto";
+import LiveLocation from "../screens/LiveLocation";
 
 const Stack = createNativeStackNavigator();
 const StackNavigator = () => {
@@ -87,6 +89,8 @@ const StackNavigator = () => {
       <Stack.Screen name="Map" component={Map} />
       <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
       <Stack.Screen name="Edit Profile" component={EditProfile} />
+      <Stack.Screen name="Add Photo" component={AddPhoto} />
+      <Stack.Screen name="Live Location" component={LiveLocation} />
     </Stack.Navigator>
   );
 };
