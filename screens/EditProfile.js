@@ -1,27 +1,35 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import {
   StyleSheet,
   View,
   TextInput,
   Text,
-  TouchableOpacity,
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  ActivityIndicator,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
-import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
 
 const EditProfile = ({ navigation }) => {
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
-    { label: "Male", value: "male" },
-    { label: "Female", value: "female" },
-    { label: "Prefer Not to Say", value: "neutral" },
+    { label: "Male", value: "M" },
+    { label: "Female", value: "F" },
+    { label: "Prefer Not to Say", value: "N" },
   ]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [focusName, setFocusName] = useState(false);
+  const [imgURL, setImgURL] = useState("");
+  const { jwt } = useSelector((state) => state?.currentUser);
   const {
     handleSubmit,
     control,
@@ -31,16 +39,10 @@ const EditProfile = ({ navigation }) => {
     defaultValues: {
       name: "",
       gender: "",
+      company: "",
+      email: "",
     },
   });
-  const onSubmit = (data) => {
-    console.log("data", data);
-    reset();
-    navigation?.navigate("Add Photo", { isEdit: true });
-  };
-
-  const [focusName, setFocusName] = useState(false);
-  const [checked, setChecked] = useState(false);
 
   const focusHandler = (set) => {
     set(true);
@@ -51,6 +53,63 @@ const EditProfile = ({ navigation }) => {
     onBlur();
   };
 
+  const onSubmit = (data) => {
+    console.log("data", data);
+    reset();
+    navigation?.navigate("Add Photo", {
+      isEdit: true,
+      imageURL: imgURL,
+      updatedData: {
+        gender: data?.gender(),
+        name: data?.name,
+      },
+    });
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    axios
+      .get(`${BASE_URL}/account/user/details`, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        const resp = response?.data;
+        const info = {
+          name: resp?.name,
+          gender: resp?.gender,
+          company: resp?.organization?.name,
+          email: resp?.email,
+        };
+        setImgURL(resp?.imgURL);
+        reset(info);
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [reset]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -119,37 +178,46 @@ const EditProfile = ({ navigation }) => {
               )}
             />
             <Text style={styles?.label}>Institute/Organization</Text>
-            <TextInput
-              style={styles?.input}
-              //value={}
-              editable={false}
-              selectTextOnFocus={false}
+            <Controller
+              name="company"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <TextInput
+                  style={styles?.input}
+                  value={value}
+                  editable={false}
+                  onChangeText={onChange}
+                />
+              )}
             />
           </View>
           <Text style={styles?.label}>Email Address</Text>
-          <TextInput
-            style={styles?.input}
-            //value={value}
-            editable={false}
-            selectTextOnFocus={false}
-          />
-          <View style={styles?.checkboxContainer}>
-            <TouchableOpacity
-              onPress={() => {
-                setChecked(!checked);
-              }}
-            >
-              <Ionicons
-                name={checked ? "checkbox" : "square-outline"}
-                size={25}
-                color={"#5188E3"}
+          <Controller
+            name="email"
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <TextInput
+                style={styles?.input}
+                value={value}
+                editable={false}
+                onChangeText={onChange}
               />
-            </TouchableOpacity>
-            <Text>Travel Only with Same Gender</Text>
-          </View>
+            )}
+          />
         </KeyboardAvoidingView>
-        <View style={{ flex: 1, justifyContent: "center" }}>
+        <View style={{ flex: 1, marginTop: 10 }}>
           <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
+        </View>
+        <View>
+          <ErrorDialog
+            visible={!!error}
+            errorHeader={"Error"}
+            errorDescription={error}
+            clearError={() => {
+              setError("");
+              navigation?.navigate("Roles");
+            }}
+          />
         </View>
       </View>
     </TouchableWithoutFeedback>
