@@ -1,11 +1,23 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View, FlatList } from "react-native";
 import Header from "../components/Header";
 import HitcherCard from "../components/HitcherCard";
 import Button from "../components/Button";
 import { useSelector } from "react-redux";
+import ErrorDialog from "../components/ErrorDialog";
+import * as Location from "expo-location";
+import { firestore } from "../config/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import jwt_decode from "jwt-decode";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs(["Setting a timer"]);
 
 const MatchingRidesPatron = ({ navigation }) => {
+  const [error, setError] = useState("");
+  const { jwt } = useSelector((state) => state?.currentUser);
+  var decoded = jwt_decode(jwt);
+  const patron_id = decoded?.user_id;
   const dummyHitchers = [
     {
       id: 1,
@@ -17,13 +29,55 @@ const MatchingRidesPatron = ({ navigation }) => {
     },
   ];
   const { source, destination } = useSelector((state) => state?.locations);
+  const updateLocationOnFirebase = async (latitude, longitude) => {
+    const locationObj = {
+      latitude,
+      longitude,
+    };
+    const docId = patron_id;
+    const ref = doc(firestore, "live-coordinates", `${docId}`);
+    await setDoc(ref, locationObj);
+  };
+  useEffect(() => {
+    let unsubscribe;
+    Location.requestForegroundPermissionsAsync().then((response) => {
+      if (response?.status === "granted") {
+        Location?.watchPositionAsync(
+          {
+            accuracy: Location?.Accuracy?.BestForNavigation,
+            timeInterval: 2000,
+          },
+          (location_update) => {
+            const { latitude, longitude } = location_update?.coords;
+            console?.log("INIT");
+            updateLocationOnFirebase(latitude, longitude);
+          }
+        )
+          .then((unsub) => {
+            unsubscribe = unsub;
+          })
+          .catch((error) => {
+            console?.log(error?.message);
+          });
+      } else {
+        setError("Permission to access location was denied");
+      }
+    });
+
+    return () => {
+      unsubscribe?.remove();
+    };
+  }, []);
+
   return (
     <View style={styles?.container}>
       <Header
         text="Matching Rides"
         navigation={() => navigation?.goBack()}
         isCancel={true}
-        onCancel={() => {}}
+        onCancel={() => {
+          
+        }}
       />
       <Text style={styles?.text}>
         Source: {source && `${source?.formatted_address}`}
@@ -46,6 +100,16 @@ const MatchingRidesPatron = ({ navigation }) => {
       </View>
       <View>
         <Button text="Start Ride" onPress={() => {}} />
+      </View>
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error!"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
       </View>
     </View>
   );
