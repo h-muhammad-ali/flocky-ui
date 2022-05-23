@@ -1,8 +1,11 @@
-import React from "react";
-import { StyleSheet, Text, View, TextInput } from "react-native";
+import React, { useState } from "react";
+import { StyleSheet, Text, View, TextInput, ActivityIndicator } from "react-native";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
 
 const ForgotPassword = ({ navigation }) => {
   const EMAIL_REGEX =
@@ -17,13 +20,44 @@ const ForgotPassword = ({ navigation }) => {
       email: "",
     },
   });
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
   const onSubmit = (data) => {
-    console.log("data", data);
-    reset();
-    navigation?.navigate("AddCode", {
-      resetCode: true,
-    });
+    setLoading(true);
+    axios
+      .post(`${BASE_URL}/auth/password/reset/token`, data, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        reset();
+        navigation?.navigate("AddCode", {
+          resetCode: true,
+        });
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Header text="Forgot Password?" navigation={() => navigation?.goBack()} />
@@ -49,6 +83,16 @@ const ForgotPassword = ({ navigation }) => {
         )}
       />
       <Button text="Send Reset Code" onPress={handleSubmit(onSubmit)} />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };
