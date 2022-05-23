@@ -1,13 +1,31 @@
-import React, { useState } from "react";
-import { StyleSheet, Text, View, TouchableOpacity, Image } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+  ToastAndroid,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "../components/Button";
 import * as ImagePicker from "expo-image-picker";
 import { getStorage, getDownloadURL } from "firebase/storage";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
 
 const storage = getStorage();
 const AddPhoto = ({ navigation, route }) => {
   const [image, setImage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { jwt } = useSelector((state) => state?.currentUser);
+  const showToast = () => {
+    ToastAndroid.show("User info updated successfully!", ToastAndroid?.LONG);
+  };
   const pickImage = async () => {
     let result = await ImagePicker?.launchImageLibraryAsync({
       mediaTypes: ImagePicker?.MediaTypeOptions?.All,
@@ -53,19 +71,56 @@ const AddPhoto = ({ navigation, route }) => {
       }
     );
   }
-  const logInOnPressHandler = () => {
-    const dataObj = { ...route?.params?.userData, imageURI: image };
-    // signInAnonymously(auth)
-    //   .then(() => {
-    //     console?.log("SignIn")
-    //   })
-    //   .catch((error) => {
-    //     const errorCode = error.code;
-    //     const errorMessage = error.message;
-    //     console?.log(errorCode, errorMessage);
-    //   });
-    navigation?.navigate("LogIn");
+  const editData = (updatedData) => {
+    setLoading(true);
+    axios
+      .put(`${BASE_URL}/account/user/details/update`, updatedData, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        showToast();
+        navigation?.navigate("Roles");
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
+  const uploadOnPressHandler = () => {
+    const dataObj = { imageURI: image };
+
+    // here upload the image on firebase and save/update the returned link in database via api.
+    // if image is not updated by the user, dont call api for no reason!
+
+    if (route.params?.isEdit) editData(route.params?.updatedData);
+    if (!route.params?.isEdit) navigation?.navigate("LogIn");
+  };
+
+  useEffect(() => {
+    if (route.params?.isEdit) setImage(route.params?.imageURL);
+  }, []);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles?.container}>
       <View style={styles?.subContainer}>
@@ -104,13 +159,15 @@ const AddPhoto = ({ navigation, route }) => {
           text={route.params?.isEdit ? "Update Photo" : "Continue"}
           onPress={
             route.params?.isEdit
-              ? () => {}
+              ? () => {
+                  uploadOnPressHandler();
+                }
               : route.params?.isAdmin
               ? () => {
                   navigation?.navigate("VerificationFinished");
                 }
               : () => {
-                  logInOnPressHandler();
+                  uploadOnPressHandler();
                 }
           }
         />
@@ -118,7 +175,9 @@ const AddPhoto = ({ navigation, route }) => {
           style={styles?.skipContainer}
           onPress={
             route.params?.isEdit
-              ? () => {}
+              ? () => {
+                  navigation?.navigate("Roles");
+                }
               : route.params?.isAdmin
               ? () => {
                   navigation?.navigate("VerificationFinished");
@@ -130,6 +189,16 @@ const AddPhoto = ({ navigation, route }) => {
         >
           <Text style={styles?.skipText}>Skip this step</Text>
         </TouchableOpacity>
+      </View>
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error!"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
       </View>
     </View>
   );
