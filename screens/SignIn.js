@@ -41,7 +41,6 @@ const SignIn = ({ navigation }) => {
       })
       .then((response) => {
         dispatch(setCurrentUserJWT(response?.data));
-        navigation?.navigate("User Stack");
         reset();
       })
       .catch((error) => {
