@@ -41,7 +41,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
       <View style={styles?.patrons}>
         <FlatList
           data={dummyPatrons}
-          keyExtractor={(item) => item?.id}
+          keyExtractor={(item) => item?.ride_id}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() => {

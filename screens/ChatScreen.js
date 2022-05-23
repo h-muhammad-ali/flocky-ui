@@ -16,6 +16,9 @@ import {
   onSnapshot,
 } from "firebase/firestore";
 import { useSelector } from "react-redux";
+import { LogBox } from "react-native";
+
+LogBox.ignoreLogs(["Setting a timer"]);
 
 const ChatScreen = ({ navigation, route }) => {
   const { id } = useSelector((state) => state?.currentUser);
