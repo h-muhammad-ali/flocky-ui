@@ -1,19 +1,17 @@
 import React from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
-import {
-  MaterialIcons,
-  MaterialCommunityIcons,
-  FontAwesome,
-  Ionicons,
-} from "@expo/vector-icons";
+import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import PendingRequests from "../screens/PendingRequests";
 import Companies from "../screens/Companies";
 import BlockedCompanies from "../screens/BlockedCompanies";
+import { useDispatch } from "react-redux";
+import { clearCurrentUserJWT } from "../redux/currentUser/currentUserActions";
 
 const Tab = createBottomTabNavigator();
 
 const CompaniesManagementTabNavigator = ({ navigation }) => {
+  const dispatch = useDispatch();
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -22,7 +20,7 @@ const CompaniesManagementTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 15 }}
               onPress={() => {
-                navigation?.navigate("MainMenu");
+                dispatch(clearCurrentUserJWT());
               }}
             >
               <Ionicons name="exit-outline" size={30} color="black" />
@@ -50,9 +48,21 @@ const CompaniesManagementTabNavigator = ({ navigation }) => {
         tabBarInactiveBackgroundColor: "#E0E0E0",
       })}
     >
-      <Tab.Screen name="Pending Requests" component={PendingRequests} />
-      <Tab.Screen name="Companies" component={Companies} />
-      <Tab.Screen name="Blocked Companies" component={BlockedCompanies} />
+      <Tab.Screen
+        name="Pending Requests"
+        options={{ unmountOnBlur: true }}
+        component={PendingRequests}
+      />
+      <Tab.Screen
+        name="Companies"
+        options={{ unmountOnBlur: true }}
+        component={Companies}
+      />
+      <Tab.Screen
+        name="Blocked Companies"
+        options={{ unmountOnBlur: true }}
+        component={BlockedCompanies}
+      />
     </Tab.Navigator>
   );
 };

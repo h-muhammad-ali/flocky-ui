@@ -41,13 +41,16 @@ const MainStackNavigator = () => {
               <Stack.Screen name="Admin Tab" component={AdminDrawerNavigator} />
               <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
             </>
-          ) : (
+          ) : decoded?.is_flocky_admin ? (
             <>
-              <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
               <Stack.Screen
                 name="Companies Management"
                 component={CompaniesManagementTabNavigator}
               />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
             </>
           )}
         </>

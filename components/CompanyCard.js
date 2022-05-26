@@ -1,15 +1,106 @@
-import React from "react";
-import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TouchableOpacity,
+  Image,
+  ActivityIndicator,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
 
 const CompanyCard = ({
+  companyId,
   companyName,
   adminName,
   adminEmail,
   forApprove,
   forBlock,
   forUnblock,
-  onPress,
+  setUpdated,
+  updated,
 }) => {
+  const { jwt } = useSelector((state) => state?.currentUser);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const changeStatus = () => {
+    setLoading(true);
+    console?.log(companyId);
+    axios
+      .put(
+        `${BASE_URL}/flocky/admin/organizations/${companyId}/change-status`,
+        null,
+        {
+          timeout: 5000,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      )
+      .then((response) => {
+        setUpdated(!updated);
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  const approveOrganization = () => {
+    setLoading(true);
+    console?.log(companyId);
+    axios
+      .put(
+        `${BASE_URL}/flocky/admin/organizations/${companyId}/approve`,
+        null,
+        {
+          timeout: 5000,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        }
+      )
+      .then((response) => {
+        setUpdated(!updated);
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles?.container}>
       <Text style={styles?.companyName}>{companyName}</Text>
@@ -24,24 +115,43 @@ const CompanyCard = ({
       {forApprove ? (
         <TouchableOpacity
           style={[styles?.button, { backgroundColor: "#427646" }]}
+          onPress={() => {
+            approveOrganization();
+          }}
         >
           <Text style={styles?.buttonText}>Approve</Text>
         </TouchableOpacity>
       ) : forBlock ? (
         <TouchableOpacity
           style={[styles?.button, { backgroundColor: "#C54E57" }]}
+          onPress={() => {
+            changeStatus();
+          }}
         >
           <Text style={styles?.buttonText}>Block</Text>
         </TouchableOpacity>
       ) : forUnblock ? (
         <TouchableOpacity
           style={[styles?.button, { backgroundColor: "#5188E3" }]}
+          onPress={() => {
+            changeStatus();
+          }}
         >
           <Text style={styles?.buttonText}>Unblock</Text>
         </TouchableOpacity>
       ) : (
         <></>
       )}
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

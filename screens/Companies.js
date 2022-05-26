@@ -1,46 +1,117 @@
-import React from "react";
-import { View, FlatList } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, FlatList, ActivityIndicator, StyleSheet } from "react-native";
 import CompanyCard from "../components/CompanyCard";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
+import EmptyFlatlistMessage from "../components/EmptyFlatlistMessage";
 
 const Companies = () => {
-  const dummyCompanies = [
-    {
-      id: 1,
-      name: "Microsoft",
-      adminName: "Ali",
-      adminEmail: "microsoft@gmail.com",
-    },
-    {
-      id: 2,
-      name: "Google",
-      adminName: "Suleman",
-      adminEmail: "google@gmail.com",
-    },
-    {
-      id: 3,
-      name: "Meta",
-      adminName: "Ahsan",
-      adminEmail: "meta@gmail.com",
-    },
-  ];
+  const { jwt } = useSelector((state) => state?.currentUser);
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
+  const [organizations, setOrganizations] = useState([]);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(false);
+  const [updated, setUpdated] = useState(false);
+  const [serverError, setServerError] = useState(false);
+  const fetchOrganizations = (isLoading) => {
+    if (connectionStatus) {
+      if (isLoading) setLoading(true);
+      else setFetching(true);
+      axios
+        .get(`${BASE_URL}/flocky/admin/organizations/unblocked`, {
+          timeout: 5000,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        })
+        .then((response) => {
+          if (serverError) setServerError(false);
+          const resp = response?.data;
+          setOrganizations(resp);
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            if (connectionStatus) setServerError(true);
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          if (isLoading) setLoading(false);
+          else setFetching(false);
+        });
+    }
+  };
+
+  useEffect(() => {
+    fetchOrganizations(true);
+  }, [updated, connectionStatus]);
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
-    <View>
+    <View style={styles?.container}>
       <FlatList
-        data={dummyCompanies}
-        keyExtractor={(item) => item?.id}
+        contentContainerStyle={{ flexGrow: 1 }}
+        data={organizations}
+        keyExtractor={(item) => item?.organization_id}
         renderItem={({ item }) => (
           <CompanyCard
-            companyName={item?.name}
-            adminName={item?.adminName}
-            adminEmail={item?.adminEmail}
+            companyId={item?.organization_id}
+            companyName={item?.organization_name}
+            adminName={item?.admin_name}
+            adminEmail={item?.admin_email}
             forBlock={true}
-            onPress={() => {}}
+            setUpdated={setUpdated}
+            updated={updated}
           />
         )}
+        onRefresh={() => {
+          fetchOrganizations(false);
+        }}
         showsVerticalScrollIndicator={false}
+        refreshing={fetching}
+        ListEmptyComponent={
+          <EmptyFlatlistMessage
+            networkError={!connectionStatus}
+            serverError={serverError}
+            serverErrorHandler={() => {
+              fetchOrganizations(true);
+            }}
+          />
+        }
       />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };
 
 export default Companies;
+
+const styles = StyleSheet?.create({
+  container: {
+    flex: 1,
+  },
+});
