@@ -1,10 +1,25 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
 import { NavigationContainer } from "@react-navigation/native";
 import MainStackNavigator from "./navigators/MainStackNavigator";
 import store, { persistor } from "./redux/store";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
+import {
+  registerNetworkStatusListener,
+  unregisterNetworkStatusListener,
+} from "./redux/internetStatus/internetStatusActions";
+import { useDispatch } from "react-redux";
+
+const AppWrapper = () => {
+  return (
+    <Provider store={store}>
+      <PersistGate loading={null} persistor={persistor}>
+        <App />
+      </PersistGate>
+    </Provider>
+  );
+};
 
 const App = () => {
   const [loaded] = useFonts({
@@ -17,19 +32,20 @@ const App = () => {
     "NunitoSans-SemiBold": require("./assets/fonts/NunitoSans-SemiBold.ttf"),
     "Lobster-Regular": require("./assets/fonts/Lobster-Regular.ttf"),
   });
+  const dispatch = useDispatch();
+  useEffect(() => {
+    dispatch(registerNetworkStatusListener());
+    return () => unregisterNetworkStatusListener();
+  }, []);
 
   if (!loaded) {
     return null;
   }
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <NavigationContainer>
-          <MainStackNavigator />
-        </NavigationContainer>
-      </PersistGate>
-    </Provider>
+    <NavigationContainer>
+      <MainStackNavigator />
+    </NavigationContainer>
   );
 };
 
-export default App;
+export default AppWrapper;
