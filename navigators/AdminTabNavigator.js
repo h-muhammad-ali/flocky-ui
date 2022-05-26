@@ -66,9 +66,21 @@ const AdminTabNavigator = ({ navigation }) => {
         tabBarInactiveBackgroundColor: "#E0E0E0",
       })}
     >
-      <Tab.Screen name="Notifications" component={AdminNotifications} />
-      <Tab.Screen name="Users" component={AdminUsers} />
-      <Tab.Screen name="Blocked Users" component={AdminBlockedUsers} />
+      <Tab.Screen
+        name="Notifications"
+        options={{ unmountOnBlur: true }}
+        component={AdminNotifications}
+      />
+      <Tab.Screen
+        name="Users"
+        options={{ unmountOnBlur: true }}
+        component={AdminUsers}
+      />
+      <Tab.Screen
+        name="Blocked Users"
+        options={{ unmountOnBlur: true }}
+        component={AdminBlockedUsers}
+      />
     </Tab.Navigator>
   );
 };

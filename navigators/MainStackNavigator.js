@@ -15,25 +15,41 @@ import CompaniesManagementTabNavigator from "./CompaniesManagementTabNavigator";
 import AddCode from "../screens/AddCode";
 import SelectLocation from "../screens/SelectLocation";
 import { useSelector } from "react-redux";
+import jwt_decode from "jwt-decode";
 
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
   const { jwt } = useSelector((state) => state?.currentUser);
+  let decoded;
+  if (jwt) {
+    decoded = jwt_decode(jwt);
+    console?.log(decoded);
+  }
   return (
     <Stack.Navigator
-      initialRouteName={jwt ? "User Stack" : "MainMenu"}
+      initialRouteName={
+        jwt ? (decoded?.is_admin ? "Admin Tab" : "User Stack") : "MainMenu"
+      }
       screenOptions={{
         headerShown: false,
       }}
     >
       {jwt ? (
         <>
-          <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
-          <Stack.Screen name="Admin Tab" component={AdminDrawerNavigator} />
-          <Stack.Screen
-            name="Companies Management"
-            component={CompaniesManagementTabNavigator}
-          />
+          {decoded?.is_admin ? (
+            <>
+              <Stack.Screen name="Admin Tab" component={AdminDrawerNavigator} />
+              <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
+            </>
+          ) : (
+            <>
+              <Stack.Screen name="User Stack" component={UserDrawerNavigator} />
+              <Stack.Screen
+                name="Companies Management"
+                component={CompaniesManagementTabNavigator}
+              />
+            </>
+          )}
         </>
       ) : (
         <>

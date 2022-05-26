@@ -4,7 +4,6 @@ import CustomDrawer from "../components/CustomDrawer";
 import { Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import AdminTabNavigator from "./AdminTabNavigator";
-import AdminSignUp from "../screens/AdminSignUp";
 import WallOfHonor from "../screens/WallOfHonor";
 
 const Drawer = createDrawerNavigator();
