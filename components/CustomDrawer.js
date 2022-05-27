@@ -5,6 +5,7 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
+  Image,
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -24,6 +25,8 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
   const { jwt } = useSelector((state) => state?.currentUser);
   const [organizationName, setOrganizationName] = useState("");
   const [peopleCount, setPeopleCount] = useState(0);
+  const [userName, setUserName] = useState("");
+  const [imgURL, setImgURL] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const fetchAdminInfo = () => {
@@ -56,9 +59,49 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
         setLoading(false);
       });
   };
+
+  const fetchUserInfo = () => {
+    setLoading(true);
+    axios
+      .get(`${BASE_URL}/account/user/details`, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        const resp = response?.data;
+        const info = {
+          name: resp?.name,
+          gender: resp?.gender,
+          company: resp?.organization?.name,
+          email: resp?.email,
+        };
+        setUserName(resp?.name);
+        setImgURL(resp?.imgURL);
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
   useEffect(() => {
     if (isAdmin) {
       fetchAdminInfo();
+    } else {
+      fetchUserInfo();
     }
   }, []);
   return (
@@ -74,10 +117,20 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
           <>
             {!isAdmin ? (
               <View style={styles.headerContainer}>
-                <Ionicons name="person-circle" size={100} />
-                <Text style={[styles?.headerText, { fontSize: 30 }]}>
-                  John Doe
-                </Text>
+                {imgURL ? (
+                  <View style={styles?.imageContainer}>
+                    <Image source={{ uri: imgURL }} style={styles?.image} />
+                  </View>
+                ) : (
+                  <Ionicons name="person-circle" size={100} />
+                )}
+                {userName ? (
+                  <Text style={[styles?.headerText, { fontSize: 30 }]}>
+                    {userName}
+                  </Text>
+                ) : (
+                  <></>
+                )}
               </View>
             ) : (
               <View>
@@ -97,18 +150,21 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
                   ) : (
                     <></>
                   )}
-                  <TouchableOpacity
-                    style={styles?.button}
-                    onPress={() => {
-                      fetchAdminInfo();
-                    }}
-                  >
-                    <Text style={styles?.buttonText}>Refresh</Text>
-                    <EvilIcons name="refresh" size={24} color="#427646" />
-                  </TouchableOpacity>
                 </View>
               </View>
             )}
+            <View style={styles.headerContainer}>
+              <TouchableOpacity
+                style={styles?.button}
+                onPress={() => {
+                  if (isAdmin) fetchAdminInfo();
+                  else fetchUserInfo();
+                }}
+              >
+                <Text style={styles?.buttonText}>Refresh</Text>
+                <EvilIcons name="refresh" size={24} color="#427646" />
+              </TouchableOpacity>
+            </View>
           </>
         )}
         <DrawerItemList {...props} />
@@ -175,5 +231,18 @@ const styles = StyleSheet.create({
     fontFamily: "NunitoSans-Regular",
     fontSize: 10,
     textAlignVertical: "center",
+  },
+  image: {
+    resizeMode: "cover",
+    width: "100%",
+    height: "100%",
+  },
+  imageContainer: {
+    aspectRatio: 1 * 1,
+    width: 100,
+    height: 100,
+    overflow: "hidden",
+    borderRadius: 100,
+    marginVertical: 15,
   },
 });
