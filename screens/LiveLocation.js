@@ -21,29 +21,29 @@ const LONGITUDE = 69.3451;
 const LATITUDE_DELTA = 12;
 const LONGITUDE_DELTA = 12;
 
-const LiveLocation = ({ navigation }) => {
-  const hitcherMarkerRef = useRef(null);
-  const patronMarkerRef = useRef(null);
+const LiveLocation = ({ navigation, isPatron, id }) => {
+  const sourceMarkerRef = useRef(null);
+  const destinationMarkerRef = useRef(null);
   const mapRef = useRef(null);
   const [error, setError] = useState("");
-  const [hitcherState, setHitcherState] = useState(null);
-  const [patronState, setPatronState] = useState(null);
-  const prevHitcherState = usePrevious(hitcherState);
-  const prevPatronState = usePrevious(patronState);
-  const updateHitcherState = (data) =>
-    setHitcherState((state) => ({ ...state, ...data }));
-  const updatePatronState = (data) =>
-    setPatronState((state) => ({ ...state, ...data }));
+  const [sourceState, setSourceState] = useState(null);
+  const [destinationState, setDestinationState] = useState(null);
+  const prevSourceState = usePrevious(sourceState);
+  const prevDestinationState = usePrevious(destinationState);
+  const updateSourceState = (data) =>
+    setSourceState((state) => ({ ...state, ...data }));
+  const updateDestinationState = (data) =>
+    setDestinationState((state) => ({ ...state, ...data }));
 
   useEffect(() => {
-    const docId = 37; //patron_id here
+    const docId = 37; //destination_id/source_id here
     const ref = doc(firestore, "live-coordinates", `${docId}`);
     const unsubscribe = onSnapshot(
       ref,
       (doc) => {
         const { latitude, longitude } = doc?.data();
-        animate(patronMarkerRef, latitude, longitude);
-        updatePatronState({
+        animate(destinationMarkerRef, latitude, longitude);
+        updateDestinationState({ 
           curLoc: { latitude, longitude },
           coordinate: new AnimatedRegion({
             latitude: latitude,
@@ -76,7 +76,7 @@ const LiveLocation = ({ navigation }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       getLiveLocation();
-    }, 6000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 
@@ -88,8 +88,8 @@ const LiveLocation = ({ navigation }) => {
         })
           .then((response) => {
             const { latitude, longitude } = response?.coords;
-            animate(hitcherMarkerRef, latitude, longitude);
-            updateHitcherState({
+            animate(sourceMarkerRef, latitude, longitude);
+            updateSourceState({
               curLoc: { latitude, longitude },
               coordinate: new AnimatedRegion({
                 latitude: latitude,
@@ -112,17 +112,17 @@ const LiveLocation = ({ navigation }) => {
     const newCoordinate = { latitude, longitude };
     if (Platform.OS === "android") {
       if (markerRef?.current) {
-        markerRef?.current?.animateMarkerToCoordinate(newCoordinate, 7000);
+        markerRef?.current?.animateMarkerToCoordinate(newCoordinate, 1000);
       }
     }
   };
 
   const fitToMarkers = () => {
     let paramArray = [];
-    if (hitcherState) paramArray?.push("hitcher");
-    if (patronState) paramArray?.push("patron");
+    if (sourceState) paramArray?.push("source");
+    if (destinationState) paramArray?.push("destination");
     if (paramArray.length === 1) {
-      const region = hitcherState?.curLoc ?? patronState?.curLoc;
+      const region = sourceState?.curLoc ?? destinationState?.curLoc;
       mapRef?.current?.animateToRegion(
         {
           latitude: region?.latitude,
@@ -145,13 +145,13 @@ const LiveLocation = ({ navigation }) => {
   };
 
   useEffect(() => {
-    if (hitcherState && patronState && !(prevHitcherState && prevPatronState)) {
-      console.log(prevHitcherState, hitcherState, prevPatronState, patronState);
+    if (sourceState && destinationState && !(prevSourceState && prevDestinationState)) {
+      console.log(prevSourceState, sourceState, prevDestinationState, destinationState);
       setTimeout(() => {
         fitToMarkers();
       }, 1000);
     }
-  }, [hitcherState, patronState]);
+  }, [sourceState, destinationState]);
 
   return (
     <View style={[StyleSheet?.absoluteFillObject, styles?.container]}>
@@ -160,30 +160,30 @@ const LiveLocation = ({ navigation }) => {
         initialRegion={getMapRegion()}
         ref={mapRef}
       >
-        {hitcherState ? (
+        {sourceState ? (
           <MarkerAnimated
-            ref={hitcherMarkerRef}
+            ref={sourceMarkerRef}
             coordinate={{
-              latitude: hitcherState?.curLoc?.latitude,
-              longitude: hitcherState?.curLoc?.longitude,
+              latitude: sourceState?.curLoc?.latitude,
+              longitude: sourceState?.curLoc?.longitude,
             }}
-            title="Hitcher"
-            identifier="hitcher"
+            title="Source"
+            identifier="source"
           >
             <FontAwesome5 name="sourcetree" size={24} color="black" />
           </MarkerAnimated>
         ) : (
           <></>
         )}
-        {patronState ? (
+        {destinationState ? (
           <MarkerAnimated
-            ref={patronMarkerRef}
+            ref={destinationMarkerRef}
             coordinate={{
-              latitude: patronState?.curLoc?.latitude,
-              longitude: patronState?.curLoc?.longitude,
+              latitude: destinationState?.curLoc?.latitude,
+              longitude: destinationState?.curLoc?.longitude,
             }}
-            title="Patron"
-            identifier="patron"
+            title="Destination"
+            identifier="destination"
           >
             <Foundation name="target-two" size={24} color="black" />
           </MarkerAnimated>

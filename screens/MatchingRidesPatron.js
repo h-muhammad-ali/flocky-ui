@@ -10,14 +10,23 @@ import { firestore } from "../config/firebase";
 import { doc, setDoc } from "firebase/firestore";
 import jwt_decode from "jwt-decode";
 import { LogBox } from "react-native";
+import * as TaskManager from "expo-task-manager";
+import BackgroundPermissionModal from "../components/BackgroundPermissionModal";
 
+let lat;
+let long;
+let patron_id;
 LogBox.ignoreLogs(["Setting a timer"]);
+const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_FOR_LIVE_LOCATION";
 
 const MatchingRidesPatron = ({ navigation }) => {
   const [error, setError] = useState("");
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [requestGranted, setRequestGranted] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
   const { jwt } = useSelector((state) => state?.currentUser);
   var decoded = jwt_decode(jwt);
-  const patron_id = decoded?.user_id;
+  patron_id = decoded?.user_id;
   const dummyHitchers = [
     {
       id: 1,
@@ -29,44 +38,74 @@ const MatchingRidesPatron = ({ navigation }) => {
     },
   ];
   const { source, destination } = useSelector((state) => state?.locations);
-  const updateLocationOnFirebase = async (latitude, longitude) => {
-    const locationObj = {
-      latitude,
-      longitude,
-    };
-    const docId = patron_id;
-    const ref = doc(firestore, "live-coordinates", `${docId}`);
-    await setDoc(ref, locationObj);
-  };
   useEffect(() => {
-    let unsubscribe;
+    if (!requestGranted && showPermissionModal && openSettings) {
+      Location.requestBackgroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          setRequestGranted(true);
+        } else {
+          setError("Background Location Permission is not given.");
+        }
+        setShowPermissionModal(false);
+        setOpenSettings(false);
+      });
+    } else if (requestGranted && !showPermissionModal && !openSettings) {
+      startBackgroundUpdate();
+    }
+    return () => stopBackgroundUpdate();
+  }, [requestGranted, showPermissionModal, openSettings]);
+
+  const startBackgroundUpdate = async () => {
+    const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+    if (!isTaskDefined) {
+      console.log("Task is not defined");
+      return;
+    }
+    Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
+      (hasStarted) => {
+        console?.log(hasStarted);
+        if (hasStarted) {
+          console.log("Already started");
+          return;
+        }
+      }
+    );
+    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      accuracy: Location.Accuracy.BestForNavigation,
+      timeInterval: 2000,
+      showsBackgroundLocationIndicator: true,
+      foregroundService: {
+        notificationTitle: "Flocky",
+        notificationBody: "Flocky is using your location in the background.",
+        notificationColor: "#fff",
+      },
+    });
+  };
+
+  const stopBackgroundUpdate = async () => {
+    const hasStarted = await Location.hasStartedLocationUpdatesAsync(
+      LOCATION_TASK_NAME
+    );
+    if (hasStarted) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+      console.log("Location tracking stopped");
+    }
+  };
+
+  useEffect(() => {
     Location.requestForegroundPermissionsAsync().then((response) => {
       if (response?.status === "granted") {
-        Location?.watchPositionAsync(
-          {
-            accuracy: Location?.Accuracy?.BestForNavigation,
-            timeInterval: 2000,
-          },
-          (location_update) => {
-            const { latitude, longitude } = location_update?.coords;
-            console?.log("INIT");
-            updateLocationOnFirebase(latitude, longitude);
+        Location.getBackgroundPermissionsAsync().then((response) => {
+          if (response?.status === "granted") {
+            setRequestGranted(true);
+          } else {
+            setShowPermissionModal(true);
           }
-        )
-          .then((unsub) => {
-            unsubscribe = unsub;
-          })
-          .catch((error) => {
-            console?.log(error?.message);
-          });
+        });
       } else {
         setError("Permission to access location was denied");
       }
     });
-
-    return () => {
-      unsubscribe?.remove();
-    };
   }, []);
 
   return (
@@ -75,9 +114,7 @@ const MatchingRidesPatron = ({ navigation }) => {
         text="Matching Rides"
         navigation={() => navigation?.goBack()}
         isCancel={true}
-        onCancel={() => {
-          
-        }}
+        onCancel={() => {}}
       />
       <Text style={styles?.text}>
         Source: {source && `${source?.formatted_address}`}
@@ -104,10 +141,22 @@ const MatchingRidesPatron = ({ navigation }) => {
       <View>
         <ErrorDialog
           visible={!!error}
-          errorHeader={"Error!"}
+          errorHeader={"Warning!"}
           errorDescription={error}
           clearError={() => {
             setError("");
+          }}
+        />
+      </View>
+      <View>
+        <BackgroundPermissionModal
+          visible={showPermissionModal}
+          forPatron={true}
+          positiveHandler={() => {
+            setOpenSettings(true);
+          }}
+          negativeHandler={() => {
+            setShowPermissionModal(false);
           }}
         />
       </View>
@@ -142,4 +191,35 @@ const styles = StyleSheet?.create({
     alignSelf: "center",
     flex: 1,
   },
+});
+
+const updateLocationOnFirebase = async (latitude, longitude) => {
+  const locationObj = {
+    latitude,
+    longitude,
+  };
+  const docId = patron_id;
+  const ref = doc(firestore, "live-coordinates", `${docId}`);
+  await setDoc(ref, locationObj);
+};
+
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  if (data) {
+    const { locations } = data;
+    const location = locations[0];
+    if (location) {
+      lat = location?.coords?.latitude;
+      long = location?.coords?.longitude;
+      updateLocationOnFirebase(lat, long);
+      console.log(
+        `${new Date(Date.now()).toLocaleString()}: ${
+          location?.coords?.latitude
+        },${location?.coords?.longitude}`
+      );
+    }
+  }
 });

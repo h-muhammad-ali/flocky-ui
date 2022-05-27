@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
 import Header from "../components/Header";
 import PatronDetailsHeader from "../components/PatronDetailsHeader";
@@ -8,8 +8,30 @@ import VehicleDetails from "../components/VehicleDetails";
 import Button from "../components/Button";
 import Map from "../components/Map";
 import { Ionicons } from "@expo/vector-icons";
+import { useSelector } from "react-redux";
+import ErrorDialog from "../components/ErrorDialog";
+import * as Location from "expo-location";
+import { firestore } from "../config/firebase";
+import { doc, setDoc } from "firebase/firestore";
+import jwt_decode from "jwt-decode";
+import { LogBox } from "react-native";
+import * as TaskManager from "expo-task-manager";
+import BackgroundPermissionModal from "../components/BackgroundPermissionModal";
+
+let lat;
+let long;
+let hitcher_id;
+LogBox.ignoreLogs(["Setting a timer"]);
+const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_FOR_LIVE_LOCATION";
 
 const PatronDetails = ({ navigation, route }) => {
+  const [error, setError] = useState("");
+  const [showPermissionModal, setShowPermissionModal] = useState(false);
+  const [requestGranted, setRequestGranted] = useState(false);
+  const [openSettings, setOpenSettings] = useState(false);
+  const { jwt } = useSelector((state) => state?.currentUser);
+  var decoded = jwt_decode(jwt);
+  hitcher_id = decoded?.user_id;
   const dummyPatronDetails = [
     {
       ride_id: 1,
@@ -102,12 +124,95 @@ const PatronDetails = ({ navigation, route }) => {
     },
   ];
   const [patron, setPatron] = useState(null);
+
   useEffect(() => {
     const obj = dummyPatronDetails?.find(
       (element) => element?.ride_id === route.params?.id
     );
     setPatron(obj);
   }, []);
+
+  useEffect(() => {
+    if (
+      route.params?.isBooked &&
+      !requestGranted &&
+      showPermissionModal &&
+      openSettings
+    ) {
+      Location.requestBackgroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          setRequestGranted(true);
+        } else {
+          setError("Background Location Permission is not given.");
+        }
+        setShowPermissionModal(false);
+        setOpenSettings(false);
+      });
+    } else if (
+      route.params?.isBooked &&
+      requestGranted &&
+      !showPermissionModal &&
+      !openSettings
+    ) {
+      startBackgroundUpdate();
+    }
+    return () => stopBackgroundUpdate();
+  }, [requestGranted, showPermissionModal, openSettings]);
+
+  useEffect(() => {
+    if (route.params?.isBooked) {
+      Location.requestForegroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          Location.getBackgroundPermissionsAsync().then((response) => {
+            if (response?.status === "granted") {
+              setRequestGranted(true);
+            } else {
+              setShowPermissionModal(true);
+            }
+          });
+        } else {
+          setError("Permission to access location was denied");
+        }
+      });
+    }
+  }, [route]);
+
+  const startBackgroundUpdate = async () => {
+    const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+    if (!isTaskDefined) {
+      console.log("Task is not defined");
+      return;
+    }
+    Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
+      (hasStarted) => {
+        console?.log(hasStarted);
+        if (hasStarted) {
+          console.log("Already started");
+          return;
+        }
+      }
+    );
+    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      accuracy: Location.Accuracy.BestForNavigation,
+      timeInterval: 2000,
+      showsBackgroundLocationIndicator: true,
+      foregroundService: {
+        notificationTitle: "Flocky",
+        notificationBody: "Flocky is using your location in the background.",
+        notificationColor: "#fff",
+      },
+    });
+  };
+
+  const stopBackgroundUpdate = async () => {
+    const hasStarted = await Location.hasStartedLocationUpdatesAsync(
+      LOCATION_TASK_NAME
+    );
+    if (hasStarted) {
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+      console.log("Location tracking stopped");
+    }
+  };
 
   return (
     <View style={styles?.container}>
@@ -200,6 +305,28 @@ const PatronDetails = ({ navigation, route }) => {
       ) : (
         <></>
       )}
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Warning!"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
+      <View>
+        <BackgroundPermissionModal
+          visible={showPermissionModal}
+          forPatron={false}
+          positiveHandler={() => {
+            setOpenSettings(true);
+          }}
+          negativeHandler={() => {
+            setShowPermissionModal(false);
+          }}
+        />
+      </View>
     </View>
   );
 };
@@ -222,4 +349,35 @@ const styles = StyleSheet?.create({
     borderRadius: 20,
   },
   liveLocationText: { color: "white", marginEnd: 5 },
+});
+
+const updateLocationOnFirebase = async (latitude, longitude) => {
+  const locationObj = {
+    latitude,
+    longitude,
+  };
+  const docId = hitcher_id;
+  const ref = doc(firestore, "live-coordinates", `${docId}`);
+  await setDoc(ref, locationObj);
+};
+
+TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+  if (error) {
+    console.error(error);
+    return;
+  }
+  if (data) {
+    const { locations } = data;
+    const location = locations[0];
+    if (location) {
+      lat = location?.coords?.latitude;
+      long = location?.coords?.longitude;
+      updateLocationOnFirebase(lat, long);
+      console.log(
+        `${new Date(Date.now()).toLocaleString()}: ${
+          location?.coords?.latitude
+        },${location?.coords?.longitude}`
+      );
+    }
+  }
 });

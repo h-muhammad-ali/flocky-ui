@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import Button from "../components/Button";
 import Map from "../components/Map";
 import TimeLine from "../components/TimeLine";
@@ -82,18 +82,23 @@ const HitcherDetails = ({ route, navigation }) => {
               <Text style={styles?.name}>{hitcher?.name}</Text>
             </View>
           </View>
-          <View style={{ flex: 1 }}>
+          <View style={{ flex: 1.5 }}>
             <TimeLine
               source={hitcher?.pickup_location?.formatted_address}
               destination={hitcher?.dropoff_location?.formatted_address}
             />
           </View>
-          <View style={styles?.statementContainer}>
-            <Text style={styles?.statement}>Arriving on meeting point in </Text>
-            <View style={styles?.timeContainer}>
-              <Text style={styles?.time}>5 minutes</Text>
-            </View>
-          </View>
+
+          <TouchableOpacity
+            style={styles?.liveLocationButton}
+            onPress={() => {
+              navigation?.navigate("Live Location");
+            }}
+          >
+            <Text style={styles?.liveLocationText}>See Live Location</Text>
+            <Ionicons name="location" size={20} />
+          </TouchableOpacity>
+
           <View style={{ flex: 6, marginHorizontal: 10 }}>
             <Map
               start={hitcher?.pickup_location}
@@ -157,10 +162,15 @@ const styles = StyleSheet?.create({
     flex: 1,
     justifyContent: "center",
   },
-  timeContainer: {
+  liveLocationButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     backgroundColor: "#5188E3",
-    paddingHorizontal: 10,
-    paddingVertical: 3,
+    marginVertical: 5,
+    marginHorizontal: 40,
+    paddingVertical: 10,
     borderRadius: 20,
   },
+  liveLocationText: { color: "white", marginEnd: 5 },
 });
