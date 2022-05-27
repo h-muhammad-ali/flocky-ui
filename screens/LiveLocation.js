@@ -1,17 +1,17 @@
-import { StyleSheet, View, Platform } from "react-native";
+import { StyleSheet, View, Platform, TouchableOpacity } from "react-native";
 import React, { useEffect, useState, useRef } from "react";
-import MapView, {
-  Marker,
-  AnimatedRegion,
-  MarkerAnimated,
-} from "react-native-maps";
+import MapView, { AnimatedRegion, MarkerAnimated } from "react-native-maps";
 import Header from "../components/Header";
 import ErrorDialog from "../components/ErrorDialog";
 import * as Location from "expo-location";
 import { doc, onSnapshot } from "firebase/firestore";
 import { LogBox } from "react-native";
 import { firestore } from "../config/firebase";
-import { FontAwesome5, Foundation } from "@expo/vector-icons";
+import {
+  FontAwesome5,
+  Foundation,
+  MaterialCommunityIcons,
+} from "@expo/vector-icons";
 import usePrevious from "../custom-hooks/usePrevious";
 
 LogBox.ignoreLogs(["Setting a timer"]);
@@ -21,7 +21,7 @@ const LONGITUDE = 69.3451;
 const LATITUDE_DELTA = 12;
 const LONGITUDE_DELTA = 12;
 
-const LiveLocation = ({ navigation, isPatron, id }) => {
+const LiveLocation = ({ navigation, route }) => {
   const sourceMarkerRef = useRef(null);
   const destinationMarkerRef = useRef(null);
   const mapRef = useRef(null);
@@ -36,14 +36,14 @@ const LiveLocation = ({ navigation, isPatron, id }) => {
     setDestinationState((state) => ({ ...state, ...data }));
 
   useEffect(() => {
-    const docId = 37; //destination_id/source_id here
+    const docId = 37; //route.params?.id here
     const ref = doc(firestore, "live-coordinates", `${docId}`);
     const unsubscribe = onSnapshot(
       ref,
       (doc) => {
         const { latitude, longitude } = doc?.data();
         animate(destinationMarkerRef, latitude, longitude);
-        updateDestinationState({ 
+        updateDestinationState({
           curLoc: { latitude, longitude },
           coordinate: new AnimatedRegion({
             latitude: latitude,
@@ -145,8 +145,17 @@ const LiveLocation = ({ navigation, isPatron, id }) => {
   };
 
   useEffect(() => {
-    if (sourceState && destinationState && !(prevSourceState && prevDestinationState)) {
-      console.log(prevSourceState, sourceState, prevDestinationState, destinationState);
+    if (
+      sourceState &&
+      destinationState &&
+      !(prevSourceState && prevDestinationState)
+    ) {
+      console.log(
+        prevSourceState,
+        sourceState,
+        prevDestinationState,
+        destinationState
+      );
       setTimeout(() => {
         fitToMarkers();
       }, 1000);
@@ -191,6 +200,18 @@ const LiveLocation = ({ navigation, isPatron, id }) => {
           <></>
         )}
       </MapView>
+      <TouchableOpacity
+        style={styles?.adjustMap}
+        onPress={() => {
+          fitToMarkers();
+        }}
+      >
+        <MaterialCommunityIcons
+          name="map-marker-distance"
+          size={35}
+          color="white"
+        />
+      </TouchableOpacity>
       <View style={styles?.heading}>
         <Header text="Live Location" navigation={() => navigation?.goBack()} />
       </View>
@@ -220,6 +241,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   heading: { position: "absolute", top: 0, left: 0, right: 0, bottom: 0 },
+  adjustMap: {
+    flex: 0,
+    position: "absolute",
+    right: 30,
+    bottom: 70,
+    justifyContent: "center",
+    alignItems: "center",
+    height: 60,
+    width: 60,
+    backgroundColor: "#5188E3",
+    borderRadius: 30,
+  },
 });
 
 // useEffect(() => {

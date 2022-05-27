@@ -92,7 +92,9 @@ const HitcherDetails = ({ route, navigation }) => {
           <TouchableOpacity
             style={styles?.liveLocationButton}
             onPress={() => {
-              navigation?.navigate("Live Location");
+              navigation?.navigate("Live Location", {
+                id: hitcher?.id,
+              });
             }}
           >
             <Text style={styles?.liveLocationText}>See Live Location</Text>

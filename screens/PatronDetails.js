@@ -251,7 +251,9 @@ const PatronDetails = ({ navigation, route }) => {
               <TouchableOpacity
                 style={styles?.liveLocationButton}
                 onPress={() => {
-                  navigation?.navigate("Live Location");
+                  navigation?.navigate("Live Location", {
+                    id: patron?.ride_id,
+                  });
                 }}
               >
                 <Text style={styles?.liveLocationText}>See Live Location</Text>
