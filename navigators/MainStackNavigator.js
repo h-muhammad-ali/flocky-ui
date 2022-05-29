@@ -28,7 +28,13 @@ const MainStackNavigator = () => {
   return (
     <Stack.Navigator
       initialRouteName={
-        jwt ? (decoded?.is_admin ? "Admin Tab" : "User Stack") : "MainMenu"
+        jwt
+          ? decoded?.is_admin
+            ? "Admin Tab"
+            : decoded?.is_flocky_admin
+            ? "Companies Management"
+            : "User Stack"
+          : "MainMenu"
       }
       screenOptions={{
         headerShown: false,
