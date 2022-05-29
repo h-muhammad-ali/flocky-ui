@@ -10,8 +10,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import Polyline from "@mapbox/polyline";
 import { setOverViewPolyline } from "../redux/locations/locationsActions";
+import axios from "axios";
+import ErrorDialog from "../components/ErrorDialog";
 
+let apiCancelToken;
 const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
@@ -24,41 +28,54 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
     latitudeDelta: 12,
   });
   const mapRef = useRef(null);
+  const [error, setError] = useState("");
   const getDirections = async () => {
-    try {
-      let waypoints = wayPoints
-        ?.map((wayPoint) => `place_id:${wayPoint?.place_id}`)
-        ?.join("|");
-      wayPoints.length ? (waypoints = "&waypoints=" + waypoints) : "";
-      fetch(
-        `https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${source?.place_id}&destination=place_id:${destination?.place_id}${waypoints}&key=${GOOGLE_MAPS_API_KEY}`
+    let waypoints = wayPoints
+      ?.map((wayPoint) => `place_id:${wayPoint?.place_id}`)
+      ?.join("|");
+    wayPoints.length ? (waypoints = "&waypoints=" + waypoints) : "";
+    axios
+      .get(
+        `https://maps.googleapis.com/maps/api/directions/json?origin=place_id:${source?.place_id}&destination=place_id:${destination?.place_id}${waypoints}&key=${GOOGLE_MAPS_API_KEY}`,
+        {
+          cancelToken: apiCancelToken?.token,
+        }
       )
-        .then((response) => response.json())
-        .then((responseJson) => {
-          dispatch(
-            setOverViewPolyline(
-              responseJson?.routes[0]?.overview_polyline?.points
-            )
-          );
-          let points = Polyline?.decode(
-            responseJson?.routes[0]?.overview_polyline?.points
-          );
-          let coords = points?.map((point, index) => {
-            return {
-              latitude: point[0],
-              longitude: point[1],
-            };
-          });
-          setCoords(coords);
-          return coords;
-        })
-        .then((res) => {
-          fitToMarkers(wayPoints);
+      .then((response) => {
+        dispatch(
+          setOverViewPolyline(
+            response.data?.routes[0]?.overview_polyline?.points
+          )
+        );
+        let points = Polyline?.decode(
+          response.data?.routes[0]?.overview_polyline?.points
+        );
+        let coords = points?.map((point, index) => {
+          return {
+            latitude: point[0],
+            longitude: point[1],
+          };
         });
-    } catch (error) {
-      alert(error);
-      return error;
-    }
+        setCoords(coords);
+        return coords;
+      })
+      .then(() => {
+        fitToMarkers(wayPoints);
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (connectionStatus) {
+          if (axios.isCancel(error)) {
+            console.log(error?.message);
+          } else {
+            setError(
+              "There is some issue with Google Maps API. Please try again later."
+            );
+          }
+        } else {
+          setError("No Internet Connection!");
+        }
+      });
   };
   const getDirectionsForProps = () => {
     let points = Polyline?.decode(overview_polyline);
@@ -111,14 +128,18 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
   }, []);
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     if (!source || !destination || (start && end)) {
       setTimeout(() => {
         fitToMarkers(wayPoints);
       }, 1000);
       return;
     }
-
     getDirections();
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [source, destination, wayPoints]);
   return (
     <View style={{ flex: 1 }}>
@@ -207,6 +228,16 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
       <TouchableOpacity style={styles?.fullScreen} onPress={navigation}>
         <Ionicons name="expand" size={25} />
       </TouchableOpacity>
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

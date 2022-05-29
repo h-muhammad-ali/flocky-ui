@@ -18,6 +18,7 @@ import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 
+let apiCancelToken;
 const EditProfile = ({ navigation }) => {
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
@@ -67,6 +68,7 @@ const EditProfile = ({ navigation }) => {
   };
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     setLoading(true);
     axios
       .get(`${BASE_URL}/account/user/details`, {
@@ -74,6 +76,7 @@ const EditProfile = ({ navigation }) => {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
+        cancelToken: apiCancelToken?.token,
       })
       .then((response) => {
         const resp = response?.data;
@@ -94,6 +97,8 @@ const EditProfile = ({ navigation }) => {
           );
         } else if (error?.request) {
           setError("Network Error! Please try again later.");
+        } else if (axios.isCancel(error)) {
+          console.log(error?.message);
         } else {
           console.log(error);
         }
@@ -101,6 +106,10 @@ const EditProfile = ({ navigation }) => {
       .finally(() => {
         setLoading(false);
       });
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [reset]);
 
   if (loading) {

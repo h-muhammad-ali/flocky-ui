@@ -20,6 +20,7 @@ import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 
+let apiCancelToken;
 const CustomDrawer = ({ isAdmin, ...props }) => {
   const dispatch = useDispatch();
   const { jwt } = useSelector((state) => state?.currentUser);
@@ -37,6 +38,7 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
+        cancelToken: apiCancelToken?.token,
       })
       .then((response) => {
         const resp = response?.data;
@@ -68,6 +70,7 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
+        cancelToken: apiCancelToken?.token,
       })
       .then((response) => {
         const resp = response?.data;
@@ -98,11 +101,13 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
   };
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     if (isAdmin) {
       fetchAdminInfo();
     } else {
       fetchUserInfo();
     }
+    return () => apiCancelToken?.cancel("Data Fetching Cancelled");
   }, []);
   return (
     <View style={styles.container}>

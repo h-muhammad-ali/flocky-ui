@@ -19,56 +19,83 @@ import {
 } from "../redux/locations/locationsActions";
 import * as Location from "expo-location";
 import { GOOGLE_MAPS_API_KEY } from "@env";
+import axios from "axios";
+import ErrorDialog from "../components/ErrorDialog";
+import useMountedState from "../custom-hooks/useMountedState";
 
+let apiCancelToken;
 const WhereTo = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
-  const { source, destination, wayPoints, overview_polyline } = useSelector(
+  const [error, setError] = useState("");
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
+  const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
   const dispatch = useDispatch();
   const ref = useRef(null);
-  const getCurrentPosition = async () => {
-    Location.requestForegroundPermissionsAsync().then((response) => {
-      if (response?.status === "granted") {
-        Location.getCurrentPositionAsync({})
-          .then((response) => {
-            setLocation(response);
-            fetch(
-              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-                response?.coords?.latitude +
-                "," +
-                response?.coords?.longitude +
-                "&key=" +
-                GOOGLE_MAPS_API_KEY
-            )
-              .then((response) => response.json())
-              .then((responseJson) => {
-                let result = responseJson["results"][0];
-                dispatch(
-                  setSource({
-                    coords: result["geometry"]["location"],
-                    place_id: result["place_id"],
-                    formatted_address: result["formatted_address"],
-                    short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
-                  })
-                );
-              });
-          })
-          .catch((error) => {
-            console?.log(error?.message);
-          });
-      } else {
-        setErrorMsg("Permission to access location was denied");
-        dispatch(setSource(null));
-      }
-    });
-  };
+  const isMounted = useMountedState();
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
+    const getCurrentPosition = async () => {
+      Location.requestForegroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          Location.getCurrentPositionAsync({})
+            .then((response) => {
+              if (isMounted()) setLocation(response);
+              axios
+                .get(
+                  `https://maps.googleapis.com/maps/api/geocode/json?latlng=${response?.coords?.latitude},${response?.coords?.longitude}&key=${GOOGLE_MAPS_API_KEY}`,
+                  { cancelToken: apiCancelToken?.token }
+                )
+                .then((response) => {
+                  let result = response.data["results"][0];
+                  if (isMounted()) {
+                    dispatch(
+                      setSource({
+                        coords: result["geometry"]["location"],
+                        place_id: result["place_id"],
+                        formatted_address: result["formatted_address"],
+                        short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
+                      })
+                    );
+                  }
+                })
+                .catch((error) => {
+                  console?.log(error);
+                  if (connectionStatus) {
+                    if (axios.isCancel(error)) {
+                      console.log(error?.message);
+                    } else {
+                      setError(
+                        "There is some issue with Google Maps API. Please try again later."
+                      );
+                    }
+                  } else {
+                    setError("No Internet Connection!");
+                  }
+                });
+            })
+            .catch((error) => {
+              console?.log(error?.message);
+              if (!connectionStatus && isMounted())
+                setError("No Internet Connection!");
+            });
+        } else {
+          setErrorMsg("Permission to access location was denied");
+          dispatch(setSource(null));
+        }
+      });
+    };
     getCurrentPosition();
-    return () => dispatch(resetLocationState());
-  }, []);
+    return () => {
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
+      dispatch(resetLocationState());
+    };
+  }, [isMounted, connectionStatus]);
   useEffect(() => {
     if (destination !== "" && ref?.current) {
       ref?.current?.setNativeProps({
@@ -167,6 +194,16 @@ const WhereTo = ({ navigation, route }) => {
           }
         }}
       />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

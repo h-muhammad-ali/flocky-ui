@@ -19,6 +19,7 @@ import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 
+let apiCancelToken;
 const SignUp = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -106,10 +107,12 @@ const SignUp = ({ navigation, route }) => {
   };
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     if (orgID !== 0) {
       axios
         .get(`${BASE_URL}/organization/${orgID}/domain`, {
           timeout: 5000,
+          cancelToken: apiCancelToken?.token,
         })
         .then((response) => {
           setDomain(response?.data?.organization_domain);
@@ -123,6 +126,8 @@ const SignUp = ({ navigation, route }) => {
             );
           } else if (error?.request) {
             setError("Network Error! Please try again later.");
+          } else if (axios.isCancel(error)) {
+            console.log(error?.message);
           } else {
             console.log(error);
           }
@@ -131,9 +136,14 @@ const SignUp = ({ navigation, route }) => {
           setLoading(false);
         });
     }
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [orgID]);
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     setLoading(true);
     axios
       .get(`${BASE_URL}/organization/`, {
@@ -149,6 +159,8 @@ const SignUp = ({ navigation, route }) => {
           );
         } else if (error?.request) {
           setError("Network Error! Can't get all the organizations.");
+        } else if (axios.isCancel(error)) {
+          console.log(error?.message);
         } else {
           console.log(error);
         }
@@ -156,6 +168,10 @@ const SignUp = ({ navigation, route }) => {
       .finally(() => {
         setLoading(false);
       });
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, []);
 
   if (loading) {

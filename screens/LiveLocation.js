@@ -13,6 +13,7 @@ import {
   MaterialCommunityIcons,
 } from "@expo/vector-icons";
 import usePrevious from "../custom-hooks/usePrevious";
+import useMountedState from "../custom-hooks/useMountedState";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
@@ -30,6 +31,7 @@ const LiveLocation = ({ navigation, route }) => {
   const [destinationState, setDestinationState] = useState(null);
   const prevSourceState = usePrevious(sourceState);
   const prevDestinationState = usePrevious(destinationState);
+  const isMounted = useMountedState();
   const updateSourceState = (data) =>
     setSourceState((state) => ({ ...state, ...data }));
   const updateDestinationState = (data) =>
@@ -70,43 +72,74 @@ const LiveLocation = ({ navigation, route }) => {
   });
 
   useEffect(() => {
+    const getLiveLocation = async () => {
+      Location.requestForegroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          Location.getCurrentPositionAsync({
+            accuracy: Location?.Accuracy?.BestForNavigation,
+          })
+            .then((response) => {
+              const { latitude, longitude } = response?.coords;
+              animate(sourceMarkerRef, latitude, longitude);
+              if (isMounted()) {
+                updateSourceState({
+                  curLoc: { latitude, longitude },
+                  coordinate: new AnimatedRegion({
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: LATITUDE_DELTA,
+                    longitudeDelta: LONGITUDE_DELTA,
+                  }),
+                });
+              }
+            })
+            .catch((error) => {
+              console?.log(error?.message);
+            });
+        } else {
+          setError("Permission to access location was denied");
+        }
+      });
+    };
     getLiveLocation();
-  }, []);
+  }, [isMounted]);
 
   useEffect(() => {
+    const getLiveLocation = async () => {
+      Location.requestForegroundPermissionsAsync().then((response) => {
+        if (response?.status === "granted") {
+          Location.getCurrentPositionAsync({
+            accuracy: Location?.Accuracy?.BestForNavigation,
+          })
+            .then((response) => {
+              const { latitude, longitude } = response?.coords;
+              animate(sourceMarkerRef, latitude, longitude);
+              if (isMounted()) {
+                updateSourceState({
+                  curLoc: { latitude, longitude },
+                  coordinate: new AnimatedRegion({
+                    latitude: latitude,
+                    longitude: longitude,
+                    latitudeDelta: LATITUDE_DELTA,
+                    longitudeDelta: LONGITUDE_DELTA,
+                  }),
+                });
+              }
+            })
+            .catch((error) => {
+              console?.log(error?.message);
+            });
+        } else {
+          setError("Permission to access location was denied");
+        }
+      });
+    };
+
     const interval = setInterval(() => {
       getLiveLocation();
     }, 5000);
     return () => clearInterval(interval);
-  }, []);
-
-  const getLiveLocation = async () => {
-    Location.requestForegroundPermissionsAsync().then((response) => {
-      if (response?.status === "granted") {
-        Location.getCurrentPositionAsync({
-          accuracy: Location?.Accuracy?.BestForNavigation,
-        })
-          .then((response) => {
-            const { latitude, longitude } = response?.coords;
-            animate(sourceMarkerRef, latitude, longitude);
-            updateSourceState({
-              curLoc: { latitude, longitude },
-              coordinate: new AnimatedRegion({
-                latitude: latitude,
-                longitude: longitude,
-                latitudeDelta: LATITUDE_DELTA,
-                longitudeDelta: LONGITUDE_DELTA,
-              }),
-            });
-          })
-          .catch((error) => {
-            console?.log(error?.message);
-          });
-      } else {
-        setError("Permission to access location was denied");
-      }
-    });
-  };
+  }, [isMounted]);
 
   const animate = (markerRef, latitude, longitude) => {
     const newCoordinate = { latitude, longitude };
@@ -150,12 +183,6 @@ const LiveLocation = ({ navigation, route }) => {
       destinationState &&
       !(prevSourceState && prevDestinationState)
     ) {
-      console.log(
-        prevSourceState,
-        sourceState,
-        prevDestinationState,
-        destinationState
-      );
       setTimeout(() => {
         fitToMarkers();
       }, 1000);

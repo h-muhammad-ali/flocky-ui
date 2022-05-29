@@ -13,11 +13,17 @@ import {
 import * as Location from "expo-location";
 import usePrevious from "../custom-hooks/usePrevious";
 var _ = require("lodash");
+import axios from "axios";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
 
+let apiCancelToken;
 const Map = ({ navigation, route }) => {
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState("");
   const mapRef = useRef(null);
+  const [error, setError] = useState("");
   const prevLocation = usePrevious(location);
   const dispatch = useDispatch();
   const onRegionChangeComplete = (region) => {
@@ -25,12 +31,13 @@ const Map = ({ navigation, route }) => {
     if (location === null && prevLocation === undefined) {
       getCurrentPosition();
     } else {
-      fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${region?.latitude},${region?.longitude}&key=${GOOGLE_MAPS_API_KEY}`
-      )
-        .then((response) => response.json())
-        .then((responseJson) => {
-          let result = responseJson["results"][0];
+      axios
+        .get(
+          `https://maps.googleapis.com/maps/api/geocode/json?latlng=${region?.latitude},${region?.longitude}&key=${GOOGLE_MAPS_API_KEY}`,
+          { cancelToken: apiCancelToken?.token }
+        )
+        .then((response) => {
+          let result = response.data["results"][0];
           setAddress(result["formatted_address"]);
           setLocation({
             coords: result["geometry"]["location"],
@@ -38,6 +45,20 @@ const Map = ({ navigation, route }) => {
             formatted_address: result["formatted_address"],
             short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
           });
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (connectionStatus) {
+            if (axios.isCancel(error)) {
+              console.log(error?.message);
+            } else {
+              setError(
+                "There is some issue with Google Maps API. Please try again later."
+              );
+            }
+          } else {
+            setError("No Internet Connection!");
+          }
         });
     }
   };
@@ -46,17 +67,14 @@ const Map = ({ navigation, route }) => {
       if (response?.status === "granted") {
         Location.getCurrentPositionAsync({})
           .then((response) => {
-            fetch(
-              "https://maps.googleapis.com/maps/api/geocode/json?latlng=" +
-                response?.coords?.latitude +
-                "," +
-                response?.coords?.longitude +
-                "&key=" +
-                GOOGLE_MAPS_API_KEY
-            )
-              .then((response) => response.json())
-              .then((responseJson) => {
-                let result = responseJson["results"][0];
+            axios
+              .get(
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=
+                  ${response?.coords?.latitude},${response?.coords?.longitude}&key=${GOOGLE_MAPS_API_KEY}`,
+                { cancelToken: apiCancelToken?.token }
+              )
+              .then((response) => {
+                let result = response.data["results"][0];
                 setAddress(result["formatted_address"]);
                 setLocation({
                   coords: result["geometry"]["location"],
@@ -76,10 +94,25 @@ const Map = ({ navigation, route }) => {
                     2000
                   );
                 }
+              })
+              .catch((error) => {
+                console?.log(error);
+                if (connectionStatus) {
+                  if (axios.isCancel(error)) {
+                    console.log(error?.message);
+                  } else {
+                    setError(
+                      "There is some issue with Google Maps API. Please try again later."
+                    );
+                  }
+                } else {
+                  setError("No Internet Connection!");
+                }
               });
           })
           .catch((error) => {
             console?.log(error?.message);
+            if (!connectionStatus) setError("No Internet Connection!");
           });
       } else {
         setErrorMsg("Permission to access location was denied");
@@ -88,11 +121,16 @@ const Map = ({ navigation, route }) => {
     });
   };
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     if (prevLocation === null) {
       setTimeout(() => {
         animateRegion();
       }, 1000);
     }
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [location]);
   const animateRegion = () => {
     mapRef?.current?.animateToRegion(
@@ -165,6 +203,16 @@ const Map = ({ navigation, route }) => {
       >
         <Ionicons name="checkmark-circle" size={80} color={"#5188E3"} />
       </TouchableOpacity>
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

@@ -12,6 +12,7 @@ import jwt_decode from "jwt-decode";
 import { LogBox } from "react-native";
 import * as TaskManager from "expo-task-manager";
 import BackgroundPermissionModal from "../components/BackgroundPermissionModal";
+import useMountedState from "../custom-hooks/useMountedState";
 
 let lat;
 let long;
@@ -27,6 +28,7 @@ const MatchingRidesPatron = ({ navigation }) => {
   const { jwt } = useSelector((state) => state?.currentUser);
   var decoded = jwt_decode(jwt);
   patron_id = decoded?.user_id;
+  const isMounted = useMountedState();
   const dummyHitchers = [
     {
       id: 1,
@@ -39,74 +41,76 @@ const MatchingRidesPatron = ({ navigation }) => {
   ];
   const { source, destination } = useSelector((state) => state?.locations);
   useEffect(() => {
+    const startBackgroundUpdate = async () => {
+      const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+      if (!isTaskDefined) {
+        console.log("Task is not defined");
+        return;
+      }
+      Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
+        (hasStarted) => {
+          console?.log(hasStarted);
+          if (hasStarted) {
+            console.log("Already started");
+            return;
+          }
+        }
+      );
+      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+        accuracy: Location.Accuracy.BestForNavigation,
+        timeInterval: 2000,
+        showsBackgroundLocationIndicator: true,
+        foregroundService: {
+          notificationTitle: "Flocky",
+          notificationBody: "Flocky is using your location in the background.",
+          notificationColor: "#fff",
+        },
+      });
+    };
+
+    const stopBackgroundUpdate = async () => {
+      const hasStarted = await Location.hasStartedLocationUpdatesAsync(
+        LOCATION_TASK_NAME
+      );
+      if (hasStarted) {
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
+        console.log("Location tracking stopped");
+      }
+    };
     if (!requestGranted && showPermissionModal && openSettings) {
       Location.requestBackgroundPermissionsAsync().then((response) => {
         if (response?.status === "granted") {
-          setRequestGranted(true);
+          if (isMounted()) setRequestGranted(true);
         } else {
-          setError("Background Location Permission is not given.");
+          if (isMounted())
+            setError("Background Location Permission is not given.");
         }
-        setShowPermissionModal(false);
-        setOpenSettings(false);
+        if (isMounted()) {
+          setShowPermissionModal(false);
+          setOpenSettings(false);
+        }
       });
     } else if (requestGranted && !showPermissionModal && !openSettings) {
       startBackgroundUpdate();
     }
     return () => stopBackgroundUpdate();
-  }, [requestGranted, showPermissionModal, openSettings]);
-
-  const startBackgroundUpdate = async () => {
-    const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
-    if (!isTaskDefined) {
-      console.log("Task is not defined");
-      return;
-    }
-    Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
-      (hasStarted) => {
-        console?.log(hasStarted);
-        if (hasStarted) {
-          console.log("Already started");
-          return;
-        }
-      }
-    );
-    await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
-      accuracy: Location.Accuracy.BestForNavigation,
-      timeInterval: 2000,
-      showsBackgroundLocationIndicator: true,
-      foregroundService: {
-        notificationTitle: "Flocky",
-        notificationBody: "Flocky is using your location in the background.",
-        notificationColor: "#fff",
-      },
-    });
-  };
-
-  const stopBackgroundUpdate = async () => {
-    const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-      LOCATION_TASK_NAME
-    );
-    if (hasStarted) {
-      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-      console.log("Location tracking stopped");
-    }
-  };
+  }, [requestGranted, showPermissionModal, openSettings, isMounted]);
 
   useEffect(() => {
     Location.requestForegroundPermissionsAsync().then((response) => {
       if (response?.status === "granted") {
         Location.getBackgroundPermissionsAsync().then((response) => {
           if (response?.status === "granted") {
-            setRequestGranted(true);
+            if (isMounted()) setRequestGranted(true);
           } else {
-            setShowPermissionModal(true);
+            if (isMounted()) setShowPermissionModal(true);
           }
         });
       } else {
-        setError("Permission to access location was denied");
+        if (isMounted()) setError("Permission to access location was denied");
       }
     });
-  }, []);
+  }, [isMounted]);
 
   return (
     <View style={styles?.container}>

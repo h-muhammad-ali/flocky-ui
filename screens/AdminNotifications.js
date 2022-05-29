@@ -7,6 +7,7 @@ import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 import EmptyFlatlistMessage from "../components/EmptyFlatlistMessage";
 
+let apiCancelToken;
 const AdminNotifications = () => {
   const joiningSentences = [
     "just hopped in!",
@@ -32,6 +33,7 @@ const AdminNotifications = () => {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
+          cancelToken: apiCancelToken?.token,
         })
         .then((response) => {
           if (serverError) setServerError(false);
@@ -46,6 +48,8 @@ const AdminNotifications = () => {
             );
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);
+          } else if (axios.isCancel(error)) {
+            console.log(error?.message);
           } else {
             console.log(error);
           }
@@ -57,7 +61,12 @@ const AdminNotifications = () => {
     }
   };
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     fetchNotifications(true);
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [connectionStatus]);
   if (loading) {
     return (

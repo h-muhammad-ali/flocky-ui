@@ -13,6 +13,7 @@ import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 import EmptyFlatlistMessage from "../components/EmptyFlatlistMessage";
 
+let apiCancelToken;
 const AdminUsers = () => {
   const { jwt } = useSelector((state) => state?.currentUser);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
@@ -32,6 +33,7 @@ const AdminUsers = () => {
           headers: {
             Authorization: `Bearer ${jwt}`,
           },
+          cancelToken: apiCancelToken?.token,
         })
         .then((response) => {
           if (serverError) setServerError(false);
@@ -46,6 +48,8 @@ const AdminUsers = () => {
             );
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);
+          } else if (axios.isCancel(error)) {
+            console.log(error?.message);
           } else {
             console.log(error);
           }
@@ -58,7 +62,12 @@ const AdminUsers = () => {
   };
 
   useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     fetchUsers(true);
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
   }, [updated, connectionStatus]);
 
   if (loading) {
