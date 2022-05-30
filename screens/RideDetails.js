@@ -14,6 +14,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AddVehicleDialog from "../components/AddVehicleDialog";
 import Button from "../components/Button";
 import ErrorDialog from "../components/ErrorDialog";
+import Checkbox from "expo-checkbox";
 
 const RideDetails = ({ navigation }) => {
   const dummyVehicleDetails = [
@@ -68,6 +69,7 @@ const RideDetails = ({ navigation }) => {
   const [show, setShow] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [error, setError] = useState("");
+  const [isChecked, setChecked] = useState(false);
 
   const showToast = (text) => {
     ToastAndroid.show(text, ToastAndroid.LONG);
@@ -206,6 +208,15 @@ const RideDetails = ({ navigation }) => {
             setError("");
           }}
         />
+        <View style={styles?.checkboxSection}>
+          <Checkbox
+            style={styles?.checkbox}
+            value={isChecked}
+            onValueChange={setChecked}
+            color={isChecked ? "#5188E3" : undefined}
+          />
+          <Text style={styles?.checkboxText}>Travel with Same Gender</Text>
+        </View>
       </View>
       <View style={{ flex: 1, justifyContent: "center" }}>
         <Button
@@ -316,5 +327,16 @@ const styles = StyleSheet?.create({
   },
   availableSeatsCount: {
     marginHorizontal: 15,
+  },
+  checkboxSection: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginHorizontal: 10,
+  },
+  checkbox: {
+    margin: 8,
+  },
+  checkboxText: {
+    fontFamily: "NunitoSans-SemiBold",
   },
 });
