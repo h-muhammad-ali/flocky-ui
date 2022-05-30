@@ -4,7 +4,6 @@ import {
   View,
   TextInput,
   Text,
-  TouchableOpacity,
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
@@ -74,7 +73,6 @@ const AdminSignUp = ({ navigation, route }) => {
   };
 
   const [focusName, setFocusName] = useState(false);
-  const [checked, setChecked] = useState(false);
 
   const focusHandler = (set) => {
     set(true);
@@ -163,20 +161,6 @@ const AdminSignUp = ({ navigation, route }) => {
                 </View>
               )}
             />
-            <View style={styles?.checkboxContainer}>
-              <TouchableOpacity
-                onPress={() => {
-                  setChecked(!checked);
-                }}
-              >
-                <Ionicons
-                  name={checked ? "checkbox" : "square-outline"}
-                  size={25}
-                  color={"#5188E3"}
-                />
-              </TouchableOpacity>
-              <Text>Travel Only with Same Gender</Text>
-            </View>
           </View>
           <View>
             <ErrorDialog
@@ -252,11 +236,6 @@ const styles = StyleSheet?.create({
   },
   errorBorder: {
     borderColor: "red",
-  },
-  checkboxContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginStart: 10,
   },
 });
 
