@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TouchableOpacity,
   useWindowDimensions,
+  ToastAndroid,
 } from "react-native";
 import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
@@ -57,7 +58,9 @@ const RideDetails = ({ navigation }) => {
       name: "Honda CR-V",
     },
   ];
-  const [time, setTime] = useState(new Date(Date.now()));
+  const [departureTime, setDepartureTime] = useState(
+    addMinutes(new Date(), 20)
+  );
   const [seatsCount, setSeatsCount] = useState(1);
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(null);
@@ -66,17 +69,26 @@ const RideDetails = ({ navigation }) => {
   const [showDialog, setShowDialog] = useState(false);
   const [error, setError] = useState("");
 
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid.LONG);
+  };
+
   const onChange = (event, selectedTime) => {
-    const currentTime = selectedTime || time;
+    if (selectedTime && selectedTime < new Date()) {
+      showToast("Select a time in future!");
+    } else if (selectedTime && selectedTime < addMinutes(new Date(), 15)) {
+      showToast("Too short! Spare atleast 15 minutes to find you a ride.");
+    } else if (selectedTime) {
+      setDepartureTime(selectedTime);
+    }
     setShow(false);
-    setTime(currentTime);
   };
 
   const showTimePicker = () => {
     setShow(true);
   };
 
-  function formatAMPM(date) {
+  const formatAMPM = (date) => {
     var hours = date?.getHours();
     var minutes = date?.getMinutes();
     var ampm = hours >= 12 ? "PM" : "AM";
@@ -85,6 +97,10 @@ const RideDetails = ({ navigation }) => {
     minutes = minutes < 10 ? "0" + minutes : minutes;
     var strTime = hours + ":" + minutes + " " + ampm;
     return strTime;
+  };
+
+  function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes * 60000);
   }
 
   return (
@@ -95,17 +111,9 @@ const RideDetails = ({ navigation }) => {
         <View style={styles?.timePickerSubContainer}>
           <View style={styles?.timeDisplayContainer}>
             <Ionicons name="time-outline" size={30} color={"white"} />
-            <Text style={styles?.timeText}>{formatAMPM(time)}</Text>
+            <Text style={styles?.timeText}>{formatAMPM(departureTime)}</Text>
           </View>
           <View style={{ flexDirection: "row" }}>
-            <TouchableOpacity
-              onPress={() => {
-                setTime(new Date(Date.now()));
-              }}
-              style={styles?.timeOptionContainer}
-            >
-              <Text style={styles?.timeOptionText}>Right Now</Text>
-            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
                 showTimePicker();
@@ -118,7 +126,7 @@ const RideDetails = ({ navigation }) => {
           {show && (
             <DateTimePicker
               testID="dateTimePicker"
-              value={time}
+              value={new Date()}
               mode={"time"}
               is24Hour={false}
               display="default"
@@ -162,12 +170,12 @@ const RideDetails = ({ navigation }) => {
         <View style={styles?.availableSeatsSubContainer}>
           <TouchableOpacity
             onPress={() => {
-              if (seatsCount < 8) {
-                setSeatsCount(seatsCount + 1);
+              if (seatsCount > 1) {
+                setSeatsCount(seatsCount - 1);
               }
             }}
           >
-            <Ionicons name="add-circle" color={"#5188E3"} size={40} />
+            <Ionicons name="remove-circle" color={"#5188E3"} size={40} />
           </TouchableOpacity>
           <Text
             adjustsFontSizeToFit
@@ -180,12 +188,12 @@ const RideDetails = ({ navigation }) => {
           </Text>
           <TouchableOpacity
             onPress={() => {
-              if (seatsCount > 1) {
-                setSeatsCount(seatsCount - 1);
+              if (seatsCount < 8) {
+                setSeatsCount(seatsCount + 1);
               }
             }}
           >
-            <Ionicons name="remove-circle" color={"#5188E3"} size={40} />
+            <Ionicons name="add-circle" color={"#5188E3"} size={40} />
           </TouchableOpacity>
         </View>
       </View>
@@ -203,8 +211,13 @@ const RideDetails = ({ navigation }) => {
         <Button
           text="Post Ride"
           onPress={() => {
-            if (vehicleValue) navigation?.navigate("RidePosted");
-            else setError("Please, select a vehicle before going forward.");
+            if (!vehicleValue)
+              setError("Please, select a vehicle before going forward.");
+            else if (departureTime < addMinutes(new Date(), 10))
+              showToast(
+                "Too short! Spare atleast 15 minutes to find you a ride."
+              );
+            else navigation?.navigate("RidePosted");
           }}
         />
       </View>
