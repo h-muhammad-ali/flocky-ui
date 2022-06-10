@@ -13,6 +13,7 @@ import CompanyRegisteration from "../screens/CompanyRegisteration";
 import AdminSignUp from "../screens/AdminSignUp";
 import CompaniesManagementTabNavigator from "./CompaniesManagementTabNavigator";
 import AddCode from "../screens/AddCode";
+import Map from "../screens/Map";
 import SelectLocation from "../screens/SelectLocation";
 import { useSelector } from "react-redux";
 import jwt_decode from "jwt-decode";
@@ -82,6 +83,7 @@ const MainStackNavigator = () => {
             name="SelectOrganizationLocation"
             component={SelectLocation}
           />
+          <Stack.Screen name="MapForCompanyLocation" component={Map} />
         </>
       )}
     </Stack.Navigator>

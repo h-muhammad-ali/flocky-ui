@@ -49,13 +49,59 @@ const AdminSignUp = ({ navigation, route }) => {
         gender: data?.gender(),
         password: route?.params?.password,
       },
+      coordinates: {
+        latitude: route.params?.location?.coords?.lat,
+        longitude: route.params?.location?.coords?.lng,
+      },
     };
     axios
       .post(`${BASE_URL}/organization/register`, orgData, { timeout: 5000 })
       .then((response) => {
         console.log(response);
-        reset();
-        navigation?.navigate("Add Photo", { isAdmin: true });
+        axios
+          .post(
+            `${BASE_URL}/auth/signin`,
+            {
+              email: orgData?.admin?.email,
+              password: orgData?.admin?.password,
+            },
+            {
+              timeout: 5000,
+            }
+          )
+          .then((response) => {
+            console.log(response);
+            reset();
+            navigation.reset({
+              index: 1,
+              routes: [
+                { name: "MainMenu" },
+                {
+                  name: "Add Photo",
+                  params: {
+                    isAdmin: true,
+                    jwt: response?.data,
+                  },
+                },
+              ],
+            });
+            // navigation?.navigate("Add Photo", {
+            //   isAdmin: true,
+            //   jwt: response?.data,
+            // });
+          })
+          .catch((error) => {
+            if (error?.response) {
+              setError(
+                `${error?.response?.data}. Status Code: ${error?.response?.status}`
+              );
+            } else if (error?.request) {
+              setError("Network Error! Please try again later.");
+            } else {
+              console.log(error);
+            }
+          })
+          .finally(() => {});
       })
       .catch((error) => {
         if (error?.response) {
@@ -99,6 +145,7 @@ const AdminSignUp = ({ navigation, route }) => {
         <Header
           text="Admin Information"
           navigation={() => navigation?.navigate("Company Registeration")}
+          isBackButtonVisible={true}
         />
         <KeyboardAvoidingView behavior="padding">
           <Text style={styles?.label}>Name</Text>

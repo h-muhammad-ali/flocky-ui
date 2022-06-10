@@ -5,6 +5,7 @@ import {
   Ionicons,
   MaterialCommunityIcons,
   MaterialIcons,
+  Entypo,
 } from "@expo/vector-icons";
 import { useSelector, useDispatch } from "react-redux";
 import { GOOGLE_MAPS_API_KEY } from "@env";
@@ -156,7 +157,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
             }
             identifier="source"
           >
-            <MaterialIcons name="trip-origin" size={30} color="black" />
+            <MaterialIcons name="my-location" size={30} color="black" />
           </Marker>
         )}
 
@@ -174,7 +175,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
               >
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
-                  size={24}
+                  size={28}
                   color={"#5188E3"}
                 />
               </Marker>
@@ -192,7 +193,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
               >
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
-                  size={24}
+                  size={28}
                   color={"#5188E3"}
                 />
               </Marker>
@@ -221,7 +222,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
             }
             identifier="destination"
           >
-            <MaterialCommunityIcons name="target" size={35} color="black" />
+            <Entypo name="flag" size={35} color="black" />
           </Marker>
         )}
       </MapView>

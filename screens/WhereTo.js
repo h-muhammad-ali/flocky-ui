@@ -6,6 +6,8 @@ import {
   TextInput,
   TouchableOpacity,
   FlatList,
+  BackHandler,
+  ActivityIndicator,
 } from "react-native";
 import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
@@ -17,24 +19,112 @@ import {
   removeWayPoint,
   resetLocationState,
 } from "../redux/locations/locationsActions";
+import { setRideInWaiting } from "../redux/ride/rideActions";
 import * as Location from "expo-location";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import axios from "axios";
 import ErrorDialog from "../components/ErrorDialog";
 import useMountedState from "../custom-hooks/useMountedState";
+import { clearRole } from "../redux/ride/rideActions";
+import { useFocusEffect } from "@react-navigation/native";
+import jwt_decode from "jwt-decode";
+import { BASE_URL } from "../config/baseURL";
 
 let apiCancelToken;
 const WhereTo = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
+  const { role } = useSelector((state) => state?.ride);
+  const { jwt } = useSelector((state) => state?.currentUser);
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
   const dispatch = useDispatch();
   const ref = useRef(null);
   const isMounted = useMountedState();
+  let decoded = jwt_decode(jwt);
+  let organization_id = decoded?.organization_id;
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const onBackPress = () => {
+        dispatch(clearRole());
+        //dispatch(resetLocationState());
+        return false;
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () =>
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+    }, [])
+  );
+
+  const haversineFormula = (coords1, coords2) => {
+    const R = 6371000;
+    let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
+    let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
+
+    let a =
+      Math.pow(Math.sin(latDiff / 2), 2) +
+      Math.cos(coords1.lat * (Math.PI / 180)) *
+        Math.cos(coords2.lat * (Math.PI / 180)) *
+        Math.pow(Math.sin(longDiff / 2), 2);
+
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  const checkRadius = () => {
+    setLoading(true);
+    axios
+      .get(`${BASE_URL}/organization/${organization_id}/location`, {
+        timeout: 5000,
+        cancelToken: apiCancelToken?.token,
+      })
+      .then((response) => {
+        const resp = response?.data;
+        console?.log(resp);
+        let betSourceAndOrg = haversineFormula(
+          { lat: resp?.latitude, lng: resp?.longitude },
+          source?.coords
+        );
+        let betDestinationAndOrg = haversineFormula(
+          { lat: resp?.latitude, lng: resp?.longitude },
+          destination?.coords
+        );
+        if (betSourceAndOrg > 200 && betDestinationAndOrg > 200) {
+          setError(
+            "Either your source or destination should be within the 200 m radius of your organization."
+          );
+        } else
+          role === "H"
+            ? dispatch(setRideInWaiting())
+            : navigation?.navigate("RideDetails");
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (!connectionStatus) {
+          setError("No Internet Connection!");
+        } else if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Server not reachable! Please try again later.");
+        } else if (axios.isCancel(error)) {
+          console.log(error?.message);
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
@@ -93,7 +183,6 @@ const WhereTo = ({ navigation, route }) => {
       apiCancelToken?.cancel(
         "API Request was cancelled because of component unmount."
       );
-      dispatch(resetLocationState());
     };
   }, [isMounted, connectionStatus]);
   useEffect(() => {
@@ -104,9 +193,24 @@ const WhereTo = ({ navigation, route }) => {
     }
   }, [destination]);
 
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles?.container}>
-      <Header text="Where to?" navigation={() => navigation?.goBack()} />
+      <Header
+        text="Where to?"
+        navigation={() => {
+          dispatch(clearRole());
+          // dispatch(resetLocationState());
+          navigation?.goBack();
+        }}
+        isBackButtonVisible={true}
+      />
 
       <Text style={styles.label}>From</Text>
       <TextInput
@@ -188,9 +292,7 @@ const WhereTo = ({ navigation, route }) => {
               borderColor: "red",
             });
           } else {
-            !route.params?.isPatron
-              ? navigation?.navigate("MatchingRidesHitcher")
-              : navigation?.navigate("RideDetails");
+            checkRadius();
           }
         }}
       />

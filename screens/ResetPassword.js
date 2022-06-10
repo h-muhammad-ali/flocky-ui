@@ -1,10 +1,21 @@
-import React from "react";
-import { StyleSheet, Text, View, TextInput } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  ToastAndroid,
+  ActivityIndicator,
+} from "react-native";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector, useDispatch } from "react-redux";
 
-const ResetPassword = ({ navigation }) => {
+const ResetPassword = ({ navigation, route }) => {
   const {
     handleSubmit,
     control,
@@ -17,13 +28,96 @@ const ResetPassword = ({ navigation }) => {
       confirmPassword: "",
     },
   });
-  const onSubmit = (data) => {
-    console.log("data", data);
-    reset();
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid?.SHORT);
   };
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { jwt } = useSelector((state) => state?.currentUser);
+  const onSubmit = (data) => {
+    if (route.params?.mode === "change") {
+      setLoading(true);
+      axios
+        .put(
+          `${BASE_URL}/auth/password/change`,
+          { password: data?.password },
+          {
+            timeout: 5000,
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          showToast(response?.data);
+          reset();
+          navigation.navigate("Roles");
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Network Error! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      const newData = {
+        email: route.params?.email,
+        new_password: data?.password,
+        token: route.params?.code,
+      };
+      setLoading(true);
+      axios
+        .put(`${BASE_URL}/auth/password/reset`, newData, {
+          timeout: 5000,
+        })
+        .then((response) => {
+          console.log(response);
+          showToast(response?.data);
+          reset();
+          navigation.navigate("LogIn");
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Network Error! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
+  };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
-      <Header text="New Password" navigation={() => navigation?.goBack()} />
+      <Header
+        text="New Password"
+        navigation={() => navigation?.goBack()}
+        isBackButtonVisible={true}
+      />
       <Text style={styles?.label}>New Password</Text>
       {errors?.password && (
         <Text style={styles.error}>{errors?.password?.message}</Text>
@@ -48,7 +142,7 @@ const ResetPassword = ({ navigation }) => {
       <Text style={styles?.label}>Confirm Password</Text>
       {errors?.confirmPassword &&
         errors?.confirmPassword?.type === "validate" && (
-          <Text style={styles.error}>Both Fields' values should match!"</Text>
+          <Text style={styles.error}>Both Fields' values should match!</Text>
         )}
       {errors?.confirmPassword &&
         errors?.confirmPassword?.type === "required" && (
@@ -74,7 +168,22 @@ const ResetPassword = ({ navigation }) => {
           />
         )}
       />
-      <Button text="Reset Password" onPress={handleSubmit(onSubmit)} />
+      <Button
+        text={
+          route.params?.mode === "change" ? "Change Password" : "Reset Password"
+        }
+        onPress={handleSubmit(onSubmit)}
+      />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

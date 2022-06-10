@@ -13,8 +13,11 @@ const UserDrawerNavigator = ({ navigation }) => {
   return (
     <Drawer.Navigator
       initialRouteName="User Panel"
+      defaultStatus="closed"
+      useLegacyImplementation={true}
       screenOptions={({ route }) => ({
         headerShown: false,
+        swipeEnabled: false,
         drawerIcon: ({ focused, color, size }) => {
           let iconName;
 
@@ -66,7 +69,13 @@ const UserDrawerNavigator = ({ navigation }) => {
           unmountOnBlur: true,
         }}
       />
-      <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />
+      <Drawer.Screen
+        name="Wall of Honor"
+        options={{
+          unmountOnBlur: true,
+        }}
+        component={WallOfHonor}
+      />
     </Drawer.Navigator>
   );
 };

@@ -20,77 +20,115 @@ import SelectLocation from "../screens/SelectLocation";
 import EditProfile from "../screens/EditProfile";
 import AddPhoto from "../screens/AddPhoto";
 import LiveLocation from "../screens/LiveLocation";
+import ResetPassword from "../screens/ResetPassword";
+import FullScreenMapForPatron from "../screens/FullScreenMapForPatron";
+import { useSelector } from "react-redux";
 
 const Stack = createNativeStackNavigator();
-const StackNavigator = () => {
+const StackNavigator = ({ navigation }) => {
+  const { rideID, role, rideStatus } = useSelector((state) => state?.ride);
   return (
     <Stack.Navigator
-      initialRouteName="Roles"
+      initialRouteName={
+        rideID
+          ? role === "P"
+            ? "RidePosted"
+            : "PatronDetailsAfterRideConfirmed"
+          : "Roles"
+      }
       screenOptions={{ headerShown: false }}
     >
-      <Stack.Screen
-        name="Roles"
-        component={Roles}
-        options={({ navigation, route }) => ({
-          headerShown: true,
-          headerBackVisible: false,
-          headerRight: () => (
-            <View style={styles?.headerRight}>
-              {route.params?.isAdmin ? (
-                <TouchableOpacity
-                  onPress={() => {
-                    navigation?.navigate("Admin Tab", {
-                      screen: "Admin Panel",
-                    });
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="account-switch-outline"
-                    size={30}
-                    color="black"
-                  />
-                </TouchableOpacity>
-              ) : (
-                <></>
-              )}
-            </View>
-          ),
-          headerLeft: () => (
-            <TouchableOpacity
-              style={styles.menuLogo}
-              onPress={() => {
-                navigation?.dispatch(DrawerActions?.toggleDrawer());
-              }}
-            >
-              <Ionicons name="menu-sharp" size={30} color="#5188E3" />
-            </TouchableOpacity>
-          ),
-          headerTitle: () => (
-            <Text style={styles?.heading}>Welcome to Flocky!</Text>
-          ),
-        })}
-      />
-      <Stack.Screen name="WhereTo" component={WhereTo} />
-      <Stack.Screen name="SelectLocation" component={SelectLocation} />
-      <Stack.Screen
-        name="MatchingRidesHitcher"
-        component={MatchingRidesHitcher}
-      />
-      <Stack.Screen name="PatronDetails" component={PatronDetails} />
-      <Stack.Screen name="HitcherDetails" component={HitcherDetails} />
-      <Stack.Screen
-        name="MatchingRidesPatron"
-        component={MatchingRidesPatron}
-      />
-      <Stack.Screen name="RideRequested" component={RideRequested} />
-      <Stack.Screen name="RidePosted" component={RidePosted} />
-      <Stack.Screen name="RideDetails" component={RideDetails} />
-      <Stack.Screen name="Chat" component={ChatScreen} />
-      <Stack.Screen name="Map" component={Map} />
-      <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
-      <Stack.Screen name="Edit Profile" component={EditProfile} />
-      <Stack.Screen name="Add Photo" component={AddPhoto} />
-      <Stack.Screen name="Live Location" component={LiveLocation} />
+      {!rideID ? (
+        <>
+          {role === "H" && rideStatus === "W" ? (
+            <>
+              <Stack.Screen
+                name="MatchingRidesHitcher"
+                component={MatchingRidesHitcher}
+              />
+            </>
+          ) : (
+            <>
+              <Stack.Screen
+                name="Roles"
+                component={Roles}
+                options={({ navigation, route }) => ({
+                  headerShown: true,
+                  headerBackVisible: false,
+                  headerRight: () => (
+                    <View style={styles?.headerRight}>
+                      {route.params?.isAdmin ? (
+                        <TouchableOpacity
+                          onPress={() => {
+                            navigation?.navigate("Admin Tab", {
+                              screen: "Admin Panel",
+                            });
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name="account-switch-outline"
+                            size={30}
+                            color="black"
+                          />
+                        </TouchableOpacity>
+                      ) : (
+                        <></>
+                      )}
+                    </View>
+                  ),
+                  headerLeft: () => (
+                    <TouchableOpacity
+                      style={styles.menuLogo}
+                      onPress={() => {
+                        navigation?.dispatch(DrawerActions?.toggleDrawer());
+                      }}
+                    >
+                      <Ionicons name="menu-sharp" size={30} color="#5188E3" />
+                    </TouchableOpacity>
+                  ),
+                  headerTitle: () => (
+                    <Text style={styles?.heading}>Welcome to Flocky!</Text>
+                  ),
+                })}
+              />
+              <Stack.Screen name="WhereTo" component={WhereTo} />
+              <Stack.Screen name="SelectLocation" component={SelectLocation} />
+              <Stack.Screen name="RideDetails" component={RideDetails} />
+              <Stack.Screen name="Map" component={Map} />
+              <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
+              <Stack.Screen name="Edit Profile" component={EditProfile} />
+              <Stack.Screen name="Add Photo" component={AddPhoto} />
+              <Stack.Screen name="Reset Password" component={ResetPassword} />
+            </>
+          )}
+        </>
+      ) : role === "P" ? (
+        <>
+          <Stack.Screen name="RidePosted" component={RidePosted} />
+          <Stack.Screen
+            name="MatchingRidesPatron"
+            component={MatchingRidesPatron}
+          />
+          <Stack.Screen name="HitcherDetails" component={HitcherDetails} />
+          <Stack.Screen name="Live Location" component={LiveLocation} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen
+            name="Full Screen Map For Patron"
+            component={FullScreenMapForPatron}
+          />
+        </>
+      ) : (
+        <>
+          {/* <Stack.Screen name="RideRequested" component={RideRequested} /> */}
+          <Stack.Screen
+            name="PatronDetailsAfterRideConfirmed"
+            component={PatronDetails}
+          />
+          <Stack.Screen name="Live Location" component={LiveLocation} />
+          <Stack.Screen name="Chat" component={ChatScreen} />
+          <Stack.Screen name="Full Screen Map" component={FullScreenMap} />
+        </>
+      )}
     </Stack.Navigator>
   );
 };

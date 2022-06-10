@@ -9,7 +9,7 @@ import { persistReducer, persistStore } from "redux-persist";
 const persistConfig = {
   key: "root",
   storage: AsyncStorage,
-  whitelist: ["currentUser"],
+  whitelist: ["currentUser", "ride", "locations"],
 };
 const pReducer = persistReducer(persistConfig, rootReducer);
 const store = createStore(

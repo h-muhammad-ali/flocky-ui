@@ -14,7 +14,6 @@ import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
-import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
@@ -32,7 +31,7 @@ const SignUp = ({ navigation, route }) => {
     { label: "Prefer Not to Say", value: "N" },
   ]);
   const [companyOpen, setCompanyOpen] = useState(false);
-  const [company, setComapny] = useState([]);
+  const [company, setCompany] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [focusName, setFocusName] = useState(false);
@@ -69,7 +68,9 @@ const SignUp = ({ navigation, route }) => {
       password: data?.password,
       gender: data?.gender(),
       organization_id: data?.company(),
-      email: domain ? `${data?.email}@${domain}` : data?.email,
+      email: domain
+        ? `${data?.email.toLowerCase()}@${domain.toLowerCase()}`
+        : data?.email.toLowerCase(),
       invitation_code: data?.invitationCode,
     };
     axios
@@ -78,8 +79,36 @@ const SignUp = ({ navigation, route }) => {
       })
       .then((response) => {
         console.log(response);
-        reset();
-        navigation?.navigate("Add Photo");
+        axios
+          .post(
+            `${BASE_URL}/auth/signin`,
+            {
+              email: userData?.email,
+              password: userData?.password,
+            },
+            {
+              timeout: 5000,
+            }
+          )
+          .then((response) => {
+            console.log(response);
+            navigation?.navigate("Add Photo", {
+              jwt: response?.data,
+            });
+            reset();
+          })
+          .catch((error) => {
+            if (error?.response) {
+              setError(
+                `${error?.response?.data}. Status Code: ${error?.response?.status}`
+              );
+            } else if (error?.request) {
+              setError("Network Error! Please try again later.");
+            } else {
+              console.log(error);
+            }
+          })
+          .finally(() => {});
       })
       .catch((error) => {
         if (error?.response) {
@@ -150,7 +179,7 @@ const SignUp = ({ navigation, route }) => {
         timeout: 5000,
       })
       .then((response) => {
-        setComapny(response?.data);
+        setCompany(response?.data);
       })
       .catch((error) => {
         if (error?.response) {
@@ -303,7 +332,7 @@ const SignUp = ({ navigation, route }) => {
                     items={company}
                     setOpen={setCompanyOpen}
                     setValue={onChange}
-                    setItems={setComapny}
+                    setItems={setCompany}
                     placeholder="Select Company"
                     placeholderStyle={styles?.placeholderStyles}
                     searchable={true}

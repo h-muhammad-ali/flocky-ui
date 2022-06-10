@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
@@ -31,6 +32,9 @@ const EditProfile = ({ navigation }) => {
   const [focusName, setFocusName] = useState(false);
   const [imgURL, setImgURL] = useState("");
   const { jwt } = useSelector((state) => state?.currentUser);
+  const showToast = () => {
+    ToastAndroid.show("User info updated successfully!", ToastAndroid?.LONG);
+  };
   const {
     handleSubmit,
     control,
@@ -55,16 +59,37 @@ const EditProfile = ({ navigation }) => {
   };
 
   const onSubmit = (data) => {
-    console.log("data", data);
-    reset();
-    navigation?.navigate("Add Photo", {
-      isEdit: true,
-      imageURL: imgURL,
-      updatedData: {
-        gender: data?.gender(),
-        name: data?.name,
-      },
-    });
+    setLoading(true);
+    axios
+      .put(`${BASE_URL}/account/user/details/update`, data, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        showToast();
+        reset();
+        navigation?.navigate("Add Photo", {
+          isEdit: true,
+          imageURL: imgURL,
+        });
+      })
+      .catch((error) => {
+        console?.log(error);
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
 
   useEffect(() => {

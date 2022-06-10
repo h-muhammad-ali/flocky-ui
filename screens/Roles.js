@@ -1,18 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import Constants from "expo-constants";
+import InfoDialog from "../components/InfoDialog";
 import { Ionicons } from "@expo/vector-icons";
+import { useDispatch, useSelector } from "react-redux";
+import { setRole } from "../redux/ride/rideActions";
+import { resetLocationState } from "../redux/locations/locationsActions";
+import { useFocusEffect } from "@react-navigation/native";
+import ErrorDialog from "../components/ErrorDialog";
 
 const Roles = ({ navigation }) => {
+  const dispatch = useDispatch();
+  const { source, destination, wayPoints, overview_polyline } = useSelector(
+    (state) => state?.locations
+  );
+  const [hitcherTip, setHitcherTip] = useState(false);
+  const [patronTip, setPatronTip] = useState(false);
+  const [secret, showSecret] = useState(false);
+  useFocusEffect(
+    React.useCallback(() => {
+      if (
+        source !== null ||
+        destination !== null ||
+        wayPoints?.length !== 0 ||
+        overview_polyline !== ""
+      )
+        dispatch(resetLocationState());
+    }, [])
+  );
   return (
     <View style={styles?.container}>
       <View style={styles?.title}>
-        <Text style={styles?.titleText}>Choose your Role</Text>
+        <Text style={styles?.titleText}>
+          Choo<Text onPress={() => showSecret(true)}>s</Text>e your Role
+        </Text>
       </View>
       <View style={styles?.mainBody}>
         <View>
           <TouchableOpacity
-            onPress={() => navigation?.navigate("WhereTo", { isPatron: false })}
+            onPress={() => {
+              dispatch(setRole("H"));
+              navigation?.navigate("WhereTo", { isPatron: false });
+            }}
           >
             <Image
               source={require("../assets/flocky-assets/hitcher.png")}
@@ -20,7 +49,13 @@ const Roles = ({ navigation }) => {
             />
             <View style={styles?.imageContainer}>
               <Text style={styles?.roles}>Hitcher</Text>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  setHitcherTip(
+                    "A user who wants to avail a free ride from his colleagues."
+                  )
+                }
+              >
                 <Ionicons name="help-circle" size={20} color="black" />
               </TouchableOpacity>
             </View>
@@ -28,7 +63,10 @@ const Roles = ({ navigation }) => {
         </View>
         <View>
           <TouchableOpacity
-            onPress={() => navigation?.navigate("WhereTo", { isPatron: true })}
+            onPress={() => {
+              dispatch(setRole("P"));
+              navigation?.navigate("WhereTo", { isPatron: true });
+            }}
           >
             <Image
               source={require("../assets/flocky-assets/patron.png")}
@@ -36,12 +74,35 @@ const Roles = ({ navigation }) => {
             />
             <View style={styles?.imageContainer}>
               <Text style={styles?.roles}>Patron</Text>
-              <TouchableOpacity>
+              <TouchableOpacity
+                onPress={() =>
+                  setPatronTip(
+                    "A user who is willing to offer his conveyance to commute along with his colleagues."
+                  )
+                }
+              >
                 <Ionicons name="help-circle" size={20} color="black" />
               </TouchableOpacity>
             </View>
           </TouchableOpacity>
         </View>
+      </View>
+      <View>
+        <ErrorDialog
+          visible={!!patronTip || !!hitcherTip}
+          errorHeader={!!hitcherTip ? "A Hitcher..." : "A Patron..."}
+          errorDescription={!!hitcherTip ? hitcherTip : patronTip}
+          clearError={() => {
+            !!hitcherTip ? setHitcherTip("") : setPatronTip("");
+          }}
+          buttonText={"Got it!"}
+        />
+        <InfoDialog
+          visible={secret}
+          onDisappear={() => {
+            showSecret(false);
+          }}
+        />
       </View>
     </View>
   );

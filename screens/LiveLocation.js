@@ -38,7 +38,7 @@ const LiveLocation = ({ navigation, route }) => {
     setDestinationState((state) => ({ ...state, ...data }));
 
   useEffect(() => {
-    const docId = 37; //route.params?.id here
+    const docId = route.params?.id;
     const ref = doc(firestore, "live-coordinates", `${docId}`);
     const unsubscribe = onSnapshot(
       ref,

@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import Header from "../components/Header";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,61 +16,77 @@ import AddVehicleDialog from "../components/AddVehicleDialog";
 import Button from "../components/Button";
 import ErrorDialog from "../components/ErrorDialog";
 import Checkbox from "expo-checkbox";
+import { useSelector, useDispatch } from "react-redux";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import { setRideID } from "../redux/ride/rideActions";
 
+let apiCancelToken;
 const RideDetails = ({ navigation }) => {
-  const dummyVehicleDetails = [
-    {
-      id: 1,
-      model: "CR-V",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "car",
-      name: "Honda CR-V",
-    },
-    {
-      id: 2,
-      model: "CR-V",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "car",
-      name: "Honda CR-V",
-    },
-    {
-      id: 3,
-      model: "CR-V",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "car",
-      name: "Honda CR-V",
-    },
-    {
-      id: 4,
-      model: "CR-V",
-      make: "Honda",
-      plateNumber: "LXW 1234",
-      color: "Red",
-      year: "2017",
-      type: "car",
-      name: "Honda CR-V",
-    },
-  ];
+  const dispatch = useDispatch();
+  const { source, destination, wayPoints, overview_polyline } = useSelector(
+    (state) => state?.locations
+  );
+  const { jwt } = useSelector((state) => state?.currentUser);
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const [departureTime, setDepartureTime] = useState(
     addMinutes(new Date(), 20)
   );
+  const [loading, setLoading] = useState(false);
   const [seatsCount, setSeatsCount] = useState(1);
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(null);
-  const [vehicle, setVehicle] = useState(dummyVehicleDetails);
+  const [vehicles, setVehicles] = useState([{ id: 1, name: "Honda City" }]);
+  const [vehicleID, setVehicleID] = useState(0);
   const [show, setShow] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [error, setError] = useState("");
   const [isChecked, setChecked] = useState(false);
+  const [vehicleAdded, setVehicleAdded] = useState(true);
+  const SCREEN_HEIGHT = useWindowDimensions().height;
+
+  useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
+    const getAllVehicles = () => {
+      if (vehicleAdded) {
+        setLoading(true);
+        axios
+          .get(`${BASE_URL}/vehicle`, {
+            timeout: 5000,
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          })
+          .then((response) => {
+            setVehicles(response?.data);
+          })
+          .catch((error) => {
+            if (!connectionStatus) {
+              setError("No Internet connection!");
+            } else if (error?.response) {
+              setError(
+                `${error?.response?.data}. Status Code: ${error?.response?.status}`
+              );
+            } else if (error?.request) {
+              setError("Server not reachable! Can't get your vehicles.");
+            } else if (axios.isCancel(error)) {
+              console.log(error?.message);
+            } else {
+              console.log(error);
+            }
+          })
+          .finally(() => {
+            setVehicleAdded(false);
+            setLoading(false);
+          });
+      }
+    };
+    getAllVehicles();
+    return () =>
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
+  }, [vehicleAdded, connectionStatus]);
 
   const showToast = (text) => {
     ToastAndroid.show(text, ToastAndroid.LONG);
@@ -105,9 +122,82 @@ const RideDetails = ({ navigation }) => {
     return new Date(date.getTime() + minutes * 60000);
   }
 
+  const postRide = () => {
+    setLoading(true);
+    const data = {
+      pickup_location: {
+        coordinates: {
+          latitude: source?.coords?.lat,
+          longitude: source?.coords?.lng,
+        },
+        formatted_address: source?.formatted_address,
+        place_id: source?.place_id,
+      },
+      dropoff_location: {
+        coordinates: {
+          latitude: destination?.coords?.lat,
+          longitude: destination?.coords?.lng,
+        },
+        formatted_address: destination?.formatted_address,
+        place_id: destination?.place_id,
+      },
+      way_points: wayPoints?.map((wayPoint, index) => ({
+        coordinates: {
+          latitude: wayPoint?.coords?.lat,
+          longitude: wayPoint?.coords?.lng,
+        },
+        formatted_address: wayPoint?.formatted_address,
+        place_id: wayPoint?.place_id,
+      })),
+      overview_polyline: overview_polyline,
+      start_time: departureTime,
+      vehicle_id: vehicleID,
+      no_of_seats: seatsCount,
+      same_gender: isChecked,
+    };
+    axios
+      .post(`${BASE_URL}/ride/patron/post`, data, {
+        timeout: 5000,
+        headers: {
+          Authorization: `Bearer ${jwt}`,
+        },
+      })
+      .then((response) => {
+        console?.log(response.data);
+        dispatch(setRideID(response?.data?.ride_id));
+      })
+      .catch((error) => {
+        if (!connectionStatus) {
+          setError("No Internet connection!");
+        } else if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles?.container}>
-      <Header text="Ride Details" navigation={() => navigation?.goBack()} />
+      <Header
+        text="Ride Details"
+        navigation={() => navigation?.goBack()}
+        isBackButtonVisible={true}
+      />
       <View style={styles?.timePickerContainer}>
         <Text style={styles?.containerTitle}>When?</Text>
         <View style={styles?.timePickerSubContainer}>
@@ -148,12 +238,15 @@ const RideDetails = ({ navigation }) => {
             style={styles?.dropdown}
             open={vehicleOpen}
             value={vehicleValue}
-            items={vehicle}
+            items={vehicles}
             setValue={setVehicleValue}
-            setItems={setVehicle}
+            setItems={setVehicles}
             setOpen={setVehicleOpen}
             placeholder="Select Vehicle"
             placeholderStyle={styles?.placeholderStyles}
+            onSelectItem={(item) => {
+              setVehicleID(item?.id);
+            }}
           />
         </View>
         <TouchableOpacity
@@ -165,7 +258,11 @@ const RideDetails = ({ navigation }) => {
           <Text style={styles?.addVehicleText}>Add another Vehicle</Text>
           <Ionicons name="add-circle-outline" color={"white"} size={20} />
         </TouchableOpacity>
-        <AddVehicleDialog visible={showDialog} setVisibility={setShowDialog} />
+        <AddVehicleDialog
+          setVehicleAdded={setVehicleAdded}
+          visible={showDialog}
+          setVisibility={setShowDialog}
+        />
       </View>
       <View style={styles?.availableSeatsContainer}>
         <Text style={styles?.containerTitle}>Available Seats</Text>
@@ -183,7 +280,7 @@ const RideDetails = ({ navigation }) => {
             adjustsFontSizeToFit
             style={[
               styles?.availableSeatsCount,
-              { fontSize: 0.15 * useWindowDimensions()?.height },
+              { fontSize: 0.15 * SCREEN_HEIGHT },
             ]}
           >
             {seatsCount}
@@ -228,7 +325,7 @@ const RideDetails = ({ navigation }) => {
               showToast(
                 "Too short! Spare atleast 15 minutes to find you a ride."
               );
-            else navigation?.navigate("RidePosted");
+            else postRide();
           }}
         />
       </View>

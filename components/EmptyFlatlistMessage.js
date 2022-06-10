@@ -43,6 +43,9 @@ const EmptyFlatlistMessage = ({
         <>
           <Entypo name="dropbox" size={SCREEN_WIDTH / 1.8} color="grey" />
           <Text style={styles?.text}>Nothing to Show in List!</Text>
+          <Text style={styles?.subText}>
+            `Pull to Refresh` to see updated content.
+          </Text>
         </>
       )}
     </View>
@@ -61,6 +64,11 @@ const styles = StyleSheet.create({
     fontFamily: "NunitoSans-Regular",
     fontSize: SCREEN_WIDTH / 18,
     color: "grey",
+  },
+  subText: {
+    fontFamily: "NunitoSans-SemiBold",
+    fontSize: SCREEN_WIDTH / 25,
+    color: "#5188E3",
   },
   button: {
     backgroundColor: "#5188E3",

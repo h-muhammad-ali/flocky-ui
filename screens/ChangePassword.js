@@ -1,8 +1,19 @@
-import { StyleSheet, Text, View, TextInput } from "react-native";
-import React from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
+import React, { useState } from "react";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
+import { useSelector } from "react-redux";
+import jwt_decode from "jwt-decode";
 
 const ChangePassword = ({ navigation }) => {
   const {
@@ -15,17 +26,64 @@ const ChangePassword = ({ navigation }) => {
       password: "",
     },
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const { jwt } = useSelector((state) => state?.currentUser);
+  let decoded;
+  decoded = jwt_decode(jwt);
+
   const onSubmit = (data) => {
-    console.log("data", data);
-    reset();
-    navigation?.navigate("Reset Password");
+    const userData = {
+      email: decoded?.email,
+      password: data?.password,
+    };
+    setLoading(true);
+    axios
+      .post(`${BASE_URL}/auth/signin`, userData, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        reset();
+        navigation?.navigate("Reset Password", {
+          mode: "change",
+        });
+      })
+      .catch((error) => {
+        if (error?.response) {
+          if (error?.response?.status === 404) {
+            setError("Incorrect Password!");
+          } else {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          }
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
-      <Header text="Change Password" navigation={() => navigation?.goBack()} />
+      <Header
+        text="Change Password"
+        navigation={() => navigation?.goBack()}
+        isBackButtonVisible={true}
+      />
       <Text style={styles?.label}>Enter Current Password</Text>
       {errors?.password && (
-        <Text style={styles.error}>{errors?.password?.message}</Text>
+        <Text style={styles?.error}>{errors?.password?.message}</Text>
       )}
       <Controller
         name="password"
@@ -48,6 +106,16 @@ const ChangePassword = ({ navigation }) => {
         )}
       />
       <Button text="Continue" onPress={handleSubmit(onSubmit)} />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
     </View>
   );
 };

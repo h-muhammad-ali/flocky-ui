@@ -3,12 +3,25 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Constants from "expo-constants";
 
-const Header = ({ text, navigation, isCancel, onCancel }) => {
+const Header = ({
+  text,
+  navigation,
+  isCancel,
+  onCancel,
+  isBackButtonVisible,
+}) => {
   return (
     <View style={styles?.container}>
-      <TouchableOpacity style={styles?.backArrow} onPress={navigation}>
-        <Ionicons name="arrow-back-outline" size={30} />
-      </TouchableOpacity>
+      {isBackButtonVisible ? (
+        <TouchableOpacity style={styles?.backArrow} onPress={navigation}>
+          <Ionicons name="arrow-back-outline" size={30} />
+        </TouchableOpacity>
+      ) : (
+        <>
+          <View style={{ marginLeft: 30 }}></View>
+        </>
+      )}
+
       <View style={styles?.title}>
         <Text
           style={[

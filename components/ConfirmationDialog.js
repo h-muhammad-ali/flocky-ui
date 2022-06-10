@@ -1,27 +1,31 @@
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import React from "react";
 import Modal from "react-native-modal";
 
-const ErrorDialog = ({
+const ConfirmationDialog = ({
   visible,
-  errorHeader,
-  errorDescription,
-  clearError,
-  isRetry,
-  buttonText,
+  heading,
+  body,
+  positiveHandler,
+  negativeHandler,
 }) => {
-  const handleOK = () => {
-    clearError();
-  };
   return (
     <View style={styles?.container}>
       <Modal isVisible={visible}>
         <View style={styles?.modal}>
-          <Text style={styles?.header}>{errorHeader}</Text>
-          <Text style={styles?.description}>{errorDescription}</Text>
-          <TouchableOpacity onPress={handleOK} style={styles?.buttonContainer}>
-            <Text style={styles?.buttonText}>
-              {isRetry ? "Retry!" : !!buttonText ? buttonText : "Okay"}
-            </Text>
+          <Text style={styles?.header}>{heading}</Text>
+          <Text style={styles?.description}>{body}</Text>
+          <TouchableOpacity
+            onPress={positiveHandler}
+            style={styles?.buttonContainer}
+          >
+            <Text style={styles?.buttonText}>Yes</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={negativeHandler}
+            style={styles?.buttonContainer}
+          >
+            <Text style={styles?.buttonText}>No</Text>
           </TouchableOpacity>
         </View>
       </Modal>
@@ -29,7 +33,7 @@ const ErrorDialog = ({
   );
 };
 
-export default ErrorDialog;
+export default ConfirmationDialog;
 
 const styles = StyleSheet.create({
   container: {
@@ -46,6 +50,8 @@ const styles = StyleSheet.create({
     color: "#5188E3",
     fontWeight: "600",
     fontSize: 20,
+    textAlign: "center",
+    marginVertical: 10,
   },
   description: {
     fontFamily: "Kanit-Regular",

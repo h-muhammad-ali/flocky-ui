@@ -36,9 +36,16 @@ const SignIn = ({ navigation }) => {
   const onSubmit = (data) => {
     setLoading(true);
     axios
-      .post(`${BASE_URL}/auth/signin`, data, {
-        timeout: 5000,
-      })
+      .post(
+        `${BASE_URL}/auth/signin`,
+        {
+          email: data?.email.toLowerCase(),
+          password: data?.password,
+        },
+        {
+          timeout: 5000,
+        }
+      )
       .then((response) => {
         dispatch(setCurrentUserJWT(response?.data));
         reset();
@@ -57,29 +64,6 @@ const SignIn = ({ navigation }) => {
       .finally(() => {
         setLoading(false);
       });
-    // console.log("data", data);
-    // if (data?.email === "user@gmail.com") {
-    //   dispatch(setCurrentUserID(1));
-    // }
-    // if (data?.email === "user1@gmail.com") {
-    //   dispatch(setCurrentUserID(2));
-    // }
-    // if (data?.email === "user@gmail.com" || data?.email === "user1@gmail.com") {
-    //   navigation?.navigate("User Stack");
-    // }
-    // if (data?.email === "admin@gmail.com") {
-    //   navigation?.navigate("User Stack", {
-    //     screen: "User Panel",
-    //     params: {
-    //       screen: "Roles",
-    //       params: { isAdmin: true },
-    //     },
-    //   });
-    // }
-    // if (data?.email === "flocky@gmail.com") {
-    //   navigation?.navigate("Companies Management");
-    // }
-    // reset();
   };
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");

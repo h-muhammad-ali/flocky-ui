@@ -17,12 +17,15 @@ import {
 } from "firebase/firestore";
 import { useSelector } from "react-redux";
 import { LogBox } from "react-native";
+import ErrorDialog from "../components/ErrorDialog";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
 const ChatScreen = ({ navigation, route }) => {
-  const { id } = useSelector((state) => state?.currentUser);
+  const { rideID, role } = useSelector((state) => state?.ride);
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const [messages, setMessages] = useState([]);
+  const [error, setError] = useState("");
   useEffect(() => {
     setMessages([]);
   }, []);
@@ -46,7 +49,7 @@ const ChatScreen = ({ navigation, route }) => {
               fontWeight: "700",
             }}
           >
-            Muhammad
+            {route.params?.name}
           </Text>
         </View>
       ),
@@ -54,8 +57,8 @@ const ChatScreen = ({ navigation, route }) => {
   }, [navigation]);
 
   useLayoutEffect(() => {
-    const sentTo = id === 1 ? 2 : 1;
-    const sentBy = sentTo === 1 ? 2 : 1;
+    const sentTo = role === "P" ? route.params?.id : rideID;
+    const sentBy = role === "P" ? rideID : route.params?.id;
     const docId =
       sentTo > sentBy ? sentBy + "-" + sentTo : sentTo + "-" + sentBy;
     const messagesRef = collection(firestore, "chats", docId, "messages");
@@ -71,23 +74,32 @@ const ChatScreen = ({ navigation, route }) => {
     return unsubscribe;
   }, [route]);
 
-  const onSend = useCallback(async (messages = []) => {
-    const msg = messages[0];
-    const msgObj = {
-      ...msg,
-      sentBy: id,
-      sentTo: id === 1 ? 2 : 1,
-    };
-    setMessages((previousMessages) =>
-      GiftedChat.append(previousMessages, msgObj)
-    );
-    const docId =
-      msgObj?.sentTo > msgObj?.sentBy
-        ? msgObj?.sentBy + "-" + msgObj?.sentTo
-        : msgObj?.sentTo + "-" + msgObj?.sentBy;
-    const messagesRef = collection(firestore, "chats", docId, "messages");
-    await addDoc(messagesRef, { ...msgObj, createdAt: serverTimestamp() });
-  }, []);
+  const onSend = useCallback(
+    async (messages = []) => {
+      if (connectionStatus) {
+        const sentTo = role === "P" ? route.params?.id : rideID;
+        const sentBy = role === "P" ? rideID : route.params?.id;
+        const msg = messages[0];
+        const msgObj = {
+          ...msg,
+          sentBy: sentBy,
+          sentTo: sentTo,
+        };
+        setMessages((previousMessages) =>
+          GiftedChat.append(previousMessages, msgObj)
+        );
+        const docId =
+          msgObj?.sentTo > msgObj?.sentBy
+            ? msgObj?.sentBy + "-" + msgObj?.sentTo
+            : msgObj?.sentTo + "-" + msgObj?.sentBy;
+        const messagesRef = collection(firestore, "chats", docId, "messages");
+        await addDoc(messagesRef, { ...msgObj, createdAt: serverTimestamp() });
+      } else {
+        setError("Can't send Message! No Internet Connection.");
+      }
+    },
+    [connectionStatus]
+  );
 
   return (
     <View style={{ flex: 1, marginBottom: 10 }}>
@@ -95,8 +107,10 @@ const ChatScreen = ({ navigation, route }) => {
         messages={messages}
         onSend={(messages) => onSend(messages)}
         user={{
-          _id: id,
-          avatar: "https://placeimg.com/140/140/any",
+          _id: role === "P" ? rideID : route.params?.id,
+          avatar: !!route.params?.imgURL
+            ? route.params?.imgURL
+            : "https://firebasestorage.googleapis.com/v0/b/flocky-2716.appspot.com/o/user_unknown.png?alt=media&token=65beea94-11e7-407b-ae25-fd33e4f0c7b3",
         }}
         showUserAvatar
         multiline={false}
@@ -135,7 +149,17 @@ const ChatScreen = ({ navigation, route }) => {
           />
         )}
       />
-      <KeyboardAvoidingView behavior={"position"} keyboardVerticalOffset={3} />
+      <View>
+        <ErrorDialog
+          visible={!!error}
+          errorHeader={"Error!"}
+          errorDescription={error}
+          clearError={() => {
+            setError("");
+          }}
+        />
+      </View>
+      <KeyboardAvoidingView behavior={"position"} />
     </View>
   );
 };

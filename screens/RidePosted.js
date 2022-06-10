@@ -22,7 +22,11 @@ const RidePosted = ({ navigation }) => (
       <Button
         text="Alright!"
         onPress={() => {
-          navigation?.navigate("MatchingRidesPatron");
+          // navigation?.navigate("MatchingRidesPatron");
+          navigation.reset({
+            index: 0,
+            routes: [{ name: "MatchingRidesPatron" }],
+          });
         }}
       />
     </View>

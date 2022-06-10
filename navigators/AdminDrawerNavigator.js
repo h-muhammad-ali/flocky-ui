@@ -11,6 +11,8 @@ const AdminDrawerNavigator = () => {
   return (
     <Drawer.Navigator
       initialRouteName="Admin Panel"
+      defaultStatus="closed"
+      useLegacyImplementation={true}
       screenOptions={({ route }) => ({
         headerShown: false,
         drawerIcon: ({ focused, color, size }) => {

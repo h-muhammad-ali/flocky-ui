@@ -161,6 +161,7 @@ const Map = ({ navigation, route }) => {
         <Header
           text="Select Custom Location"
           navigation={() => navigation?.navigate("SelectLocation")}
+          isBackButtonVisible={true}
         />
       </View>
       <View style={styles?.marker}>

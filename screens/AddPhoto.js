@@ -11,20 +11,33 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import Button from "../components/Button";
 import * as ImagePicker from "expo-image-picker";
-import { getStorage, getDownloadURL } from "firebase/storage";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
+import { storage } from "../config/firebase";
+import {
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from "firebase/storage";
+import { useDispatch } from "react-redux";
+import { setCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
-const storage = getStorage();
 const AddPhoto = ({ navigation, route }) => {
-  const [image, setImage] = useState(null);
+  const [image, setImage] = useState("");
+  const [imgURL, setImgURL] = useState("");
+  const [goBackConfirmation, setGoBackConfirmation] = useState(false);
+  const [action, setAction] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const { jwt } = useSelector((state) => state?.currentUser);
-  const showToast = () => {
-    ToastAndroid.show("User info updated successfully!", ToastAndroid?.LONG);
+  const dispatch = useDispatch();
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid?.LONG);
   };
   const pickImage = async () => {
     let result = await ImagePicker?.launchImageLibraryAsync({
@@ -38,6 +51,7 @@ const AddPhoto = ({ navigation, route }) => {
     }
   };
   async function uploadImageAsync(uri) {
+    setUploading(true);
     const blob = await new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
       xhr.onload = function () {
@@ -51,38 +65,77 @@ const AddPhoto = ({ navigation, route }) => {
       xhr.open("GET", uri, true);
       xhr.send(null);
     });
-    const ref = storage().ref().child(`/userProfileImages/${Date?.now()}`);
-    const uploadTask = ref.put(blob);
-    uploadTask?.on(
+    const storageRef = ref(storage, `userProfileImages/${Date?.now()}`);
+    const uploadTask = uploadBytesResumable(storageRef, blob);
+    uploadTask.on(
       "state_changed",
       (snapshot) => {
         const progress =
-          (snapshot?.bytesTransferred / snapshot?.totalBytes) * 100;
-        console?.log("Upload is " + progress + "% done");
+          (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        console.log("Upload is " + progress + "% done");
+        switch (snapshot.state) {
+          case "paused":
+            console.log("Upload is paused");
+            break;
+          case "running":
+            console.log("Upload is running");
+            break;
+        }
       },
       (error) => {
-        alert("Error in uploading image");
+        blob.close();
+        setUploading(false);
+        switch (error.code) {
+          case "storage/unauthorized":
+            setError(
+              "You don't have permission to access the object. firebaseError"
+            );
+            break;
+          case "storage/unknown":
+            setError(`Unknown error occurred. ${error?.serverResponse}`);
+            break;
+          default:
+            setError(`Unknown error occurred. ${error?.serverResponse}`);
+        }
       },
       () => {
         blob.close();
-        getDownloadURL(uploadTask?.snapshot?.ref).then((downloadURL) => {
-          console?.log("File available at", downloadURL);
+        setUploading(false);
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          console.log("File available at", downloadURL);
+          setImgURL(downloadURL);
         });
       }
     );
   }
-  const editData = (updatedData) => {
-    setLoading(true);
+
+  const removePhoto = () => {
+    setUploading(true);
     axios
-      .put(`${BASE_URL}/account/user/details/update`, updatedData, {
+      .delete(`${BASE_URL}/account/user/profile-picture/delete`, {
         timeout: 5000,
         headers: {
           Authorization: `Bearer ${jwt}`,
         },
       })
-      .then((response) => {
-        showToast();
-        navigation?.navigate("Roles");
+      .then(() => {
+        let imagePath = String(route.params?.imageURL);
+        let name = imagePath.substring(
+          imagePath.indexOf("%2F") + 3,
+          imagePath.indexOf("?")
+        );
+
+        const deleteRef = ref(storage, `userProfileImages/${name}`);
+        deleteObject(deleteRef)
+          .then(() => {
+            console?.log("Successful!");
+            showToast("Photo updated successfully!");
+            navigation?.navigate("Roles");
+          })
+          .catch((error) => {
+            console?.log(error);
+            setError(error);
+          });
       })
       .catch((error) => {
         console?.log(error);
@@ -97,22 +150,75 @@ const AddPhoto = ({ navigation, route }) => {
         }
       })
       .finally(() => {
-        setLoading(false);
+        setUploading(false);
       });
   };
-  const uploadOnPressHandler = () => {
-    const dataObj = { imageURI: image };
 
-    // here upload the image on firebase and save/update the returned link in database via api.
-    // if image is not updated by the user, dont call api for no reason!
-
-    if (route.params?.isEdit) editData(route.params?.updatedData);
-    if (!route.params?.isEdit) navigation?.navigate("LogIn");
-  };
+  useEffect(() => {
+    if (imgURL) {
+      const updatedData = { profile_picture: imgURL };
+      axios
+        .put(`${BASE_URL}/account/user/profile-picture/update`, updatedData, {
+          timeout: 5000,
+          headers: {
+            Authorization: `Bearer ${
+              route.params?.isEdit ? jwt : route.params?.jwt
+            }`,
+          },
+        })
+        .then(() => {
+          if (route.params?.isEdit) {
+            showToast("Photo updated successfully!");
+            navigation?.navigate("Roles");
+          } else if (route.params?.isAdmin) {
+            showToast("Photo uploaded successfully!");
+            navigation.reset({
+              index: 1,
+              routes: [
+                { name: "MainMenu" },
+                {
+                  name: "VerificationFinished",
+                },
+              ],
+            });
+          } else {
+            showToast("Photo uploaded successfully!");
+            dispatch(setCurrentUserJWT(route.params?.jwt));
+          }
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Network Error! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {});
+    }
+  }, [imgURL]);
 
   useEffect(() => {
     if (route.params?.isEdit) setImage(route.params?.imageURL);
   }, []);
+
+  useEffect(
+    () =>
+      navigation.addListener("beforeRemove", (e) => {
+        if (imgURL) {
+          //  if (!route.params?.isAdmin || imgURL) {
+          return;
+        }
+        e.preventDefault();
+        setAction(e.data.action);
+        setGoBackConfirmation(true);
+      }),
+    [navigation, imgURL]
+  );
 
   if (loading) {
     return (
@@ -134,20 +240,30 @@ const AddPhoto = ({ navigation, route }) => {
             Helps Patrons and Hitchers to Identify Rides
           </Text>
         )}
+
         {image ? (
           <View style={styles?.imageContainer}>
-            <Image source={{ uri: image }} style={styles?.image} />
+            {uploading ? (
+              <ActivityIndicator size="large" color="#5188E3" />
+            ) : (
+              <Image source={{ uri: image }} style={styles?.image} />
+            )}
           </View>
         ) : (
           <Ionicons name="person-circle" size={200} />
         )}
-        <TouchableOpacity style={styles?.addPhotoContainer} onPress={pickImage}>
+        <TouchableOpacity
+          disabled={uploading}
+          style={styles?.addPhotoContainer}
+          onPress={pickImage}
+        >
           <Text style={styles?.addPhotoText}>Add Photo</Text>
         </TouchableOpacity>
         <TouchableOpacity
+          disabled={!image || uploading}
           style={styles?.skipContainer}
           onPress={() => {
-            setImage(null);
+            setImage("");
           }}
         >
           <Text style={styles?.skipText}>Remove Photo</Text>
@@ -155,23 +271,46 @@ const AddPhoto = ({ navigation, route }) => {
       </View>
       <View>
         <Button
-          isDisabled={!image}
+          isDisabled={uploading || (!image && !route?.params.isEdit)}
           text={route.params?.isEdit ? "Update Photo" : "Continue"}
           onPress={
             route.params?.isEdit
               ? () => {
-                  uploadOnPressHandler();
+                  if (route.params?.imageURL !== image) {
+                    if (route.params?.imageURL && !image) {
+                      removePhoto();
+                    } else uploadImageAsync(image);
+                  } else {
+                    navigation?.navigate("Roles");
+                  }
                 }
               : route.params?.isAdmin
               ? () => {
-                  navigation?.navigate("VerificationFinished");
+                  if (image) {
+                    uploadImageAsync(image);
+                  } else {
+                    navigation.reset({
+                      index: 1,
+                      routes: [
+                        { name: "MainMenu" },
+                        {
+                          name: "VerificationFinished",
+                        },
+                      ],
+                    });
+                  }
                 }
               : () => {
-                  uploadOnPressHandler();
+                  if (image) {
+                    uploadImageAsync(image);
+                  } else {
+                    dispatch(setCurrentUserJWT(route.params?.jwt));
+                  }
                 }
           }
         />
         <TouchableOpacity
+          disabled={uploading}
           style={styles?.skipContainer}
           onPress={
             route.params?.isEdit
@@ -180,10 +319,18 @@ const AddPhoto = ({ navigation, route }) => {
                 }
               : route.params?.isAdmin
               ? () => {
-                  navigation?.navigate("VerificationFinished");
+                  navigation.reset({
+                    index: 1,
+                    routes: [
+                      { name: "MainMenu" },
+                      {
+                        name: "VerificationFinished",
+                      },
+                    ],
+                  });
                 }
               : () => {
-                  navigation?.navigate("LogIn");
+                  dispatch(setCurrentUserJWT(route.params?.jwt));
                 }
           }
         >
@@ -197,6 +344,17 @@ const AddPhoto = ({ navigation, route }) => {
           errorDescription={error}
           clearError={() => {
             setError("");
+          }}
+        />
+        <ConfirmationDialog
+          visible={goBackConfirmation}
+          heading={"Wait!"}
+          body={"Are you sure you don't want to upload your profile photo?"}
+          positiveHandler={() => {
+            navigation?.dispatch(action);
+          }}
+          negativeHandler={() => {
+            setGoBackConfirmation(false);
           }}
         />
       </View>

@@ -1,5 +1,5 @@
 import React from "react";
-import { Image, StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { Image, StyleSheet, Text, View } from "react-native";
 import Contants from "expo-constants";
 import Button from "../components/Button";
 
@@ -25,7 +25,7 @@ const VerificationFinished = ({ navigation }) => {
         <Button
           text="Exit"
           onPress={() => {
-            navigation?.navigate("MainMenu");
+            navigation.goBack();
           }}
         />
       </View>

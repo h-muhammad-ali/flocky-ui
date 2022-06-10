@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -7,10 +7,15 @@ import {
   TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
+  ToastAndroid,
+  ActivityIndicator,
 } from "react-native";
 import Button from "../components/Button";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
+import axios from "axios";
+import { BASE_URL } from "../config/baseURL";
+import ErrorDialog from "../components/ErrorDialog";
 
 const AddCode = ({ navigation, route }) => {
   const {
@@ -23,13 +28,59 @@ const AddCode = ({ navigation, route }) => {
       code: "",
     },
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid?.SHORT);
+  };
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
     route?.params?.resetCode
-      ? navigation?.navigate("Reset Password")
-      : navigation?.navigate("AdminSignUp");
+      ? navigation?.navigate("Reset Password", {
+          code: data?.code,
+          email: route.params?.email,
+        })
+      : navigation?.navigate("AdminSignUp", {
+          code: data?.code,
+        });
   };
+
+  const resendHandler = () => {
+    const data = {
+      email: route.params?.email,
+    };
+    setLoading(true);
+    axios
+      .post(`${BASE_URL}/auth/password/reset/token`, data, {
+        timeout: 5000,
+      })
+      .then((response) => {
+        reset();
+        showToast("Email Sent!");
+      })
+      .catch((error) => {
+        if (error?.response) {
+          setError(
+            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+          );
+        } else if (error?.request) {
+          setError("Network Error! Please try again later.");
+        } else {
+          console.log(error);
+        }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  };
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -66,11 +117,25 @@ const AddCode = ({ navigation, route }) => {
         </View>
         <View style={styles?.resendContainer}>
           <Text style={styles?.linkLabel}>Haven't received it? </Text>
-          <TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => {
+              resendHandler();
+            }}
+          >
             <Text style={styles?.link}>Resend!</Text>
           </TouchableOpacity>
         </View>
         <Button text="Verify" onPress={handleSubmit(onSubmit)} />
+        <View>
+          <ErrorDialog
+            visible={!!error}
+            errorHeader={"Error!"}
+            errorDescription={error}
+            clearError={() => {
+              setError("");
+            }}
+          />
+        </View>
       </View>
     </TouchableWithoutFeedback>
   );

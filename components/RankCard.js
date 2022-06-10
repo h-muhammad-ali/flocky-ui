@@ -1,12 +1,16 @@
 import React from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const RankCard = ({ name, ridesCount }) => {
+const RankCard = ({ name, ridesCount, imgURL }) => {
   return (
     <View style={styles.container}>
       <View style={styles.subContainer}>
-        <Ionicons name="person-circle" size={50} />
+        {imgURL ? (
+          <Image source={{ uri: imgURL }} style={styles?.image} />
+        ) : (
+          <Ionicons name="person-circle" size={50} />
+        )}
         <Text style={styles.name}>{name}</Text>
       </View>
       <View style={styles.ridesContainer}>
@@ -48,5 +52,12 @@ const styles = StyleSheet.create({
   name: {
     fontFamily: "Kanit-Regular",
     color: "black",
+  },
+  image: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginVertical: 7,
+    marginHorizontal: 5,
   },
 });

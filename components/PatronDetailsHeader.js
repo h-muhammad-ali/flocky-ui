@@ -8,10 +8,15 @@ const PatronDetailsHeader = ({
   filledSeats,
   availableSeats,
   showSeats,
+  imgURL,
 }) => {
   return (
     <View style={styles?.container}>
-      <Ionicons name="person-circle" size={100} color={"#5188E3"} />
+      {imgURL ? (
+        <Image source={{ uri: imgURL }} style={styles?.image} />
+      ) : (
+        <Ionicons name="person-circle" size={100} color={"#5188E3"} />
+      )}
       <View style={styles?.semiContainer}>
         <Text style={styles?.name}>{name}</Text>
         <Text style={styles?.nunitoSemiBold}>Rides Completed: {rides}</Text>
@@ -72,5 +77,12 @@ const styles = StyleSheet?.create({
     flexDirection: "row",
     alignItems: "center",
     flexWrap: "wrap",
+  },
+  image: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    marginVertical: 10,
+    marginHorizontal: 5,
   },
 });

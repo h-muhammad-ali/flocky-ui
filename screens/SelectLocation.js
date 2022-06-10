@@ -27,6 +27,7 @@ const SelectLocation = ({ navigation, route }) => {
             : "Enter Company Location"
         }
         navigation={() => navigation?.goBack()}
+        isBackButtonVisible={true}
       />
       <GooglePlacesAutocomplete
         placeholder={
@@ -101,18 +102,17 @@ const SelectLocation = ({ navigation, route }) => {
           <TouchableOpacity
             style={{ flex: 0.1 }}
             onPress={() => {
-              navigation?.navigate(
-                "Map",
-                route.params?.origin === "CompanyLocation"
-                  ? {
-                      origin: route?.params?.origin,
-                      company: route.params?.company,
-                      password: route.params?.password,
-                      email: route.params?.email,
-                      domain: route.params?.domain,
-                    }
-                  : { origin: route?.params?.origin }
-              );
+              route.params?.origin === "CompanyLocation"
+                ? navigation?.navigate("MapForCompanyLocation", {
+                    origin: route?.params?.origin,
+                    company: route.params?.company,
+                    password: route.params?.password,
+                    email: route.params?.email,
+                    domain: route.params?.domain,
+                  })
+                : navigation?.navigate("Map", {
+                    origin: route?.params?.origin,
+                  });
             }}
           >
             <Ionicons name="map" size={25} />

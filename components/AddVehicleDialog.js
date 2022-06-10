@@ -8,7 +8,7 @@ import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 
-const AddVehicleDialog = ({ visible, setVisibility }) => {
+const AddVehicleDialog = ({ setVehicleAdded, visible, setVisibility }) => {
   const [typeOpen, setTypeOpen] = useState(false);
   const [typeValue, setTypeValue] = useState(null);
   const [type, setType] = useState([
@@ -53,6 +53,7 @@ const AddVehicleDialog = ({ visible, setVisibility }) => {
       .then((response) => {
         console.log(response);
         setSubmittedData(data);
+        setVehicleAdded(true);
         setVisibility(false);
       })
       .catch((error) => {

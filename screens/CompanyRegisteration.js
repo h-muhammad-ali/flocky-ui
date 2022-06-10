@@ -36,7 +36,7 @@ const CompanyRegisteration = ({ navigation, route }) => {
       origin: "CompanyLocation",
       company: data?.company,
       password: data?.password,
-      email: data?.email,
+      email: data?.email.toLowerCase(),
       domain: data?.domain,
     });
   };
@@ -60,8 +60,9 @@ const CompanyRegisteration = ({ navigation, route }) => {
     >
       <View style={styles?.container}>
         <Header
-          text={route.params?.isEdit ? "Edit Profile" : "Company Registeration"}
+          text={"Company Registeration"}
           navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
         />
         <KeyboardAvoidingView behavior="padding">
           <Text style={styles?.label}>Institute/Organization</Text>
@@ -171,15 +172,7 @@ const CompanyRegisteration = ({ navigation, route }) => {
             )}
           />
         </KeyboardAvoidingView>
-        {route.params?.isEdit ? (
-          <>
-            <Button text="Update Profile" onPress={handleSubmit(onSubmit)} />
-          </>
-        ) : (
-          <>
-            <Button text="Continue" onPress={handleSubmit(onSubmit)} />
-          </>
-        )}
+        <Button text="Continue" onPress={handleSubmit(onSubmit)} />
       </View>
     </TouchableWithoutFeedback>
   );

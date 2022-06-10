@@ -1,12 +1,11 @@
-import React from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const HitcherCard = ({ onPress }) => {
+const HitcherCard = ({ name, onPress }) => {
   return (
     <View style={styles?.container}>
       <Text style={styles?.notification}>
-        A Hitcher appeard to ride with you.
+        <Text style={styles?.name}>{name}</Text> appeard to ride with you.
       </Text>
       <View style={styles?.showDetailsButton}>
         <TouchableOpacity onPress={onPress} style={{ flexDirection: "row" }}>
@@ -41,5 +40,9 @@ const styles = StyleSheet?.create({
     alignItems: "center",
     justifyContent: "flex-end",
     marginTop: 10,
+  },
+  name: {
+    color: "#5188E3",
+    fontFamily: "NunitoSans-SemiBold",
   },
 });

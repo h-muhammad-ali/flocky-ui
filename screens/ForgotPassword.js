@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View, TextInput, ActivityIndicator } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  ActivityIndicator,
+} from "react-native";
 import Header from "../components/Header";
 import Button from "../components/Button";
 import { useForm, Controller } from "react-hook-form";
@@ -34,6 +40,7 @@ const ForgotPassword = ({ navigation }) => {
         reset();
         navigation?.navigate("AddCode", {
           resetCode: true,
+          email: data?.email,
         });
       })
       .catch((error) => {
