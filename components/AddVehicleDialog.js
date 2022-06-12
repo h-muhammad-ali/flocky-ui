@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { StyleSheet, View, ActivityIndicator } from "react-native";
 import Dialog from "react-native-dialog";
 import { useForm, Controller } from "react-hook-form";
@@ -68,12 +68,13 @@ const AddVehicleDialog = ({ setVehicleAdded, visible, setVisibility }) => {
         }
       })
       .finally(() => {
+        setTypeValue(null);
         setLoading(false);
       });
   };
 
-  React.useEffect(() => {
-    if (formState.isSubmitSuccessful) {
+  useEffect(() => {
+    if (isSubmitSuccessful) {
       reset({ ...submittedData });
     }
   }, [formState, submittedData, reset]);
@@ -194,6 +195,7 @@ const AddVehicleDialog = ({ setVehicleAdded, visible, setVisibility }) => {
           label="Cancel"
           onPress={() => {
             reset();
+            setTypeValue(null);
             setVisibility(false);
           }}
         />
