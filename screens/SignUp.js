@@ -179,7 +179,7 @@ const SignUp = ({ navigation, route }) => {
         timeout: 5000,
       })
       .then((response) => {
-        setCompany(response?.data);
+        setCompany(response?.data ?? []);
       })
       .catch((error) => {
         if (error?.response) {

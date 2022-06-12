@@ -58,7 +58,7 @@ const RideDetails = ({ navigation }) => {
             },
           })
           .then((response) => {
-            setVehicles(response?.data);
+            setVehicles(response?.data ?? []);
           })
           .catch((error) => {
             if (!connectionStatus) {
