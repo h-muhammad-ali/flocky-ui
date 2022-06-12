@@ -36,7 +36,7 @@ const RideDetails = ({ navigation }) => {
   const [seatsCount, setSeatsCount] = useState(1);
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(null);
-  const [vehicles, setVehicles] = useState([{ id: 1, name: "Honda City" }]);
+  const [vehicles, setVehicles] = useState([]);
   const [vehicleID, setVehicleID] = useState(0);
   const [show, setShow] = useState(false);
   const [showDialog, setShowDialog] = useState(false);

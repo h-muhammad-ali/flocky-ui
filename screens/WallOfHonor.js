@@ -49,7 +49,7 @@ const WallOfHonor = ({ navigation }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          if (connectionStatus) setServerError(true);
+          setError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {
           console.log(error?.message);
         } else {
