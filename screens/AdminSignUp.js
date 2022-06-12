@@ -96,7 +96,7 @@ const AdminSignUp = ({ navigation, route }) => {
                 `${error?.response?.data}. Status Code: ${error?.response?.status}`
               );
             } else if (error?.request) {
-              setError("Network Error! Please try again later.");
+              setError("Server not reachable! Please try again later.");
             } else {
               console.log(error);
             }
@@ -108,7 +108,7 @@ const AdminSignUp = ({ navigation, route }) => {
           if (error?.response?.status === 500)
             setError(`Organization with this email is already registered.`);
         } else if (error?.request) {
-          setError(`Network Error! Please try again later.`);
+          setError(`Server not reachable! Please try again later.`);
         } else {
           console.log(error);
         }

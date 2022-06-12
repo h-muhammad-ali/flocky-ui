@@ -45,6 +45,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
   const [goBackError, setGoBackError] = useState("");
   const [loading, setLoading] = useState(false);
   const [cancel, setCancel] = useState(false);
+  const [retry, setRetry] = useState(false);
   const pairRide = () => {
     const data = {
       pickup: {
@@ -65,6 +66,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
       },
       threshold: radiusValue,
     };
+    console.log(data);
     axios
       .post(`${BASE_URL}/ride/hitcher/pair`, data, {
         timeout: 5000,
@@ -87,7 +89,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
             );
           }
         } else if (error?.request) {
-          setGoBackError("Network Error! Please try again later.");
+          setGoBackError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {
           console.log(error?.message);
         } else {
@@ -112,7 +114,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
         "API Request was cancelled because of component unmount."
       );
     };
-  }, []);
+  }, [retry]);
 
   return (
     <View style={styles?.container}>
@@ -171,7 +173,12 @@ const MatchingRidesHitcher = ({ navigation }) => {
                 Try again after sometime or change the radius to expand the area
                 for the search of patron.
               </Text>
-              <TouchableOpacity style={styles?.tryAgainButton}>
+              <TouchableOpacity
+                style={styles?.tryAgainButton}
+                onPress={() => {
+                  setRetry(!retry);
+                }}
+              >
                 <Text style={styles?.tryAgainText}>Search Again</Text>
               </TouchableOpacity>
             </View>

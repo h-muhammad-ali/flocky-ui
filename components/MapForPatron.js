@@ -62,42 +62,85 @@ const MapForPatron = ({ navigation, start, end }) => {
     getDirectionsForPatron();
   }, []);
 
+  const areCoordinatesAlmostEqual = (coords1, coords2) => {
+    const R = 6371000;
+    let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
+    let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
+
+    let a =
+      Math.pow(Math.sin(latDiff / 2), 2) +
+      Math.cos(coords1.lat * (Math.PI / 180)) *
+        Math.cos(coords2.lat * (Math.PI / 180)) *
+        Math.pow(Math.sin(longDiff / 2), 2);
+
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
   return (
     <View style={{ flex: 1 }}>
       <MapView ref={mapRef} style={styles?.mapView} initialRegion={region}>
-        {start ? (
-          <Marker
-            coordinate={{
-              latitude: start?.coords?.lat,
-              longitude: start?.coords?.lng,
-            }}
-            title="Hitcher Source"
-            description={start?.formatted_address}
-            identifier="hitcherSource"
-          >
-            <MaterialCommunityIcons
-              name="alpha-h-circle"
-              size={35}
-              color="black"
-            />
-          </Marker>
+        {start &&
+        source &&
+        areCoordinatesAlmostEqual(start?.coords, source?.coords) >= 20 ? (
+          <>
+            {start ? (
+              <Marker
+                coordinate={{
+                  latitude: start?.coords?.lat,
+                  longitude: start?.coords?.lng,
+                }}
+                title="Hitcher Source"
+                description={start?.formatted_address}
+                identifier="hitcherSource"
+              >
+                <MaterialCommunityIcons
+                  name="alpha-h-circle"
+                  size={35}
+                  color="black"
+                />
+              </Marker>
+            ) : (
+              <></>
+            )}
+            {source ? (
+              <Marker
+                coordinate={{
+                  latitude: source?.coords?.lat,
+                  longitude: source?.coords?.lng,
+                }}
+                title="Patron Source"
+                description={source?.formatted_address}
+                identifier="patronSource"
+              >
+                <MaterialIcons name="my-location" size={35} color="black" />
+              </Marker>
+            ) : (
+              <></>
+            )}
+          </>
         ) : (
-          <></>
-        )}
-        {source ? (
-          <Marker
-            coordinate={{
-              latitude: source?.coords?.lat,
-              longitude: source?.coords?.lng,
-            }}
-            title="Patron Source"
-            description={source?.formatted_address}
-            identifier="patronSource"
-          >
-            <MaterialIcons name="my-location" size={35} color="black" />
-          </Marker>
-        ) : (
-          <></>
+          <>
+            {start ? (
+              <Marker
+                coordinate={{
+                  latitude: start?.coords?.lat,
+                  longitude: start?.coords?.lng,
+                }}
+                title="Hitcher Source"
+                description={start?.formatted_address}
+                identifier="hitcherSource"
+              >
+                <MaterialCommunityIcons
+                  name="alpha-h-circle"
+                  size={35}
+                  color="black"
+                />
+              </Marker>
+            ) : (
+              <></>
+            )}
+          </>
         )}
         {wayPoints.length ? (
           wayPoints?.map((waypoint, index) => (
@@ -131,39 +174,67 @@ const MapForPatron = ({ navigation, start, end }) => {
         ) : (
           <></>
         )}
-        {end ? (
-          <Marker
-            coordinate={{
-              latitude: end?.coords?.lat,
-              longitude: end?.coords?.lng,
-            }}
-            title="Hitcher Destination"
-            description={end?.formatted_address}
-            identifier="hitcherDestination"
-          >
-            <MaterialCommunityIcons
-              name="hospital-marker"
-              size={35}
-              color="black"
-            />
-          </Marker>
+        {end &&
+        destination &&
+        areCoordinatesAlmostEqual(end?.coords, destination?.coords) >= 20 ? (
+          <>
+            {end ? (
+              <Marker
+                coordinate={{
+                  latitude: end?.coords?.lat,
+                  longitude: end?.coords?.lng,
+                }}
+                title="Hitcher Destination"
+                description={end?.formatted_address}
+                identifier="hitcherDestination"
+              >
+                <MaterialCommunityIcons
+                  name="hospital-marker"
+                  size={35}
+                  color="black"
+                />
+              </Marker>
+            ) : (
+              <></>
+            )}
+            {destination ? (
+              <Marker
+                coordinate={{
+                  latitude: destination?.coords?.lat,
+                  longitude: destination?.coords?.lng,
+                }}
+                title="Patron Destination"
+                description={destination?.formatted_address}
+                identifier="patronDestination"
+              >
+                <Entypo name="flag" size={35} color="black" />
+              </Marker>
+            ) : (
+              <></>
+            )}
+          </>
         ) : (
-          <></>
-        )}
-        {destination ? (
-          <Marker
-            coordinate={{
-              latitude: destination?.coords?.lat,
-              longitude: destination?.coords?.lng,
-            }}
-            title="Patron Destination"
-            description={destination?.formatted_address}
-            identifier="patronDestination"
-          >
-            <Entypo name="flag" size={35} color="black" />
-          </Marker>
-        ) : (
-          <></>
+          <>
+            {end ? (
+              <Marker
+                coordinate={{
+                  latitude: end?.coords?.lat,
+                  longitude: end?.coords?.lng,
+                }}
+                title="Hitcher Destination"
+                description={end?.formatted_address}
+                identifier="hitcherDestination"
+              >
+                <MaterialCommunityIcons
+                  name="hospital-marker"
+                  size={35}
+                  color="black"
+                />
+              </Marker>
+            ) : (
+              <></>
+            )}
+          </>
         )}
       </MapView>
       <TouchableOpacity style={styles?.fullScreen} onPress={navigation}>

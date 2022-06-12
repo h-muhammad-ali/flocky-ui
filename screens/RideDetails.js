@@ -155,6 +155,7 @@ const RideDetails = ({ navigation }) => {
       no_of_seats: seatsCount,
       same_gender: isChecked,
     };
+    console.log(data);
     axios
       .post(`${BASE_URL}/ride/patron/post`, data, {
         timeout: 5000,
@@ -174,7 +175,7 @@ const RideDetails = ({ navigation }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }

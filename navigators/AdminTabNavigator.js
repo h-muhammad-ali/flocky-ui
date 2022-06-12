@@ -19,13 +19,17 @@ const AdminTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 15 }}
               onPress={() => {
-                navigation?.navigate("User Stack", {
-                  screen: "User Panel",
-                  params: {
-                    screen: "Roles",
-                    params: { isAdmin: true },
-                  },
+                navigation?.reset({
+                  index: 0,
+                  routes: [{ name: "User Stack" }],
                 });
+                // navigation?.navigate("User Stack", {
+                //   screen: "User Panel",
+                //   params: {
+                //     screen: "Roles",
+                //     params: { isAdmin: true },
+                //   },
+                // });
               }}
             >
               <MaterialCommunityIcons

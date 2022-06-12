@@ -34,6 +34,7 @@ const ChatScreen = ({ navigation, route }) => {
       headerShown: true,
       headerBackTitleVisible: false,
       headerTintColor: "white",
+      headerTransparent: true,
       headerStyle: {
         backgroundColor: "#5188E3",
       },

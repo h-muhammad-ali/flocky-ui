@@ -103,7 +103,7 @@ const SignUp = ({ navigation, route }) => {
                 `${error?.response?.data}. Status Code: ${error?.response?.status}`
               );
             } else if (error?.request) {
-              setError("Network Error! Please try again later.");
+              setError("Server not reachable! Please try again later.");
             } else {
               console.log(error);
             }
@@ -116,7 +116,7 @@ const SignUp = ({ navigation, route }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }
@@ -154,7 +154,7 @@ const SignUp = ({ navigation, route }) => {
               `${error?.response?.data}. Status Code: ${error?.response?.status}`
             );
           } else if (error?.request) {
-            setError("Network Error! Please try again later.");
+            setError("Server not reachable! Please try again later.");
           } else if (axios.isCancel(error)) {
             console.log(error?.message);
           } else {
@@ -217,7 +217,11 @@ const SignUp = ({ navigation, route }) => {
       }}
     >
       <View style={styles.container}>
-        <Header text="Sign Up" navigation={() => navigation?.goBack()} />
+        <Header
+          text="Sign Up"
+          navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
+        />
         <KeyboardAvoidingView behavior="padding">
           <Text style={styles?.label}>Name</Text>
           {errors?.name && (

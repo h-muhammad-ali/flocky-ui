@@ -58,7 +58,7 @@ const ChangePassword = ({ navigation }) => {
             );
           }
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }

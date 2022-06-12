@@ -15,7 +15,7 @@ import { useSelector, useDispatch } from "react-redux";
 import ErrorDialog from "../components/ErrorDialog";
 import * as Location from "expo-location";
 import { firestore } from "../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import { LogBox } from "react-native";
 import * as TaskManager from "expo-task-manager";
 import BackgroundPermissionModal from "../components/BackgroundPermissionModal";
@@ -36,23 +36,17 @@ let lat;
 let long;
 let ride_id;
 LogBox.ignoreLogs(["Setting a timer"]);
-const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_FOR_LIVE_LOCATION";
+const LOCATION_TASK_NAME_PATRON =
+  "BACKGROUND_LOCATION_FOR_LIVE_LOCATION_PATRON";
 let apiCancelToken;
 
 const MatchingRidesPatron = ({ navigation }) => {
-  const dummyHitchers = [
-    {
-      id: 1,
-      name: "Suleman",
-    },
-    {
-      id: 2,
-      name: "Ahsan",
-    },
-  ];
+  const { rideID, rideStatus } = useSelector((state) => state?.ride);
+  ride_id = rideID;
   const [error, setError] = useState("");
   const [warning, setWarning] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fullScreenLoading, setFullScreenLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
   const [serverError, setServerError] = useState(false);
   const [hitchers, setHitchers] = useState([]); // useState([])
@@ -66,8 +60,6 @@ const MatchingRidesPatron = ({ navigation }) => {
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const { jwt } = useSelector((state) => state?.currentUser);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
-  const { rideID, rideStatus } = useSelector((state) => state?.ride);
-  ride_id = rideID;
   const isMounted = useMountedState();
   const dispatch = useDispatch();
   const { source, destination } = useSelector((state) => state?.locations);
@@ -125,12 +117,14 @@ const MatchingRidesPatron = ({ navigation }) => {
 
   useEffect(() => {
     const startBackgroundUpdate = async () => {
-      const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+      const isTaskDefined = TaskManager.isTaskDefined(
+        LOCATION_TASK_NAME_PATRON
+      );
       if (!isTaskDefined) {
         console.log("Task is not defined");
         return;
       }
-      Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
+      Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME_PATRON).then(
         (hasStarted) => {
           console?.log(hasStarted);
           if (hasStarted) {
@@ -139,7 +133,7 @@ const MatchingRidesPatron = ({ navigation }) => {
           }
         }
       );
-      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME_PATRON, {
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 2000,
         showsBackgroundLocationIndicator: true,
@@ -153,11 +147,13 @@ const MatchingRidesPatron = ({ navigation }) => {
 
     const stopBackgroundUpdate = async () => {
       const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-        LOCATION_TASK_NAME
+        LOCATION_TASK_NAME_PATRON
       );
       if (hasStarted && !isMounted()) {
-        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-        console.log("Location tracking stopped");
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME_PATRON);
+        const docId = ride_id;
+        await deleteDoc(doc(firestore, "live-coordinates", `${docId}`));
+        console.log("Patron Location tracking stopped");
       }
     };
     if (!requestGranted && showPermissionModal && openSettings) {
@@ -174,6 +170,17 @@ const MatchingRidesPatron = ({ navigation }) => {
         }
       });
     } else if (requestGranted && !showPermissionModal && !openSettings) {
+      console.log(
+        "MATCHING RIDE HITCHER => USEEFFECT => BEFORE ASSIGNING ID: ",
+        rideID,
+        ride_id
+      );
+      ride_id = rideID;
+      console.log(
+        "MATCHING RIDE HITCHER => USEEFFECT => AFTER ASSIGNING ID: ",
+        rideID,
+        ride_id
+      );
       startBackgroundUpdate();
     }
     return () => stopBackgroundUpdate();
@@ -197,17 +204,19 @@ const MatchingRidesPatron = ({ navigation }) => {
 
   const stopBackgroundUpdate = async () => {
     const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-      LOCATION_TASK_NAME
+      LOCATION_TASK_NAME_PATRON
     );
     if (hasStarted && !isMounted()) {
-      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-      console.log("Location tracking stopped");
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME_PATRON);
+      const docId = ride_id;
+      await deleteDoc(doc(firestore, "live-coordinates", `${docId}`));
+      console.log("Patron Location tracking stopped");
     }
   };
 
   //ride status can be P(in progress), M(matching), C(cancelled), F(finished)
   const changeRideStatus = (todo) => {
-    setLoading(true);
+    setFullScreenLoading(true);
     axios
       .put(`${BASE_URL}/ride/patron/${rideID}/${todo}`, null, {
         timeout: 5000,
@@ -240,13 +249,13 @@ const MatchingRidesPatron = ({ navigation }) => {
         }
       })
       .finally(() => {
-        setLoading(false);
+        setFullScreenLoading(false);
         setFinish(false);
       });
   };
 
   const deleteRide = () => {
-    setLoading(true);
+    setFullScreenLoading(true);
     axios
       .delete(`${BASE_URL}/ride/patron/${rideID}/cancel`, {
         timeout: 5000,
@@ -274,13 +283,16 @@ const MatchingRidesPatron = ({ navigation }) => {
         }
       })
       .finally(() => {
-        setLoading(false);
+        setFullScreenLoading(false);
         setCancel(false);
       });
   };
 
   const fetchMatchedHitchers = (isLoading) => {
     if (connectionStatus && appStateVisible === "active") {
+      if (cancel) setCancel(false);
+      if (finish) setFinish(false);
+      if (goBackConfirmation) setGoBackConfirmation(false);
       if (isLoading) setLoading(true);
       else setFetching(true);
       axios
@@ -303,10 +315,10 @@ const MatchingRidesPatron = ({ navigation }) => {
               setError(
                 `${error?.response?.data}. Status Code: ${error?.response?.status}`
               );
-              setServerError(false);
             } else {
               setHitchers([]);
             }
+            setServerError(false);
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);
           } else if (axios.isCancel(error)) {
@@ -330,6 +342,13 @@ const MatchingRidesPatron = ({ navigation }) => {
   //     );
   // }, [fetchMatchedHitchers]);
 
+  if (fullScreenLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center" }}>
+        <ActivityIndicator size="large" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={styles?.container}>
       <Header
@@ -476,28 +495,28 @@ const styles = StyleSheet?.create({
   },
 });
 
-const updateLocationOnFirebase = async (latitude, longitude) => {
+const updateLocationOnFirebase = async (latitude, longitude, docId) => {
   const locationObj = {
     latitude,
     longitude,
   };
-  const docId = ride_id;
   const ref = doc(firestore, "live-coordinates", `${docId}`);
   await setDoc(ref, locationObj);
 };
 
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+TaskManager.defineTask(LOCATION_TASK_NAME_PATRON, async ({ data, error }) => {
   if (error) {
     console.error(error);
     return;
   }
-  if (data) {
+  console.log("MATCHING RIDE HITCHER => DEFINE TASK: ", ride_id);
+  if (data && ride_id) {
     const { locations } = data;
     const location = locations[0];
     if (location) {
       lat = location?.coords?.latitude;
       long = location?.coords?.longitude;
-      updateLocationOnFirebase(lat, long);
+      updateLocationOnFirebase(lat, long, ride_id);
       console.log(
         `${new Date(Date.now()).toLocaleString()}: ${
           location?.coords?.latitude

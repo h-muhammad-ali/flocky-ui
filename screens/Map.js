@@ -160,7 +160,7 @@ const Map = ({ navigation, route }) => {
       <View style={styles?.heading}>
         <Header
           text="Select Custom Location"
-          navigation={() => navigation?.navigate("SelectLocation")}
+          navigation={() => navigation?.goBack()}
           isBackButtonVisible={true}
         />
       </View>

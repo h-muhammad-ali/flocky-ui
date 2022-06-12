@@ -14,6 +14,7 @@ import {
 } from "@expo/vector-icons";
 import usePrevious from "../custom-hooks/usePrevious";
 import useMountedState from "../custom-hooks/useMountedState";
+import { useSelector } from "react-redux";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
@@ -31,6 +32,7 @@ const LiveLocation = ({ navigation, route }) => {
   const [destinationState, setDestinationState] = useState(null);
   const prevSourceState = usePrevious(sourceState);
   const prevDestinationState = usePrevious(destinationState);
+  const { role } = useSelector((state) => state?.ride);
   const isMounted = useMountedState();
   const updateSourceState = (data) =>
     setSourceState((state) => ({ ...state, ...data }));
@@ -39,28 +41,37 @@ const LiveLocation = ({ navigation, route }) => {
 
   useEffect(() => {
     const docId = route.params?.id;
+    console.log(docId);
     const ref = doc(firestore, "live-coordinates", `${docId}`);
     const unsubscribe = onSnapshot(
       ref,
       (doc) => {
-        const { latitude, longitude } = doc?.data();
-        animate(destinationMarkerRef, latitude, longitude);
-        updateDestinationState({
-          curLoc: { latitude, longitude },
-          coordinate: new AnimatedRegion({
-            latitude: latitude,
-            longitude: longitude,
-            latitudeDelta: LATITUDE_DELTA,
-            longitudeDelta: LONGITUDE_DELTA,
-          }),
-        });
+        if (doc.exists()) {
+          const { latitude, longitude } = doc?.data();
+          animate(destinationMarkerRef, latitude, longitude);
+          updateDestinationState({
+            curLoc: { latitude, longitude },
+            coordinate: new AnimatedRegion({
+              latitude: latitude,
+              longitude: longitude,
+              latitudeDelta: LATITUDE_DELTA,
+              longitudeDelta: LONGITUDE_DELTA,
+            }),
+          });
+        } else {
+          setError(
+            `Sadly, the ${
+              role === "P" ? "hitcher" : "patron"
+            } has not allowed us to track their location. So, you won't be able to see there reali-time location.`
+          );
+        }
       },
       (error) => {
         setError(error);
       }
     );
     return () => {
-      unsubscribe();
+      unsubscribe && unsubscribe();
     };
   }, []);
 
@@ -203,7 +214,7 @@ const LiveLocation = ({ navigation, route }) => {
               latitude: sourceState?.curLoc?.latitude,
               longitude: sourceState?.curLoc?.longitude,
             }}
-            title="Source"
+            title="You"
             identifier="source"
           >
             <FontAwesome5 name="sourcetree" size={24} color="black" />
@@ -218,7 +229,7 @@ const LiveLocation = ({ navigation, route }) => {
               latitude: destinationState?.curLoc?.latitude,
               longitude: destinationState?.curLoc?.longitude,
             }}
-            title="Destination"
+            title={`${route.params?.name}`}
             identifier="destination"
           >
             <Foundation name="target-two" size={24} color="black" />
@@ -240,7 +251,11 @@ const LiveLocation = ({ navigation, route }) => {
         />
       </TouchableOpacity>
       <View style={styles?.heading}>
-        <Header text="Live Location" navigation={() => navigation?.goBack()} />
+        <Header
+          text="Live Location"
+          navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
+        />
       </View>
       <View>
         <ErrorDialog

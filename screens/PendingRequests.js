@@ -37,9 +37,14 @@ const PendingRequests = () => {
         .catch((error) => {
           console?.log(error);
           if (error?.response) {
-            setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            if (error?.response?.status !== 404) {
+              setError(
+                `${error?.response?.data}. Status Code: ${error?.response?.status}`
+              );
+            } else {
+              setOrganizations([]);
+            }
+            setServerError(false);
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);
           } else if (axios.isCancel(error)) {

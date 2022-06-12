@@ -20,7 +20,7 @@ import { useSelector, useDispatch } from "react-redux";
 import ErrorDialog from "../components/ErrorDialog";
 import * as Location from "expo-location";
 import { firestore } from "../config/firebase";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, deleteDoc } from "firebase/firestore";
 import jwt_decode from "jwt-decode";
 import { LogBox } from "react-native";
 import * as TaskManager from "expo-task-manager";
@@ -38,10 +38,14 @@ let lat;
 let long;
 let hitcher_id;
 LogBox.ignoreLogs(["Setting a timer"]);
-const LOCATION_TASK_NAME = "BACKGROUND_LOCATION_FOR_LIVE_LOCATION";
+const LOCATION_TASK_NAME_HITCHER =
+  "BACKGROUND_LOCATION_FOR_LIVE_LOCATION_HITCHER";
 let apiCancelToken;
 
 const PatronDetails = ({ navigation, route }) => {
+  const { jwt } = useSelector((state) => state?.currentUser);
+  let decoded = jwt_decode(jwt);
+  hitcher_id = decoded?.user_id;
   const [loading, setLoading] = useState(false);
   const [stayOnPageError, setStayOnPageError] = useState("");
   const [goBackError, setGoBackError] = useState("");
@@ -53,11 +57,8 @@ const PatronDetails = ({ navigation, route }) => {
   const [cancel, setCancel] = useState(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
-  const { jwt } = useSelector((state) => state?.currentUser);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const { rideID } = useSelector((state) => state?.ride);
-  var decoded = jwt_decode(jwt);
-  hitcher_id = decoded?.user_id;
   const isMounted = useMountedState();
   const dispatch = useDispatch();
   const [patron, setPatron] = useState(null);
@@ -162,9 +163,7 @@ const PatronDetails = ({ navigation, route }) => {
           return true;
         }
       };
-
       BackHandler.addEventListener("hardwareBackPress", onBackPress);
-
       return () =>
         BackHandler.removeEventListener("hardwareBackPress", onBackPress);
     }, [])
@@ -172,11 +171,13 @@ const PatronDetails = ({ navigation, route }) => {
 
   const stopBackgroundUpdate = async () => {
     const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-      LOCATION_TASK_NAME
+      LOCATION_TASK_NAME_HITCHER
     );
     if (hasStarted && !isMounted()) {
-      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-      console.log("Location tracking stopped");
+      await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME_HITCHER);
+      const docId = hitcher_id;
+      await deleteDoc(doc(firestore, "live-coordinates", `${docId}`));
+      console.log("Hitcher Location tracking stopped");
     }
   };
 
@@ -279,12 +280,14 @@ const PatronDetails = ({ navigation, route }) => {
 
   useEffect(() => {
     const startBackgroundUpdate = async () => {
-      const isTaskDefined = TaskManager.isTaskDefined(LOCATION_TASK_NAME);
+      const isTaskDefined = TaskManager.isTaskDefined(
+        LOCATION_TASK_NAME_HITCHER
+      );
       if (!isTaskDefined) {
         console.log("Task is not defined");
         return;
       }
-      Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME).then(
+      Location.hasStartedLocationUpdatesAsync(LOCATION_TASK_NAME_HITCHER).then(
         (hasStarted) => {
           console?.log(hasStarted);
           if (hasStarted) {
@@ -293,7 +296,7 @@ const PatronDetails = ({ navigation, route }) => {
           }
         }
       );
-      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME, {
+      await Location.startLocationUpdatesAsync(LOCATION_TASK_NAME_HITCHER, {
         accuracy: Location.Accuracy.BestForNavigation,
         timeInterval: 2000,
         showsBackgroundLocationIndicator: true,
@@ -307,11 +310,13 @@ const PatronDetails = ({ navigation, route }) => {
 
     const stopBackgroundUpdate = async () => {
       const hasStarted = await Location.hasStartedLocationUpdatesAsync(
-        LOCATION_TASK_NAME
+        LOCATION_TASK_NAME_HITCHER
       );
       if (hasStarted && !isMounted()) {
-        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME);
-        console.log("Location tracking stopped");
+        await Location.stopLocationUpdatesAsync(LOCATION_TASK_NAME_HITCHER);
+        const docId = hitcher_id;
+        await deleteDoc(doc(firestore, "live-coordinates", `${docId}`));
+        console.log("Hitcher Location tracking stopped");
       }
     };
     if (rideID && !requestGranted && showPermissionModal && openSettings) {
@@ -333,6 +338,17 @@ const PatronDetails = ({ navigation, route }) => {
       !showPermissionModal &&
       !openSettings
     ) {
+      console.log(
+        "PATRON DETAILS => USEEFFECT => BEFORE ASSIGNING ID: ",
+        decoded?.user_id,
+        hitcher_id
+      );
+      hitcher_id = decoded?.user_id;
+      console.log(
+        "PATRON DETAILS => USEEFFECT => AFTER ASSIGNING ID: ",
+        decoded?.user_id,
+        hitcher_id
+      );
       startBackgroundUpdate();
     }
     return () => {
@@ -497,7 +513,7 @@ const PatronDetails = ({ navigation, route }) => {
   //   checkRideStatus();
   // }, [checkRideStatus]);
 
-  if (loading) {
+  if (loading || !patron) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#5188E3" />
@@ -543,7 +559,8 @@ const PatronDetails = ({ navigation, route }) => {
             if (connectionStatus) {
               checkRideStatus(() => {
                 navigation?.navigate("Live Location", {
-                  id: patron?.ride_id,
+                  id: rideID,
+                  name: patron?.name,
                 });
               }, "LL");
             } else {
@@ -563,73 +580,69 @@ const PatronDetails = ({ navigation, route }) => {
         type={patron?.vehicle?.type}
       />
       <View style={{ flex: 2, marginHorizontal: 12 }}>
-        {patron ? (
-          <Map
-            start={{
-              coords: {
-                lat: patron?.ride?.start_location?.coordinates?.latitude,
-                lng: patron?.ride?.start_location?.coordinates?.longitude,
-              },
-              formatted_address: patron?.start_location?.formatted_address,
-              place_id: patron?.start_location?.place_id,
-            }}
-            end={{
-              coords: {
-                lat: patron?.ride?.end_location?.coordinates?.latitude,
-                lng: patron?.ride?.end_location?.coordinates?.longitude,
-              },
-              formatted_address: patron?.end_location?.formatted_address,
-              place_id: patron?.end_location?.place_id,
-            }}
-            way_points={
-              patron?.ride?.way_points === null
-                ? []
-                : patron?.ride?.way_points.map((waypoint) => ({
-                    coords: {
-                      lat: waypoint?.coordinates?.latitude,
-                      lng: waypoint?.coordinates?.longitude,
-                    },
-                    formatted_address: waypoint?.formatted_address,
-                    place_id: waypoint?.place_id,
-                  }))
-            }
-            overview_polyline={patron?.ride?.overview_polyline}
-            navigation={() => {
-              navigation?.navigate("Full Screen Map", {
-                start: {
+        <Map
+          start={{
+            coords: {
+              lat: patron?.ride?.start_location?.coordinates?.latitude,
+              lng: patron?.ride?.start_location?.coordinates?.longitude,
+            },
+            formatted_address: patron?.start_location?.formatted_address,
+            place_id: patron?.start_location?.place_id,
+          }}
+          end={{
+            coords: {
+              lat: patron?.ride?.end_location?.coordinates?.latitude,
+              lng: patron?.ride?.end_location?.coordinates?.longitude,
+            },
+            formatted_address: patron?.end_location?.formatted_address,
+            place_id: patron?.end_location?.place_id,
+          }}
+          way_points={
+            patron?.ride?.way_points === null
+              ? []
+              : patron?.ride?.way_points.map((waypoint) => ({
                   coords: {
-                    lat: patron?.ride?.end_location?.coordinates?.latitude,
-                    lng: patron?.ride?.end_location?.coordinates?.longitude,
+                    lat: waypoint?.coordinates?.latitude,
+                    lng: waypoint?.coordinates?.longitude,
                   },
-                  formatted_address: patron?.end_location?.formatted_address,
-                  place_id: patron?.end_location?.place_id,
+                  formatted_address: waypoint?.formatted_address,
+                  place_id: waypoint?.place_id,
+                }))
+          }
+          overview_polyline={patron?.ride?.overview_polyline}
+          navigation={() => {
+            navigation?.navigate("Full Screen Map", {
+              start: {
+                coords: {
+                  lat: patron?.ride?.end_location?.coordinates?.latitude,
+                  lng: patron?.ride?.end_location?.coordinates?.longitude,
                 },
-                end: {
-                  coords: {
-                    lat: patron?.ride?.end_location?.coordinates?.latitude,
-                    lng: patron?.ride?.end_location?.coordinates?.longitude,
-                  },
-                  formatted_address: patron?.end_location?.formatted_address,
-                  place_id: patron?.end_location?.place_id,
+                formatted_address: patron?.end_location?.formatted_address,
+                place_id: patron?.end_location?.place_id,
+              },
+              end: {
+                coords: {
+                  lat: patron?.ride?.end_location?.coordinates?.latitude,
+                  lng: patron?.ride?.end_location?.coordinates?.longitude,
                 },
-                way_points:
-                  patron?.ride?.way_points === null
-                    ? []
-                    : patron?.ride?.way_points.map((waypoint) => ({
-                        coords: {
-                          lat: waypoint?.coordinates?.latitude,
-                          lng: waypoint?.coordinates?.longitude,
-                        },
-                        formatted_address: waypoint?.formatted_address,
-                        place_id: waypoint?.place_id,
-                      })),
-                overview_polyline: patron?.ride?.overview_polyline,
-              });
-            }}
-          />
-        ) : (
-          <></>
-        )}
+                formatted_address: patron?.end_location?.formatted_address,
+                place_id: patron?.end_location?.place_id,
+              },
+              way_points:
+                patron?.ride?.way_points === null
+                  ? []
+                  : patron?.ride?.way_points.map((waypoint) => ({
+                      coords: {
+                        lat: waypoint?.coordinates?.latitude,
+                        lng: waypoint?.coordinates?.longitude,
+                      },
+                      formatted_address: waypoint?.formatted_address,
+                      place_id: waypoint?.place_id,
+                    })),
+              overview_polyline: patron?.ride?.overview_polyline,
+            });
+          }}
+        />
       </View>
       <Button
         text="Message"
@@ -726,28 +739,28 @@ const styles = StyleSheet?.create({
   liveLocationText: { color: "white", marginEnd: 5 },
 });
 
-const updateLocationOnFirebase = async (latitude, longitude) => {
+const updateLocationOnFirebase = async (latitude, longitude, docId) => {
   const locationObj = {
     latitude,
     longitude,
   };
-  const docId = hitcher_id;
   const ref = doc(firestore, "live-coordinates", `${docId}`);
   await setDoc(ref, locationObj);
 };
 
-TaskManager.defineTask(LOCATION_TASK_NAME, async ({ data, error }) => {
+TaskManager.defineTask(LOCATION_TASK_NAME_HITCHER, async ({ data, error }) => {
   if (error) {
     console.error(error);
     return;
   }
-  if (data) {
+  console.log("PATRON DETAILS => TASK DEFINED: ", hitcher_id);
+  if (data && hitcher_id) {
     const { locations } = data;
     const location = locations[0];
     if (location) {
       lat = location?.coords?.latitude;
       long = location?.coords?.longitude;
-      updateLocationOnFirebase(lat, long);
+      updateLocationOnFirebase(lat, long, hitcher_id);
       console.log(
         `${new Date(Date.now()).toLocaleString()}: ${
           location?.coords?.latitude

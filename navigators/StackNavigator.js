@@ -23,10 +23,17 @@ import LiveLocation from "../screens/LiveLocation";
 import ResetPassword from "../screens/ResetPassword";
 import FullScreenMapForPatron from "../screens/FullScreenMapForPatron";
 import { useSelector } from "react-redux";
+import jwt_decode from "jwt-decode";
 
 const Stack = createNativeStackNavigator();
-const StackNavigator = ({ navigation }) => {
+const StackNavigator = () => {
   const { rideID, role, rideStatus } = useSelector((state) => state?.ride);
+  const { jwt } = useSelector((state) => state?.currentUser);
+  let decoded;
+  if (jwt) {
+    decoded = jwt_decode(jwt);
+    console?.log(decoded);
+  }
   return (
     <Stack.Navigator
       initialRouteName={
@@ -52,17 +59,21 @@ const StackNavigator = ({ navigation }) => {
               <Stack.Screen
                 name="Roles"
                 component={Roles}
-                options={({ navigation, route }) => ({
+                options={({ navigation }) => ({
                   headerShown: true,
                   headerBackVisible: false,
                   headerRight: () => (
                     <View style={styles?.headerRight}>
-                      {route.params?.isAdmin ? (
+                      {decoded?.is_admin ? (
                         <TouchableOpacity
                           onPress={() => {
-                            navigation?.navigate("Admin Tab", {
-                              screen: "Admin Panel",
+                            navigation?.reset({
+                              index: 0,
+                              routes: [{ name: "Admin Tab" }],
                             });
+                            // navigation?.navigate("Admin Tab", {
+                            //   screen: "Admin Panel",
+                            // });
                           }}
                         >
                           <MaterialCommunityIcons

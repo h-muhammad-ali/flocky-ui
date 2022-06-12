@@ -21,6 +21,7 @@ import jwt_decode from "jwt-decode";
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
   const { jwt } = useSelector((state) => state?.currentUser);
+  const { rideID } = useSelector((state) => state?.ride);
   let decoded;
   if (jwt) {
     decoded = jwt_decode(jwt);
@@ -31,7 +32,9 @@ const MainStackNavigator = () => {
       initialRouteName={
         jwt
           ? decoded?.is_admin
-            ? "Admin Tab"
+            ? rideID
+              ? "User Stack"
+              : "Admin Tab"
             : decoded?.is_flocky_admin
             ? "Companies Management"
             : "User Stack"

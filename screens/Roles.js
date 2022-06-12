@@ -24,8 +24,9 @@ const Roles = ({ navigation }) => {
         destination !== null ||
         wayPoints?.length !== 0 ||
         overview_polyline !== ""
-      )
+      ) {
         dispatch(resetLocationState());
+      }
     }, [])
   );
   return (

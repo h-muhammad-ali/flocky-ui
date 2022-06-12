@@ -5,18 +5,18 @@ import {
   TouchableOpacity,
   View,
   Image,
-  useWindowDimensions,
+  Dimensions,
 } from "react-native";
 import Constants from "expo-constants";
 
+const SCREEN_HEIGHT = Dimensions.get("window").height;
 const MainMenu = ({ navigation }) => {
-  const { height, width } = useWindowDimensions();
   return (
     <View style={styles?.container}>
       <View style={styles?.header}>
         <Image
-          source={require("../assets/flocky-assets/logo.png")}
-          style={{ width: 130, height: 100 }}
+          source={require("../assets/flocky-assets/flocky-icon-transparent.png")}
+          style={styles?.logo}
         />
         <Text style={styles?.title}>Flocky</Text>
       </View>
@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     textDecorationLine: "underline",
   },
   title: {
-    fontFamily: "Lobster-Regular",
+    fontFamily: "NunitoSans-SemiBold",
     fontSize: 48,
   },
   header: {
@@ -108,4 +108,8 @@ const styles = StyleSheet.create({
   },
   imageContainer: { flex: 1, aspectRatio: 1 * 1, alignSelf: "center" },
   image: { resizeMode: "cover", width: "100%", height: "100%" },
+  logo: {
+    width: SCREEN_HEIGHT / 8,
+    height: SCREEN_HEIGHT / 8,
+  },
 });

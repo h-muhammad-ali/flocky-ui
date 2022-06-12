@@ -56,7 +56,7 @@ const SignIn = ({ navigation }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }
@@ -91,7 +91,11 @@ const SignIn = ({ navigation }) => {
       }}
     >
       <View style={styles?.container}>
-        <Header text="Log In" navigation={() => navigation?.goBack()} />
+        <Header
+          text="Log In"
+          navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
+        />
         <Text style={styles?.label}>Email Address</Text>
         {errors?.email && (
           <Text style={styles.error}>{errors?.email?.message}</Text>

@@ -65,7 +65,7 @@ const AddCode = ({ navigation, route }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }
@@ -91,6 +91,7 @@ const AddCode = ({ navigation, route }) => {
         <Header
           text="Add Verification Code"
           navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
         />
         <View style={styles?.subContainer}>
           <Text style={styles?.text}>

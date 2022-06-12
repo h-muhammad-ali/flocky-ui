@@ -82,7 +82,7 @@ const EditProfile = ({ navigation }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }
@@ -121,7 +121,7 @@ const EditProfile = ({ navigation }) => {
             `${error?.response?.data}. Status Code: ${error?.response?.status}`
           );
         } else if (error?.request) {
-          setError("Network Error! Please try again later.");
+          setError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {
           console.log(error?.message);
         } else {
@@ -152,7 +152,11 @@ const EditProfile = ({ navigation }) => {
     >
       <View style={styles.container}>
         <KeyboardAvoidingView behavior="padding">
-          <Header text="Edit Profile" navigation={() => navigation?.goBack()} />
+          <Header
+            text="Edit Profile"
+            navigation={() => navigation?.goBack()}
+            isBackButtonVisible={true}
+          />
           <Text style={styles?.label}>Name</Text>
           {errors?.name && (
             <Text style={styles?.error}>{errors?.name?.message}</Text>

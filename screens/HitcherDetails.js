@@ -159,7 +159,7 @@ const HitcherDetails = ({ route, navigation }) => {
       );
   }, []);
 
-  if (loading) {
+  if (loading || !hitcher) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
         <ActivityIndicator size="large" color="#5188E3" />
@@ -197,6 +197,7 @@ const HitcherDetails = ({ route, navigation }) => {
             checkRideStatus(() => {
               navigation?.navigate("Live Location", {
                 id: hitcher?.id,
+                name: hitcher?.name,
               });
             }, "LL");
           } else {
@@ -209,7 +210,7 @@ const HitcherDetails = ({ route, navigation }) => {
       </TouchableOpacity>
 
       <View style={{ flex: 6, marginHorizontal: 10 }}>
-        {hitcher ? (
+     
           <MapForPatron
             start={{
               coords: {
@@ -250,9 +251,7 @@ const HitcherDetails = ({ route, navigation }) => {
               });
             }}
           />
-        ) : (
-          <></>
-        )}
+    
       </View>
 
       <Button
