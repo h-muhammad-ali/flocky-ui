@@ -100,6 +100,11 @@ const WhereTo = ({ navigation, route }) => {
           setError(
             "Either your source or destination should be within the 200 m radius of your organization."
           );
+        } else if (
+          source?.coords?.lat === destination?.coords?.lat &&
+          source?.coords?.lng === destination?.coords?.lng
+        ) {
+          setError("Source & Destination can't be same!");
         } else
           role === "H"
             ? dispatch(setRideInWaiting())
@@ -219,7 +224,10 @@ const WhereTo = ({ navigation, route }) => {
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
         onPressOut={() =>
-          navigation?.navigate("SelectLocation", { origin: "From" })
+          navigation?.navigate("SelectLocation", {
+            origin: "From",
+            org_id: organization_id,
+          })
         }
         showSoftInputOnFocus={false}
       />
@@ -261,7 +269,10 @@ const WhereTo = ({ navigation, route }) => {
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"
         onPressOut={() =>
-          navigation?.navigate("SelectLocation", { origin: "To" })
+          navigation?.navigate("SelectLocation", {
+            origin: "To",
+            org_id: organization_id,
+          })
         }
         showSoftInputOnFocus={false}
       />
@@ -269,7 +280,10 @@ const WhereTo = ({ navigation, route }) => {
         <TouchableOpacity
           style={styles?.waypoint}
           onPress={() => {
-            navigation?.navigate("SelectLocation", { origin: "Stop" });
+            navigation?.navigate("SelectLocation", {
+              origin: "Stop",
+              org_id: organization_id,
+            });
           }}
         >
           <Text style={styles?.waypointText}>Add Way-Points</Text>

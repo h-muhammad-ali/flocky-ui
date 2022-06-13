@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import { StyleSheet, Text, View, Image, TouchableOpacity } from "react-native";
 import Constants from "expo-constants";
 import InfoDialog from "../components/InfoDialog";
@@ -18,7 +18,7 @@ const Roles = ({ navigation }) => {
   const [patronTip, setPatronTip] = useState(false);
   const [secret, showSecret] = useState(false);
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       if (
         source !== null ||
         destination !== null ||
@@ -27,7 +27,7 @@ const Roles = ({ navigation }) => {
       ) {
         dispatch(resetLocationState());
       }
-    }, [])
+    }, [source, destination, wayPoints, overview_polyline])
   );
   return (
     <View style={styles?.container}>
