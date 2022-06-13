@@ -9,6 +9,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
@@ -61,6 +62,9 @@ const SignUp = ({ navigation, route }) => {
       invitationCode: "",
     },
   });
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid?.SHORT);
+  };
   const onSubmit = (data) => {
     setLoading(true);
     const userData = {
@@ -74,41 +78,20 @@ const SignUp = ({ navigation, route }) => {
       invitation_code: data?.invitationCode,
     };
     axios
-      .post(`${BASE_URL}/auth/signup`, userData, {
-        timeout: 5000,
-      })
+      .post(
+        `${BASE_URL}/auth/signup/token`,
+        { email: userData?.email },
+        {
+          timeout: 5000,
+        }
+      )
       .then((response) => {
         console.log(response);
-        axios
-          .post(
-            `${BASE_URL}/auth/signin`,
-            {
-              email: userData?.email,
-              password: userData?.password,
-            },
-            {
-              timeout: 5000,
-            }
-          )
-          .then((response) => {
-            console.log(response);
-            navigation?.navigate("Add Photo", {
-              jwt: response?.data,
-            });
-            reset();
-          })
-          .catch((error) => {
-            if (error?.response) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
-            } else if (error?.request) {
-              setError("Server not reachable! Please try again later.");
-            } else {
-              console.log(error);
-            }
-          })
-          .finally(() => {});
+        showToast("An email has been sent to you.");
+        navigation?.navigate("AddCode", {
+          confirmationCode: true,
+          data: userData,
+        });
       })
       .catch((error) => {
         if (error?.response) {
@@ -416,15 +399,16 @@ const SignUp = ({ navigation, route }) => {
               />
             )}
           />
-          <ErrorDialog
-            visible={!!error}
-            errorHeader={"Error"}
-            errorDescription={error}
-            clearError={() => {
-              setError("");
-            }}
-          />
-
+          <View>
+            <ErrorDialog
+              visible={!!error}
+              errorHeader={"Error"}
+              errorDescription={error}
+              clearError={() => {
+                setError("");
+              }}
+            />
+          </View>
           <Button text="Get Started" onPress={handleSubmit(onSubmit)} />
         </KeyboardAvoidingView>
         <Text style={styles?.terms}>

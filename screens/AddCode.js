@@ -1,10 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   Keyboard,
   ToastAndroid,
@@ -12,10 +11,12 @@ import {
 } from "react-native";
 import Button from "../components/Button";
 import Header from "../components/Header";
+import ResendEmailButton from "../components/ResendEmailButton";
 import { useForm, Controller } from "react-hook-form";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
+import useMountedState from "../custom-hooks/useMountedState";
 
 const AddCode = ({ navigation, route }) => {
   const {
@@ -30,49 +31,187 @@ const AddCode = ({ navigation, route }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [timeLeft, setTimeLeft] = useState(null);
+  const [targetTime, setTargetTime] = useState(null);
+  const [activeResend, setActiveResend] = useState(false);
+  const isMounted = useMountedState();
+  let resendTimerInterval;
+  const calculateTimeLeft = useCallback(
+    (finalTime) => {
+      if (isMounted()) {
+        const difference = finalTime - +new Date();
+        if (difference >= 0) {
+          setTimeLeft(Math.round(difference / 1000));
+        } else {
+          setTimeLeft(null);
+          clearInterval(resendTimerInterval);
+          setActiveResend(true);
+        }
+      }
+    },
+    [isMounted]
+  );
+  const triggerTimer = useCallback(
+    (targetTimeInSeconds = 60) => {
+      if (isMounted()) {
+        setTargetTime(targetTimeInSeconds);
+        setActiveResend(false);
+        const finalTime = +new Date() + targetTimeInSeconds * 1000;
+        resendTimerInterval = setInterval(
+          () => (calculateTimeLeft(finalTime), 1000)
+        );
+      }
+    },
+    [isMounted]
+  );
+
+  useEffect(() => {
+    triggerTimer();
+    return () => clearInterval(resendTimerInterval);
+  }, []);
+
   const showToast = (text) => {
     ToastAndroid.show(text, ToastAndroid?.SHORT);
   };
   const onSubmit = (data) => {
     console.log("data", data);
     reset();
-    route?.params?.resetCode
-      ? navigation?.navigate("Reset Password", {
-          code: data?.code,
-          email: route.params?.email,
+    if (route.params?.confirmationCode) {
+      setLoading(true);
+      const userData = { ...route.params?.data, token: data?.code };
+      axios
+        .post(`${BASE_URL}/auth/signup`, userData, {
+          timeout: 5000,
         })
-      : navigation?.navigate("AdminSignUp", {
-          code: data?.code,
+        .then((response) => {
+          console.log(response);
+          axios
+            .post(
+              `${BASE_URL}/auth/signin`,
+              {
+                email: userData?.email,
+                password: userData?.password,
+              },
+              {
+                timeout: 5000,
+              }
+            )
+            .then((response) => {
+              console.log(response);
+              navigation.reset({
+                index: 2,
+                routes: [
+                  { name: "MainMenu" },
+                  { name: "SignUp" },
+                  {
+                    name: "Add Photo",
+                    params: {
+                      jwt: response?.data,
+                    },
+                  },
+                ],
+              });
+              reset();
+            })
+            .catch((error) => {
+              if (error?.response) {
+                setAuthError(
+                  `${error?.response?.data}. Status Code: ${error?.response?.status}`
+                );
+              } else if (error?.request) {
+                setAuthError("Server not reachable! Please try again later.");
+              } else {
+                console.log(error);
+              }
+            })
+            .finally(() => {});
+        })
+        .catch((error) => {
+          if (error?.response) {
+            setAuthError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setAuthError("Server not reachable! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
         });
+    } else {
+      route.params?.resetCode
+        ? navigation?.navigate("Reset Password", {
+            code: data?.code,
+            email: route.params?.email,
+          })
+        : navigation?.navigate("AdminSignUp", {
+            code: data?.code,
+          });
+    }
   };
 
   const resendHandler = () => {
-    const data = {
-      email: route.params?.email,
-    };
-    setLoading(true);
-    axios
-      .post(`${BASE_URL}/auth/password/reset/token`, data, {
-        timeout: 5000,
-      })
-      .then((response) => {
-        reset();
-        showToast("Email Sent!");
-      })
-      .catch((error) => {
-        if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
-        } else if (error?.request) {
-          setError("Server not reachable! Please try again later.");
-        } else {
-          console.log(error);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    if (route.params?.confirmationCode) {
+      setLoading(true);
+      axios
+        .post(
+          `${BASE_URL}/auth/signup/token`,
+          { email: route.params?.data?.email },
+          {
+            timeout: 5000,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          triggerTimer();
+          showToast("An email has been sent to you.");
+        })
+        .catch((error) => {
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Server not reachable! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    } else {
+      const data = {
+        email: route.params?.email,
+      };
+      setLoading(true);
+      axios
+        .post(`${BASE_URL}/auth/password/reset/token`, data, {
+          timeout: 5000,
+        })
+        .then((response) => {
+          reset();
+          triggerTimer();
+          showToast("Email Sent!");
+        })
+        .catch((error) => {
+          if (error?.response) {
+            setError(
+              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            );
+          } else if (error?.request) {
+            setError("Server not reachable! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
   if (loading) {
     return (
@@ -116,24 +255,27 @@ const AddCode = ({ navigation, route }) => {
             <Text style={styles?.error}>{errors?.code?.message}</Text>
           )}
         </View>
-        <View style={styles?.resendContainer}>
-          <Text style={styles?.linkLabel}>Haven't received it? </Text>
-          <TouchableOpacity
-            onPress={() => {
-              resendHandler();
-            }}
-          >
-            <Text style={styles?.link}>Resend!</Text>
-          </TouchableOpacity>
-        </View>
+        <ResendEmailButton
+          resendHandler={() => {
+            resendHandler();
+          }}
+          activeResend={activeResend}
+          timeLeft={timeLeft}
+          targetTime={targetTime}
+        />
         <Button text="Verify" onPress={handleSubmit(onSubmit)} />
         <View>
           <ErrorDialog
-            visible={!!error}
+            visible={!!error || !!authError}
             errorHeader={"Error!"}
-            errorDescription={error}
+            errorDescription={!!error ? error : authError}
             clearError={() => {
-              setError("");
+              !!error
+                ? setError("")
+                : navigation.reset({
+                    index: 1,
+                    routes: [{ name: "MainMenu" }, { name: "SignUp" }],
+                  });
             }}
           />
         </View>
@@ -166,25 +308,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
     textAlignVertical: "center",
   },
-  resendContainer: {
-    flexDirection: "row",
-    alignSelf: "center",
-    marginBottom: 20,
-  },
   text: {
     fontFamily: "NunitoSans-Bold",
     fontSize: 20,
-    textAlign: "center",
-  },
-  link: {
-    fontFamily: "Kanit-Medium",
-    fontSize: 15,
-    textAlign: "center",
-    color: "#5188E3",
-  },
-  linkLabel: {
-    fontFamily: "NunitoSans-Bold",
-    fontSize: 15,
     textAlign: "center",
   },
   error: {
