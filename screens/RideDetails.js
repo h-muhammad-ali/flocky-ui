@@ -207,7 +207,7 @@ const RideDetails = ({ navigation }) => {
       start_time: departureTime,
       vehicle_id: vehicleID,
       no_of_seats: seatsCount,
-      same_gender: isChecked,
+      same_gender: false,
     };
     console.log(data);
     axios
@@ -369,7 +369,7 @@ const RideDetails = ({ navigation }) => {
             setError("");
           }}
         />
-        <View style={styles?.checkboxSection}>
+        {/* <View style={styles?.checkboxSection}>
           <Checkbox
             style={styles?.checkbox}
             value={isChecked}
@@ -377,7 +377,7 @@ const RideDetails = ({ navigation }) => {
             color={isChecked ? "#5188E3" : undefined}
           />
           <Text style={styles?.checkboxText}>Travel with Same Gender</Text>
-        </View>
+        </View> */}
       </View>
       <View style={{ flex: 1, justifyContent: "center" }}>
         <Button
