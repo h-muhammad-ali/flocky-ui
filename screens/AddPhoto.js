@@ -43,7 +43,7 @@ const AddPhoto = ({ navigation, route }) => {
     let result = await ImagePicker?.launchImageLibraryAsync({
       mediaTypes: ImagePicker?.MediaTypeOptions?.All,
       allowsEditing: true,
-      aspect: [4, 3],
+      aspect: [1, 1],
       quality: 1,
     });
     if (!result?.cancelled) {
@@ -100,10 +100,10 @@ const AddPhoto = ({ navigation, route }) => {
       },
       () => {
         blob.close();
-        setUploading(false);
         getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
           console.log("File available at", downloadURL);
           setImgURL(downloadURL);
+          setUploading(false);
         });
       }
     );
@@ -119,30 +119,14 @@ const AddPhoto = ({ navigation, route }) => {
         },
       })
       .then(() => {
-        let imagePath = String(route.params?.imageURL);
-        let name = imagePath.substring(
-          imagePath.indexOf("%2F") + 3,
-          imagePath.indexOf("?")
-        );
-
-        const deleteRef = ref(storage, `userProfileImages/${name}`);
-        deleteObject(deleteRef)
-          .then(() => {
-            console?.log("Successful!");
-            showToast("Photo updated successfully!");
-            navigation?.navigate("Roles");
-          })
-          .catch((error) => {
-            console?.log(error);
-            setError(error);
-          });
+        console?.log("Successful!");
+        showToast("Photo removed successfully!");
+        navigation?.navigate("Roles");
       })
       .catch((error) => {
         console?.log(error);
         if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else {
@@ -156,6 +140,7 @@ const AddPhoto = ({ navigation, route }) => {
 
   useEffect(() => {
     if (imgURL) {
+      setLoading(true);
       const updatedData = { profile_picture: imgURL };
       axios
         .put(`${BASE_URL}/account/user/profile-picture/update`, updatedData, {
@@ -189,16 +174,16 @@ const AddPhoto = ({ navigation, route }) => {
         .catch((error) => {
           console?.log(error);
           if (error?.response) {
-            setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setError("Server not reachable! Please try again later.");
           } else {
             console.log(error);
           }
         })
-        .finally(() => {});
+        .finally(() => {
+          // setLoading(false);
+        });
     }
   }, [imgURL]);
 
@@ -209,7 +194,10 @@ const AddPhoto = ({ navigation, route }) => {
   useEffect(
     () =>
       navigation.addListener("beforeRemove", (e) => {
-        if (imgURL) {
+        if (
+          imgURL ||
+          (route.params?.isEdit && route.params?.imageURL !== image)
+        ) {
           //  if (!route.params?.isAdmin || imgURL) {
           return;
         }
@@ -254,14 +242,17 @@ const AddPhoto = ({ navigation, route }) => {
         )}
         <TouchableOpacity
           disabled={uploading}
-          style={styles?.addPhotoContainer}
+          style={[styles?.addPhotoContainer, uploading && { opacity: 0.5 }]}
           onPress={pickImage}
         >
           <Text style={styles?.addPhotoText}>Add Photo</Text>
         </TouchableOpacity>
         <TouchableOpacity
           disabled={!image || uploading}
-          style={styles?.skipContainer}
+          style={[
+            styles?.skipContainer,
+            (!image || uploading) && { opacity: 0.5 },
+          ]}
           onPress={() => {
             setImage("");
           }}
@@ -271,7 +262,11 @@ const AddPhoto = ({ navigation, route }) => {
       </View>
       <View>
         <Button
-          isDisabled={uploading || (!image && !route?.params.isEdit)}
+          isDisabled={
+            uploading ||
+            (!image && !route?.params.isEdit) ||
+            (route.params?.imageURL === image && route?.params?.isEdit)
+          }
           text={route.params?.isEdit ? "Update Photo" : "Continue"}
           onPress={
             route.params?.isEdit
@@ -311,7 +306,7 @@ const AddPhoto = ({ navigation, route }) => {
         />
         <TouchableOpacity
           disabled={uploading}
-          style={styles?.skipContainer}
+          style={[styles?.skipContainer, uploading && { opacity: 0.5 }]}
           onPress={
             route.params?.isEdit
               ? () => {
@@ -349,7 +344,9 @@ const AddPhoto = ({ navigation, route }) => {
         <ConfirmationDialog
           visible={goBackConfirmation}
           heading={"Wait!"}
-          body={"Are you sure you don't want to upload your profile photo?"}
+          body={`Are you sure you don't want to ${
+            route.params?.isEdit ? "update" : "upload"
+          } your profile photo?`}
           positiveHandler={() => {
             navigation?.dispatch(action);
           }}

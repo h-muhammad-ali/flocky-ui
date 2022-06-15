@@ -30,7 +30,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
   });
   const mapRef = useRef(null);
   const [error, setError] = useState("");
-  const getDirections = async () => {
+  const getDirections = async () => { 
     let waypoints = wayPoints
       ?.map((wayPoint) => `place_id:${wayPoint?.place_id}`)
       ?.join("|");
@@ -100,7 +100,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
       ...wayPoints?.map((waypoint, index) => `waypoint#${index + 1}`)
     );
     if (paramArray.length === 1) {
-      const region = source ?? destination ?? wayPoints[0];
+      const region = source ?? destination ?? wayPoints[0]; 
       mapRef?.current?.animateToRegion(
         {
           latitude: region?.coords?.lat,
@@ -176,7 +176,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
                   size={28}
-                  color={"#5188E3"}
+                  color={"black"}
                 />
               </Marker>
             ))
@@ -194,7 +194,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
                   size={28}
-                  color={"#5188E3"}
+                  color={"black"}
                 />
               </Marker>
             ))}

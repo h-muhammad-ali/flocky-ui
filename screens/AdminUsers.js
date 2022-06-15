@@ -38,18 +38,12 @@ const AdminUsers = () => {
         .then((response) => {
           if (serverError) setServerError(false);
           const resp = response?.data;
-          setUsers(resp);
+          setUsers(resp ?? []);
         })
         .catch((error) => {
           console?.log(error);
           if (error?.response) {
-            if (error?.response?.status !== 404) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
-            } else {
-              setUsers([]);
-            }
+            setError(`${error?.response?.data}.`);
             setServerError(false);
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);

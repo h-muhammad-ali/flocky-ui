@@ -8,6 +8,7 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  Pressable,
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
@@ -17,6 +18,8 @@ import { setCurrentUserJWT } from "../redux/currentUser/currentUserActions";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
+import useTogglePasswordVisibility from "../custom-hooks/useTogglePasswordVisibility";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const SignIn = ({ navigation }) => {
   const EMAIL_REGEX =
@@ -53,7 +56,7 @@ const SignIn = ({ navigation }) => {
       .catch((error) => {
         if (error?.response) {
           setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            `${error?.response?.data}.`
           );
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
@@ -69,6 +72,8 @@ const SignIn = ({ navigation }) => {
   const [error, setError] = useState("");
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusPassword, setFocusPassword] = useState(false);
+  const { passwordVisibility, rightIcon, handlePasswordVisibility } =
+    useTogglePasswordVisibility();
   const focusHandler = (set) => {
     set(true);
   };
@@ -119,6 +124,7 @@ const SignIn = ({ navigation }) => {
               onFocus={() => focusHandler(setFocusEmail)}
               onBlur={() => blurHandler(onBlur, setFocusEmail)}
               value={value}
+              autoCapitalize="none"
             />
           )}
         />
@@ -137,19 +143,42 @@ const SignIn = ({ navigation }) => {
             },
           }}
           render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
+            <View
               style={[
                 styles?.input,
+                {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingHorizontal: 10,
+                },
                 errors?.password && styles?.errorBorder,
                 focusPassword && { borderColor: "#5188E3" },
               ]}
-              secureTextEntry={true}
-              selectionColor={"#5188E3"}
-              onChangeText={onChange}
               onFocus={() => focusHandler(setFocusPassword)}
               onBlur={() => blurHandler(onBlur, setFocusPassword)}
-              value={value}
-            />
+            >
+              <TextInput
+                style={{
+                  fontSize: 15,
+                  height: 45,
+                  flex: 1,
+                  marginEnd: 5,
+                }}
+                secureTextEntry={passwordVisibility}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                value={value}
+                autoCapitalize="none"
+              />
+              <Pressable onPress={handlePasswordVisibility}>
+                <MaterialCommunityIcons
+                  name={rightIcon}
+                  size={22}
+                  color="#232323"
+                />
+              </Pressable>
+            </View>
           )}
         />
         <TouchableOpacity
@@ -200,6 +229,7 @@ const styles = StyleSheet?.create({
     height: 45,
     marginHorizontal: 10,
     paddingStart: 10,
+    paddingEnd: 5,
     marginBottom: 15,
   },
   label: {

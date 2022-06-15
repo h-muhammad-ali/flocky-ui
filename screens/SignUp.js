@@ -10,6 +10,7 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   ToastAndroid,
+  Pressable,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
@@ -18,6 +19,8 @@ import Button from "../components/Button";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
+import useTogglePasswordVisibility from "../custom-hooks/useTogglePasswordVisibility";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 let apiCancelToken;
 const SignUp = ({ navigation, route }) => {
@@ -47,6 +50,8 @@ const SignUp = ({ navigation, route }) => {
   const onCompanyOpen = useCallback(() => {
     setGenderOpen(false);
   }, []);
+  const { passwordVisibility, rightIcon, handlePasswordVisibility } =
+    useTogglePasswordVisibility();
   const {
     handleSubmit,
     control,
@@ -80,7 +85,11 @@ const SignUp = ({ navigation, route }) => {
     axios
       .post(
         `${BASE_URL}/auth/signup/token`,
-        { email: userData?.email },
+        {
+          email: userData?.email,
+          organization_id: userData?.organization_id,
+          invitation_code: userData?.invitation_code,
+        },
         {
           timeout: 5000,
         }
@@ -95,9 +104,7 @@ const SignUp = ({ navigation, route }) => {
       })
       .catch((error) => {
         if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else {
@@ -133,9 +140,7 @@ const SignUp = ({ navigation, route }) => {
           if (error?.response?.status === 400) {
             setDomain("");
           } else if (error?.response) {
-            setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setError("Server not reachable! Please try again later.");
           } else if (axios.isCancel(error)) {
@@ -166,9 +171,7 @@ const SignUp = ({ navigation, route }) => {
       })
       .catch((error) => {
         if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Network Error! Can't get all the organizations.");
         } else if (axios.isCancel(error)) {
@@ -250,19 +253,42 @@ const SignUp = ({ navigation, route }) => {
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
+              <View
                 style={[
                   styles?.input,
+                  {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingHorizontal: 10,
+                  },
                   errors?.password && styles?.errorBorder,
                   focusPassword && { borderColor: "#5188E3" },
                 ]}
-                secureTextEntry={true}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
                 onFocus={() => focusHandler(setFocusPassword)}
                 onBlur={() => blurHandler(onBlur, setFocusPassword)}
-                value={value}
-              />
+              >
+                <TextInput
+                  style={{
+                    fontSize: 15,
+                    height: 45,
+                    flex: 1,
+                    marginEnd: 5,
+                  }}
+                  secureTextEntry={passwordVisibility}
+                  selectionColor={"#5188E3"}
+                  onChangeText={onChange}
+                  value={value}
+                  autoCapitalize="none"
+                />
+                <Pressable onPress={handlePasswordVisibility}>
+                  <MaterialCommunityIcons
+                    name={rightIcon}
+                    size={22}
+                    color="#232323"
+                  />
+                </Pressable>
+              </View>
             )}
           />
 
@@ -369,6 +395,7 @@ const SignUp = ({ navigation, route }) => {
                   onFocus={() => focusHandler(setFocusEmail)}
                   onBlur={() => blurHandler(onBlur, setFocusEmail)}
                   value={value}
+                  autoCapitalize="none"
                 />
               )}
             />
@@ -443,6 +470,7 @@ const styles = StyleSheet?.create({
     height: 45,
     marginHorizontal: 10,
     paddingStart: 10,
+    paddingEnd: 5,
     marginBottom: 15,
   },
   label: {

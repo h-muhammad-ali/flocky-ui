@@ -46,7 +46,7 @@ const WallOfHonor = ({ navigation }) => {
         console?.log(error);
         if (error?.response) {
           setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            `${error?.response?.data}.`
           );
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");

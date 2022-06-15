@@ -32,13 +32,15 @@ const RideDetails = ({ navigation }) => {
   const [departureTime, setDepartureTime] = useState(
     addMinutes(new Date(), 20)
   );
+  const [departureDate, setDepartureDate] = useState(null);
   const [loading, setLoading] = useState(false);
   const [seatsCount, setSeatsCount] = useState(1);
   const [vehicleOpen, setVehicleOpen] = useState(false);
   const [vehicleValue, setVehicleValue] = useState(null);
   const [vehicles, setVehicles] = useState([]);
   const [vehicleID, setVehicleID] = useState(0);
-  const [show, setShow] = useState(false);
+  const [showTime, setShowTime] = useState(false);
+  const [showDate, setShowDate] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
   const [error, setError] = useState("");
   const [isChecked, setChecked] = useState(false);
@@ -64,9 +66,7 @@ const RideDetails = ({ navigation }) => {
             if (!connectionStatus) {
               setError("No Internet connection!");
             } else if (error?.response) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
+              setError(`${error?.response?.data}.`);
             } else if (error?.request) {
               setError("Server not reachable! Can't get your vehicles.");
             } else if (axios.isCancel(error)) {
@@ -88,23 +88,67 @@ const RideDetails = ({ navigation }) => {
       );
   }, [vehicleAdded, connectionStatus]);
 
+  useEffect(() => {
+    console.log(
+      `Departure Date: ${departureDate}, showTime: ${showTime}, showDate: ${showDate}`
+    );
+    if (departureDate) {
+      console.log("IN");
+      console.log(
+        `Departure Date: ${departureDate}, showTime: ${showTime}, showDate: ${showDate}`
+      );
+      showTimePicker();
+    }
+    console.log(
+      `Departure Date: ${departureDate}, showTime: ${showTime}, showDate: ${showDate}`
+    );
+  }, [departureDate]);
+
   const showToast = (text) => {
     ToastAndroid.show(text, ToastAndroid.LONG);
   };
 
-  const onChange = (event, selectedTime) => {
-    if (selectedTime && selectedTime < new Date()) {
-      showToast("Select a time in future!");
-    } else if (selectedTime && selectedTime < addMinutes(new Date(), 15)) {
-      showToast("Too short! Spare atleast 15 minutes to find you a ride.");
-    } else if (selectedTime) {
-      setDepartureTime(selectedTime);
+  const onChangeTime = (event, selectedTime) => {
+    if (event.type === "set") {
+      selectedTime.setDate(departureDate.getDate());
+      selectedTime.setMonth(departureDate.getMonth());
+      selectedTime.setFullYear(departureDate.getFullYear());
+      if (selectedTime && selectedTime < new Date()) {
+        showToast("Select a time in future!");
+      } else if (selectedTime && selectedTime < addMinutes(new Date(), 15)) {
+        showToast("Too short! Spare atleast 15 minutes to find you a ride.");
+      } else if (
+        selectedTime &&
+        Math.abs(selectedTime - new Date()) / 36e5 > 12
+      ) {
+        showToast("Too short! Maximum time span is 12 hours.");
+      } else if (selectedTime) {
+        setDepartureTime(selectedTime);
+      }
+      setShowTime(false);
+      setDepartureDate(null);
+    } else {
+      console.log("Cancel Time");
+      setShowTime(false);
+      setDepartureDate(null);
     }
-    setShow(false);
+  };
+
+  const onChangeDate = (event, selectedDate) => {
+    if (event.type === "set") {
+      setShowDate(false);
+      setDepartureDate(selectedDate);
+      return;
+    }
+    setShowDate(false);
   };
 
   const showTimePicker = () => {
-    setShow(true);
+    setShowTime(true);
+  };
+
+  const showDatePicker = () => {
+    setShowDate(true);
   };
 
   const formatAMPM = (date) => {
@@ -114,13 +158,23 @@ const RideDetails = ({ navigation }) => {
     hours = hours % 12;
     hours = hours ? hours : 12;
     minutes = minutes < 10 ? "0" + minutes : minutes;
-    var strTime = hours + ":" + minutes + " " + ampm;
+    var dateString = date?.toLocaleDateString("en-us");
+    var strTime = dateString + " " + hours + ":" + minutes + " " + ampm;
     return strTime;
   };
 
   function addMinutes(date, minutes) {
     return new Date(date.getTime() + minutes * 60000);
   }
+
+  const getDate = (addDay = 0) => {
+    let today = new Date();
+    today.setDate(today.getDate() + addDay);
+    let dd = String(today.getDate());
+    let mm = String(today.getMonth());
+    let yyyy = today.getFullYear();
+    return new Date(yyyy, mm, dd);
+  };
 
   const postRide = () => {
     setLoading(true);
@@ -171,9 +225,7 @@ const RideDetails = ({ navigation }) => {
         if (!connectionStatus) {
           setError("No Internet connection!");
         } else if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else {
@@ -209,21 +261,32 @@ const RideDetails = ({ navigation }) => {
           <View style={{ flexDirection: "row" }}>
             <TouchableOpacity
               onPress={() => {
-                showTimePicker();
+                showDatePicker();
               }}
               style={styles?.timeOptionContainer}
             >
               <Text style={styles?.timeOptionText}>Set Custom Time</Text>
             </TouchableOpacity>
           </View>
-          {show && (
+          {showTime && (
             <DateTimePicker
               testID="dateTimePicker"
               value={new Date()}
               mode={"time"}
               is24Hour={false}
               display="default"
-              onChange={onChange}
+              onChange={onChangeTime}
+            />
+          )}
+          {showDate && (
+            <DateTimePicker
+              testID="dateTimePicker"
+              value={new Date()}
+              mode={"date"}
+              maximumDate={getDate(1)}
+              minimumDate={getDate()}
+              display="default"
+              onChange={onChangeDate}
             />
           )}
         </View>

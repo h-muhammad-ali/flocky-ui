@@ -8,6 +8,7 @@ import {
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
@@ -38,11 +39,14 @@ const AdminSignUp = ({ navigation, route }) => {
       gender: "",
     },
   });
+  const showToast = (text) => {
+    ToastAndroid.show(text, ToastAndroid?.SHORT);
+  };
   const onSubmit = (data) => {
     setLoading(true);
     const orgData = {
       organization_name: route?.params?.company,
-      email_domain: route?.params?.domain?.substring(1),
+      email_domain: route?.params?.domain,
       admin: {
         email: route?.params?.email,
         name: data?.name,
@@ -55,60 +59,26 @@ const AdminSignUp = ({ navigation, route }) => {
       },
     };
     axios
-      .post(`${BASE_URL}/organization/register`, orgData, { timeout: 5000 })
+      .post(
+        `${BASE_URL}/organization/register/token`,
+        { email: orgData?.admin?.email },
+        {
+          timeout: 5000,
+        }
+      )
       .then((response) => {
         console.log(response);
-        axios
-          .post(
-            `${BASE_URL}/auth/signin`,
-            {
-              email: orgData?.admin?.email,
-              password: orgData?.admin?.password,
-            },
-            {
-              timeout: 5000,
-            }
-          )
-          .then((response) => {
-            console.log(response);
-            reset();
-            navigation.reset({
-              index: 1,
-              routes: [
-                { name: "MainMenu" },
-                {
-                  name: "Add Photo",
-                  params: {
-                    isAdmin: true,
-                    jwt: response?.data,
-                  },
-                },
-              ],
-            });
-            // navigation?.navigate("Add Photo", {
-            //   isAdmin: true,
-            //   jwt: response?.data,
-            // });
-          })
-          .catch((error) => {
-            if (error?.response) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
-            } else if (error?.request) {
-              setError("Server not reachable! Please try again later.");
-            } else {
-              console.log(error);
-            }
-          })
-          .finally(() => {});
+        showToast("An email has been sent to you.");
+        navigation?.navigate("AddCode", {
+          adminConfirmationCode: true,
+          orgData: orgData,
+        });
       })
       .catch((error) => {
         if (error?.response) {
-          if (error?.response?.status === 500)
-            setError(`Organization with this email is already registered.`);
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
-          setError(`Server not reachable! Please try again later.`);
+          setError("Server not reachable! Please try again later.");
         } else {
           console.log(error);
         }
@@ -144,7 +114,7 @@ const AdminSignUp = ({ navigation, route }) => {
       <View style={styles.container}>
         <Header
           text="Admin Information"
-          navigation={() => navigation?.navigate("Company Registeration")}
+          navigation={() => navigation?.goBack()}
           isBackButtonVisible={true}
         />
         <KeyboardAvoidingView behavior="padding">

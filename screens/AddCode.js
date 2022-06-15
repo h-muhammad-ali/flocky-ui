@@ -116,9 +116,7 @@ const AddCode = ({ navigation, route }) => {
             })
             .catch((error) => {
               if (error?.response) {
-                setAuthError(
-                  `${error?.response?.data}. Status Code: ${error?.response?.status}`
-                );
+                setAuthError(`${error?.response?.data}.`);
               } else if (error?.request) {
                 setAuthError("Server not reachable! Please try again later.");
               } else {
@@ -129,9 +127,9 @@ const AddCode = ({ navigation, route }) => {
         })
         .catch((error) => {
           if (error?.response) {
-            setAuthError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            if (error?.response?.status === 406)
+              setError("Incorrect OTP! Please try again.");
+            else setAuthError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setAuthError("Server not reachable! Please try again later.");
           } else {
@@ -139,7 +137,71 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          setLoading(false);
+          // setLoading(false);
+        });
+    } else if (route.params?.adminConfirmationCode) {
+      setLoading(true);
+      const orgData = { ...route.params?.orgData, token: data?.code };
+      axios
+        .post(`${BASE_URL}/organization/register`, orgData, { timeout: 5000 })
+        .then((response) => {
+          console.log(response);
+          axios
+            .post(
+              `${BASE_URL}/auth/signin`,
+              {
+                email: orgData?.admin?.email,
+                password: orgData?.admin?.password,
+              },
+              {
+                timeout: 5000,
+              }
+            )
+            .then((response) => {
+              console.log(response);
+              reset();
+              navigation.reset({
+                index: 1,
+                routes: [
+                  { name: "MainMenu" },
+                  {
+                    name: "Add Photo",
+                    params: {
+                      isAdmin: true,
+                      jwt: response?.data,
+                    },
+                  },
+                ],
+              });
+            })
+            .catch((error) => {
+              if (error?.response) {
+                setAuthError(`${error?.response?.data}.`);
+              } else if (error?.request) {
+                setAuthError("Server not reachable! Please try again later.");
+              } else {
+                console.log(error);
+              }
+            })
+            .finally(() => {});
+        })
+        .catch((error) => {
+          if (error?.response) {
+            if (error?.response?.status === 500)
+              setAuthError(
+                `Organization with this email is already registered.`
+              );
+            else if (error?.response?.status === 406)
+              setError("Incorrect OTP! Please try again.");
+            else setAuthError(`${error?.response?.data}.`);
+          } else if (error?.request) {
+            setAuthError(`Server not reachable! Please try again later.`);
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          // setLoading(false);
         });
     } else {
       route.params?.resetCode
@@ -159,7 +221,11 @@ const AddCode = ({ navigation, route }) => {
       axios
         .post(
           `${BASE_URL}/auth/signup/token`,
-          { email: route.params?.data?.email },
+          {
+            email: route.params?.data?.email,
+            organization_id: route.params?.data?.organization_id,
+            invitation_code: route.params?.data?.invitation_code,
+          },
           {
             timeout: 5000,
           }
@@ -171,9 +237,7 @@ const AddCode = ({ navigation, route }) => {
         })
         .catch((error) => {
           if (error?.response) {
-            setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setError("Server not reachable! Please try again later.");
           } else {
@@ -181,7 +245,34 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          setLoading(false);
+          // setLoading(false);
+        });
+    } else if (route.params?.adminConfirmationCode) {
+      setLoading(true);
+      axios
+        .post(
+          `${BASE_URL}/organization/register/token`,
+          { email: route.params?.orgData?.admin?.email },
+          {
+            timeout: 5000,
+          }
+        )
+        .then((response) => {
+          console.log(response);
+          triggerTimer();
+          showToast("An email has been sent to you.");
+        })
+        .catch((error) => {
+          if (error?.response) {
+            setError(`${error?.response?.data}.`);
+          } else if (error?.request) {
+            setError("Server not reachable! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          // setLoading(false);
         });
     } else {
       const data = {
@@ -199,9 +290,7 @@ const AddCode = ({ navigation, route }) => {
         })
         .catch((error) => {
           if (error?.response) {
-            setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setError("Server not reachable! Please try again later.");
           } else {
@@ -209,7 +298,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          setLoading(false);
+          // setLoading(false);
         });
     }
   };
@@ -272,6 +361,14 @@ const AddCode = ({ navigation, route }) => {
             clearError={() => {
               !!error
                 ? setError("")
+                : route.params?.adminConfirmationCode
+                ? navigation.reset({
+                    index: 1,
+                    routes: [
+                      { name: "MainMenu" },
+                      { name: "Company Registeration" },
+                    ],
+                  })
                 : navigation.reset({
                     index: 1,
                     routes: [{ name: "MainMenu" }, { name: "SignUp" }],

@@ -4,6 +4,9 @@ import {
   View,
   TextInput,
   ActivityIndicator,
+  Pressable,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import React, { useState } from "react";
 import Header from "../components/Header";
@@ -14,6 +17,8 @@ import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 import jwt_decode from "jwt-decode";
+import useTogglePasswordVisibility from "../custom-hooks/useTogglePasswordVisibility";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const ChangePassword = ({ navigation }) => {
   const {
@@ -28,10 +33,12 @@ const ChangePassword = ({ navigation }) => {
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [focusPassword, setFocusPassword] = useState(false);
   const { jwt } = useSelector((state) => state?.currentUser);
   let decoded;
   decoded = jwt_decode(jwt);
-
+  const { passwordVisibility, rightIcon, handlePasswordVisibility } =
+    useTogglePasswordVisibility();
   const onSubmit = (data) => {
     const userData = {
       email: decoded?.email,
@@ -46,6 +53,7 @@ const ChangePassword = ({ navigation }) => {
         reset();
         navigation?.navigate("Reset Password", {
           mode: "change",
+          currPassword: data?.password,
         });
       })
       .catch((error) => {
@@ -54,7 +62,7 @@ const ChangePassword = ({ navigation }) => {
             setError("Incorrect Password!");
           } else {
             setError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
+              `${error?.response?.data}.`
             );
           }
         } else if (error?.request) {
@@ -67,6 +75,14 @@ const ChangePassword = ({ navigation }) => {
         setLoading(false);
       });
   };
+  const focusHandler = (set) => {
+    set(true);
+  };
+
+  const blurHandler = (onBlur, set) => {
+    set(false);
+    onBlur();
+  };
   if (loading) {
     return (
       <View style={{ flex: 1, justifyContent: "center" }}>
@@ -75,48 +91,83 @@ const ChangePassword = ({ navigation }) => {
     );
   }
   return (
-    <View style={styles.container}>
-      <Header
-        text="Change Password"
-        navigation={() => navigation?.goBack()}
-        isBackButtonVisible={true}
-      />
-      <Text style={styles?.label}>Enter Current Password</Text>
-      {errors?.password && (
-        <Text style={styles?.error}>{errors?.password?.message}</Text>
-      )}
-      <Controller
-        name="password"
-        control={control}
-        rules={{
-          required: { value: true, message: "This field is required" },
-          minLength: {
-            value: 8,
-            message: "Password must be >= 8 characters",
-          },
-        }}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            style={[styles?.input, errors?.password && styles?.errorBorder]}
-            selectionColor={"#5188E3"}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            value={value}
-          />
-        )}
-      />
-      <Button text="Continue" onPress={handleSubmit(onSubmit)} />
-      <View>
-        <ErrorDialog
-          visible={!!error}
-          errorHeader={"Error"}
-          errorDescription={error}
-          clearError={() => {
-            setError("");
-          }}
+    <TouchableWithoutFeedback
+      onPress={() => {
+        Keyboard.dismiss();
+      }}
+    >
+      <View style={styles.container}>
+        <Header
+          text="Change Password"
+          navigation={() => navigation?.goBack()}
+          isBackButtonVisible={true}
         />
+        <Text style={styles?.label}>Enter Current Password</Text>
+        {errors?.password && (
+          <Text style={styles?.error}>{errors?.password?.message}</Text>
+        )}
+        <Controller
+          name="password"
+          control={control}
+          rules={{
+            required: { value: true, message: "This field is required" },
+            minLength: {
+              value: 8,
+              message: "Password must be >= 8 characters",
+            },
+          }}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View
+              style={[
+                styles?.input,
+                {
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  paddingHorizontal: 10,
+                },
+                errors?.password && styles?.errorBorder,
+                focusPassword && { borderColor: "#5188E3" },
+              ]}
+              onFocus={() => focusHandler(setFocusPassword)}
+              onBlur={() => blurHandler(onBlur, setFocusPassword)}
+            >
+              <TextInput
+                style={{
+                  fontSize: 15,
+                  height: 45,
+                  flex: 1,
+                  marginEnd: 5,
+                }}
+                secureTextEntry={passwordVisibility}
+                selectionColor={"#5188E3"}
+                onChangeText={onChange}
+                value={value}
+                autoCapitalize="none"
+              />
+              <Pressable onPress={handlePasswordVisibility}>
+                <MaterialCommunityIcons
+                  name={rightIcon}
+                  size={22}
+                  color="#232323"
+                />
+              </Pressable>
+            </View>
+          )}
+        />
+        <Button text="Continue" onPress={handleSubmit(onSubmit)} />
+        <View>
+          <ErrorDialog
+            visible={!!error}
+            errorHeader={"Error"}
+            errorDescription={error}
+            clearError={() => {
+              setError("");
+            }}
+          />
+        </View>
       </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

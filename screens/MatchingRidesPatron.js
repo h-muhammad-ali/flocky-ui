@@ -7,6 +7,8 @@ import {
   BackHandler,
   ActivityIndicator,
   AppState,
+  TouchableOpacity,
+  Image,
 } from "react-native";
 import Header from "../components/Header";
 import HitcherCard from "../components/HitcherCard";
@@ -26,11 +28,11 @@ import {
   setRideInProgress,
   clearRideStatus,
 } from "../redux/ride/rideActions";
-import { resetLocationState } from "../redux/locations/locationsActions";
 import { useFocusEffect } from "@react-navigation/native";
 import EmptyFlatlistMessage from "../components/EmptyFlatlistMessage";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
+import * as Linking from "expo-linking";
 
 let lat;
 let long;
@@ -56,13 +58,16 @@ const MatchingRidesPatron = ({ navigation }) => {
   const [goBackConfirmation, setGoBackConfirmation] = useState(false);
   const [cancel, setCancel] = useState(false);
   const [finish, setFinish] = useState(false);
+  const [mapIcon, showMapIcon] = useState(false);
   const appState = useRef(AppState.currentState);
   const [appStateVisible, setAppStateVisible] = useState(appState.current);
   const { jwt } = useSelector((state) => state?.currentUser);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const isMounted = useMountedState();
   const dispatch = useDispatch();
-  const { source, destination } = useSelector((state) => state?.locations);
+  const { source, destination, wayPoints } = useSelector(
+    (state) => state?.locations
+  );
 
   useFocusEffect(
     React.useCallback(() => {
@@ -228,10 +233,10 @@ const MatchingRidesPatron = ({ navigation }) => {
         if (todo === "start") {
           dispatch(setRideInProgress());
           stopBackgroundUpdate();
+          showMapIcon(true);
         } else {
           dispatch(clearRideStatus());
           dispatch(clearRideID());
-          //dispatch(resetLocationState());
         }
       })
       .catch((error) => {
@@ -240,7 +245,7 @@ const MatchingRidesPatron = ({ navigation }) => {
           setError("No Internet connection!");
         } else if (error?.response) {
           setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            `${error?.response?.data}.`
           );
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
@@ -266,7 +271,6 @@ const MatchingRidesPatron = ({ navigation }) => {
       .then((response) => {
         dispatch(clearRideStatus());
         dispatch(clearRideID());
-        //dispatch(resetLocationState());
       })
       .catch((error) => {
         console?.log(error);
@@ -274,7 +278,7 @@ const MatchingRidesPatron = ({ navigation }) => {
           setError("No Internet connection!");
         } else if (error?.response) {
           setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
+            `${error?.response?.data}.`
           );
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
@@ -286,6 +290,25 @@ const MatchingRidesPatron = ({ navigation }) => {
         setFullScreenLoading(false);
         setCancel(false);
       });
+  };
+
+  const openMap = () => {
+    const link = `https://www.google.com/maps/dir/?api=1&origin=${
+      source?.formatted_address
+    }&origin_place_id=${source?.place_id}&destination=${
+      destination?.formatted_address
+    }&destination_place_id=${
+      destination?.place_id
+    }&travelmode=driving&waypoints=${
+      wayPoints?.length === 0
+        ? ""
+        : wayPoints?.map((waypoint) => waypoint?.formatted_address)?.join("|")
+    }&waypoint_place_ids=${
+      wayPoints?.length === 0
+        ? ""
+        : wayPoints?.map((waypoint) => waypoint?.place_id)?.join("|")
+    }`;
+    Linking.openURL(link);
   };
 
   const fetchMatchedHitchers = (isLoading) => {
@@ -313,7 +336,7 @@ const MatchingRidesPatron = ({ navigation }) => {
           if (error?.response) {
             if (error?.response?.status !== 404) {
               setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
+                `${error?.response?.data}.`
               );
             } else {
               setHitchers([]);
@@ -333,14 +356,6 @@ const MatchingRidesPatron = ({ navigation }) => {
         });
     }
   };
-  // useEffect(() => {
-  //   apiCancelToken = axios.CancelToken.source();
-  //   fetchMatchedHitchers(true);
-  //   return () =>
-  //     apiCancelToken?.cancel(
-  //       "API Request was cancelled because of component unmount."
-  //     );
-  // }, [fetchMatchedHitchers]);
 
   if (fullScreenLoading) {
     return (
@@ -366,6 +381,22 @@ const MatchingRidesPatron = ({ navigation }) => {
       <Text style={styles?.text}>
         Destination: {destination && `${destination?.formatted_address}`}
       </Text>
+      {mapIcon ? (
+        <>
+          <TouchableOpacity
+            style={styles?.mapButtonContainer}
+            onPress={() => openMap()}
+          >
+            <Text style={styles?.mapButtonText}>Open Google Maps</Text>
+            <Image
+              source={require("../assets/flocky-assets/google-maps.png")}
+              style={styles?.image}
+            />
+          </TouchableOpacity>
+        </>
+      ) : (
+        <></>
+      )}
       {loading ? (
         <View style={{ flex: 1, justifyContent: "center" }}>
           <ActivityIndicator size="large" color="#5188E3" />
@@ -405,13 +436,14 @@ const MatchingRidesPatron = ({ navigation }) => {
             <Button
               text={rideStatus === "P" ? "Finish Ride" : "Start Ride"}
               onPress={() => {
-                if (hitchers.length === 0) {
+                if (hitchers.length === 0 && rideStatus !== "P") {
                   setWarning(
                     "You can't go further alone! Wait for hitchers and keep refreshing the screen."
                   );
                 } else {
-                  if (rideStatus === "P") setFinish(true);
-                  else changeRideStatus("start");
+                  if (rideStatus === "P") {
+                    setFinish(true);
+                  } else changeRideStatus("start");
                 }
               }}
             />
@@ -492,6 +524,21 @@ const styles = StyleSheet?.create({
     width: "100%",
     alignSelf: "center",
     flex: 1,
+  },
+  image: { width: 30, height: 30, borderRadius: 15 },
+  mapButtonText: {
+    textAlignVertical: "center",
+    marginHorizontal: 10,
+    fontFamily: "NunitoSans-SemiBold",
+  },
+  mapButtonContainer: {
+    flexDirection: "row",
+    alignSelf: "center",
+    borderWidth: 2,
+    borderColor: "#5188E3",
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "white",
   },
 });
 

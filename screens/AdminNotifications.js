@@ -38,18 +38,12 @@ const AdminNotifications = () => {
         .then((response) => {
           if (serverError) setServerError(false);
           const resp = response?.data;
-          setNotifications(resp?.recently_joined_persons);
+          setNotifications(resp?.recently_joined_persons ?? []);
         })
         .catch((error) => {
           console?.log(error);
           if (error?.response) {
-            if (error?.response?.status !== 404) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
-            } else {
-              setNotifications([]);
-            }
+            setError(`${error?.response?.data}.`);
             setServerError(false);
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);

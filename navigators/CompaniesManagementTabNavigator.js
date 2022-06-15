@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { StyleSheet, TouchableOpacity, Text, View } from "react-native";
 import { MaterialIcons, FontAwesome, Ionicons } from "@expo/vector-icons";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
@@ -7,11 +7,28 @@ import Companies from "../screens/Companies";
 import BlockedCompanies from "../screens/BlockedCompanies";
 import { useDispatch } from "react-redux";
 import { clearCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const Tab = createBottomTabNavigator();
 
 const CompaniesManagementTabNavigator = ({ navigation }) => {
   const dispatch = useDispatch();
+  const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  if (showLogoutDialog) {
+    return (
+      <ConfirmationDialog
+        visible={showLogoutDialog}
+        heading={"Wait!"}
+        body={"Are you sure you want to logout?"}
+        positiveHandler={() => {
+          dispatch(clearCurrentUserJWT());
+        }}
+        negativeHandler={() => {
+          setShowLogoutDialog(false);
+        }}
+      />
+    );
+  }
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -20,7 +37,7 @@ const CompaniesManagementTabNavigator = ({ navigation }) => {
             <TouchableOpacity
               style={{ marginEnd: 15 }}
               onPress={() => {
-                dispatch(clearCurrentUserJWT());
+                setShowLogoutDialog(true);
               }}
             >
               <Ionicons name="exit-outline" size={30} color="black" />

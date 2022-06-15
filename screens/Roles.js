@@ -90,6 +90,7 @@ const Roles = ({ navigation }) => {
       </View>
       <View>
         <ErrorDialog
+          showHeader={true}
           visible={!!patronTip || !!hitcherTip}
           errorHeader={!!hitcherTip ? "A Hitcher..." : "A Patron..."}
           errorDescription={!!hitcherTip ? hitcherTip : patronTip}

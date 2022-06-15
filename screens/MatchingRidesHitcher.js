@@ -84,9 +84,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
           setGoBackError("No Internet connection!");
         } else if (error?.response) {
           if (error?.response?.status !== 404) {
-            setGoBackError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setGoBackError(`${error?.response?.data}.`);
           }
         } else if (error?.request) {
           setGoBackError("Server not reachable! Please try again later.");
@@ -137,9 +135,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
         {loading ? (
           <>
             <View style={styles?.textContainer}>
-              <Text style={styles?.primaryText}>
-                Searching for a Patrons...
-              </Text>
+              <Text style={styles?.primaryText}>Searching for a Patron...</Text>
               <Text style={styles?.secondaryText}>
                 This may take a some time.
               </Text>

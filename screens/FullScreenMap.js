@@ -2,7 +2,11 @@ import React, { useRef, useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { StyleSheet, View } from "react-native";
 import MapView, { Marker } from "react-native-maps";
-import { MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import {
+  MaterialCommunityIcons,
+  MaterialIcons,
+  Entypo,
+} from "@expo/vector-icons";
 import Polyline from "@mapbox/polyline";
 
 const FullScreenMap = ({ route }) => {
@@ -84,8 +88,16 @@ const FullScreenMap = ({ route }) => {
 
   useEffect(() => {
     console?.log(route);
-    if (!source || !destination || (route?.params?.start && route?.params?.end))
+    if (
+      !source ||
+      !destination ||
+      (route?.params?.start && route?.params?.end)
+    ) {
+      setTimeout(() => {
+        fitToMarkers(wayPoints);
+      }, 1000);
       return;
+    }
     getDirections();
   }, []);
   return (
@@ -114,7 +126,7 @@ const FullScreenMap = ({ route }) => {
             }
             identifier="source"
           >
-            <MaterialIcons name="trip-origin" size={30} color="black" />
+            <MaterialIcons name="my-location" size={30} color="black" />
           </Marker>
         )}
 
@@ -133,7 +145,7 @@ const FullScreenMap = ({ route }) => {
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
                   size={24}
-                  color={"#5188E3"}
+                  color={"black"}
                 />
               </Marker>
             ))
@@ -151,7 +163,7 @@ const FullScreenMap = ({ route }) => {
                 <MaterialCommunityIcons
                   name={`numeric-${index + 1}-circle`}
                   size={24}
-                  color={"#5188E3"}
+                  color={"black"}
                 />
               </Marker>
             ))}
@@ -186,7 +198,7 @@ const FullScreenMap = ({ route }) => {
             }
             identifier="destination"
           >
-            <MaterialCommunityIcons name="target" size={35} color="black" />
+            <Entypo name="flag" size={35} color="black" />
           </Marker>
         )}
       </MapView>

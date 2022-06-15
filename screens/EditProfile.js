@@ -31,6 +31,8 @@ const EditProfile = ({ navigation }) => {
   const [error, setError] = useState("");
   const [focusName, setFocusName] = useState(false);
   const [imgURL, setImgURL] = useState("");
+  const [name, setName] = useState("");
+  const [genderFromAPI, setGenderFromAPI] = useState("");
   const { jwt } = useSelector((state) => state?.currentUser);
   const showToast = () => {
     ToastAndroid.show("User info updated successfully!", ToastAndroid?.LONG);
@@ -60,36 +62,43 @@ const EditProfile = ({ navigation }) => {
 
   const onSubmit = (data) => {
     setLoading(true);
-    axios
-      .put(`${BASE_URL}/account/user/details/update`, data, {
-        timeout: 5000,
-        headers: {
-          Authorization: `Bearer ${jwt}`,
-        },
-      })
-      .then((response) => {
-        showToast();
-        reset();
-        navigation?.navigate("Add Photo", {
-          isEdit: true,
-          imageURL: imgURL,
-        });
-      })
-      .catch((error) => {
-        console?.log(error);
-        if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
-        } else if (error?.request) {
-          setError("Server not reachable! Please try again later.");
-        } else {
-          console.log(error);
-        }
-      })
-      .finally(() => {
-        setLoading(false);
+    if (name === data?.name && genderFromAPI === data?.gender) {
+      reset();
+      navigation?.navigate("Add Photo", {
+        isEdit: true,
+        imageURL: imgURL,
       });
+      setLoading(false);
+    } else {
+      axios
+        .put(`${BASE_URL}/account/user/details/update`, data, {
+          timeout: 5000,
+          headers: {
+            Authorization: `Bearer ${jwt}`,
+          },
+        })
+        .then((response) => {
+          showToast();
+          reset();
+          navigation?.navigate("Add Photo", {
+            isEdit: true,
+            imageURL: imgURL,
+          });
+        })
+        .catch((error) => {
+          console?.log(error);
+          if (error?.response) {
+            setError(`${error?.response?.data}.`);
+          } else if (error?.request) {
+            setError("Server not reachable! Please try again later.");
+          } else {
+            console.log(error);
+          }
+        })
+        .finally(() => {
+          setLoading(false);
+        });
+    }
   };
 
   useEffect(() => {
@@ -112,14 +121,14 @@ const EditProfile = ({ navigation }) => {
           email: resp?.email,
         };
         setImgURL(resp?.imgURL);
+        setName(resp?.name);
+        setGenderFromAPI(resp?.gender);
         reset(info);
       })
       .catch((error) => {
         console?.log(error);
         if (error?.response) {
-          setError(
-            `${error?.response?.data}. Status Code: ${error?.response?.status}`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {

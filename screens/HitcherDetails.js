@@ -61,9 +61,7 @@ const HitcherDetails = ({ route, navigation }) => {
           if (!connectionStatus) {
             setStayOnPageError("No Internet connection!");
           } else if (error?.response) {
-            setStayOnPageError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setStayOnPageError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setStayOnPageError(
               "Server not reachable! Can't get your vehicles."
@@ -136,9 +134,7 @@ const HitcherDetails = ({ route, navigation }) => {
           if (!connectionStatus) {
             setGoBackError("No Internet connection!");
           } else if (error?.response) {
-            setGoBackError(
-              `${error?.response?.data}. Status Code: ${error?.response?.status}`
-            );
+            setGoBackError(`${error?.response?.data}.`);
           } else if (error?.request) {
             setGoBackError("Server not reachable! Can't get your vehicles.");
           } else if (axios.isCancel(error)) {
@@ -210,48 +206,44 @@ const HitcherDetails = ({ route, navigation }) => {
       </TouchableOpacity>
 
       <View style={{ flex: 6, marginHorizontal: 10 }}>
-     
-          <MapForPatron
-            start={{
-              coords: {
-                lat: hitcher?.pickup_location?.coordinates?.latitude,
-                lng: hitcher?.pickup_location?.coordinates?.longitude,
-              },
-              formatted_address: hitcher?.pickup_location?.formatted_address,
-              place_id: hitcher?.pickup_location?.place_id,
-            }}
-            end={{
-              coords: {
-                lat: hitcher?.dropoff_location?.coordinates?.latitude,
-                lng: hitcher?.dropoff_location?.coordinates?.longitude,
-              },
-              formatted_address: hitcher?.dropoff_location?.formatted_address,
-              place_id: hitcher?.dropoff_location?.place_id,
-            }}
-            navigation={() => {
-              navigation?.navigate("Full Screen Map For Patron", {
-                start: {
-                  coords: {
-                    lat: hitcher?.pickup_location?.coordinates?.latitude,
-                    lng: hitcher?.pickup_location?.coordinates?.longitude,
-                  },
-                  formatted_address:
-                    hitcher?.pickup_location?.formatted_address,
-                  place_id: hitcher?.pickup_location?.place_id,
+        <MapForPatron
+          start={{
+            coords: {
+              lat: hitcher?.pickup_location?.coordinates?.latitude,
+              lng: hitcher?.pickup_location?.coordinates?.longitude,
+            },
+            formatted_address: hitcher?.pickup_location?.formatted_address,
+            place_id: hitcher?.pickup_location?.place_id,
+          }}
+          end={{
+            coords: {
+              lat: hitcher?.dropoff_location?.coordinates?.latitude,
+              lng: hitcher?.dropoff_location?.coordinates?.longitude,
+            },
+            formatted_address: hitcher?.dropoff_location?.formatted_address,
+            place_id: hitcher?.dropoff_location?.place_id,
+          }}
+          navigation={() => {
+            navigation?.navigate("Full Screen Map For Patron", {
+              start: {
+                coords: {
+                  lat: hitcher?.pickup_location?.coordinates?.latitude,
+                  lng: hitcher?.pickup_location?.coordinates?.longitude,
                 },
-                end: {
-                  coords: {
-                    lat: hitcher?.dropoff_location?.coordinates?.latitude,
-                    lng: hitcher?.dropoff_location?.coordinates?.longitude,
-                  },
-                  formatted_address:
-                    hitcher?.dropoff_location?.formatted_address,
-                  place_id: hitcher?.dropoff_location?.place_id,
+                formatted_address: hitcher?.pickup_location?.formatted_address,
+                place_id: hitcher?.pickup_location?.place_id,
+              },
+              end: {
+                coords: {
+                  lat: hitcher?.dropoff_location?.coordinates?.latitude,
+                  lng: hitcher?.dropoff_location?.coordinates?.longitude,
                 },
-              });
-            }}
-          />
-    
+                formatted_address: hitcher?.dropoff_location?.formatted_address,
+                place_id: hitcher?.dropoff_location?.place_id,
+              },
+            });
+          }}
+        />
       </View>
 
       <Button

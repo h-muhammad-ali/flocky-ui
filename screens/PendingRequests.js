@@ -32,18 +32,12 @@ const PendingRequests = () => {
         .then((response) => {
           if (serverError) setServerError(false);
           const resp = response?.data;
-          setOrganizations(resp);
+          setOrganizations(resp ?? []);
         })
         .catch((error) => {
           console?.log(error);
           if (error?.response) {
-            if (error?.response?.status !== 404) {
-              setError(
-                `${error?.response?.data}. Status Code: ${error?.response?.status}`
-              );
-            } else {
-              setOrganizations([]);
-            }
+            setError(`${error?.response?.data}.`);
             setServerError(false);
           } else if (error?.request) {
             if (connectionStatus) setServerError(true);

@@ -157,7 +157,7 @@ const MapForPatron = ({ navigation, start, end }) => {
               <MaterialCommunityIcons
                 name={`numeric-${index + 1}-circle`}
                 size={24}
-                color={"#5188E3"}
+                color={"black"}
               />
             </Marker>
           ))

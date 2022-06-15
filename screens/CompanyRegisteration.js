@@ -7,16 +7,19 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
+  Pressable,
 } from "react-native";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
 import Button from "../components/Button";
+import useTogglePasswordVisibility from "../custom-hooks/useTogglePasswordVisibility";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 const CompanyRegisteration = ({ navigation, route }) => {
   const EMAIL_REGEX =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const DOMAIN_REGEX =
-    /^@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    /^((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
   const {
     handleSubmit,
     control,
@@ -37,13 +40,15 @@ const CompanyRegisteration = ({ navigation, route }) => {
       company: data?.company,
       password: data?.password,
       email: data?.email.toLowerCase(),
-      domain: data?.domain,
+      domain: data?.domain ? data?.domain.toLowerCase() : "",
     });
   };
   const [focusPassword, setFocusPassword] = useState(false);
   const [focusEmail, setFocusEmail] = useState(false);
   const [focusCompany, setFocusCompany] = useState(false);
   const [focusDomain, setFocusDomain] = useState(false);
+  const { passwordVisibility, rightIcon, handlePasswordVisibility } =
+    useTogglePasswordVisibility();
   const focusHandler = (set) => {
     set(true);
   };
@@ -105,19 +110,42 @@ const CompanyRegisteration = ({ navigation, route }) => {
               },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
+              <View
                 style={[
                   styles?.input,
+                  {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingHorizontal: 10,
+                  },
                   errors?.password && styles?.errorBorder,
                   focusPassword && { borderColor: "#5188E3" },
                 ]}
-                secureTextEntry={true}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
                 onFocus={() => focusHandler(setFocusPassword)}
                 onBlur={() => blurHandler(onBlur, setFocusPassword)}
-                value={value}
-              />
+              >
+                <TextInput
+                  style={{
+                    fontSize: 15,
+                    height: 45,
+                    flex: 1,
+                    marginEnd: 5,
+                  }}
+                  secureTextEntry={passwordVisibility}
+                  selectionColor={"#5188E3"}
+                  onChangeText={onChange}
+                  value={value}
+                  autoCapitalize="none"
+                />
+                <Pressable onPress={handlePasswordVisibility}>
+                  <MaterialCommunityIcons
+                    name={rightIcon}
+                    size={22}
+                    color="#232323"
+                  />
+                </Pressable>
+              </View>
             )}
           />
           <Text style={styles?.label}>Email Address</Text>
@@ -143,6 +171,7 @@ const CompanyRegisteration = ({ navigation, route }) => {
                 onFocus={() => focusHandler(setFocusEmail)}
                 onBlur={() => blurHandler(onBlur, setFocusEmail)}
                 value={value}
+                autoCapitalize="none"
               />
             )}
           />
@@ -157,18 +186,42 @@ const CompanyRegisteration = ({ navigation, route }) => {
               pattern: { value: DOMAIN_REGEX, message: "Not a valid domain." },
             }}
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
+              <View
                 style={[
                   styles?.input,
+                  {
+                    flexDirection: "row",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    paddingHorizontal: 10,
+                  },
                   errors?.domain && styles?.errorBorder,
                   focusDomain && { borderColor: "#5188E3" },
                 ]}
-                selectionColor={"#5188E3"}
-                onChangeText={onChange}
                 onFocus={() => focusHandler(setFocusDomain)}
                 onBlur={() => blurHandler(onBlur, setFocusDomain)}
-                value={value}
-              />
+              >
+                <Text
+                  style={[
+                    { fontFamily: "NunitoSans-Bold", color: "grey" },
+                    focusDomain && { color: "black" },
+                  ]}
+                >
+                  @
+                </Text>
+                <TextInput
+                  style={{
+                    fontSize: 15,
+                    height: 45,
+                    flex: 1,
+                    marginEnd: 5,
+                  }}
+                  selectionColor={"#5188E3"}
+                  onChangeText={onChange}
+                  value={value}
+                  autoCapitalize="none"
+                />
+              </View>
             )}
           />
         </KeyboardAvoidingView>
@@ -191,6 +244,7 @@ const styles = StyleSheet?.create({
     height: 45,
     marginHorizontal: 10,
     paddingStart: 10,
+    paddingEnd: 5,
     marginBottom: 15,
   },
   label: {

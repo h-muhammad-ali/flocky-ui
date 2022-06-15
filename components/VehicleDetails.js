@@ -33,7 +33,6 @@ const styles = StyleSheet?.create({
     textAlign: "center",
     color: "white",
     fontWeight: "bold",
-    textDecorationLine: "underline",
     marginHorizontal: 5,
   },
   detailContainer: { flex: 1, alignItems: "center" },

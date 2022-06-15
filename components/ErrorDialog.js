@@ -8,6 +8,7 @@ const ErrorDialog = ({
   clearError,
   isRetry,
   buttonText,
+  showHeader,
 }) => {
   const handleOK = () => {
     clearError();
@@ -16,7 +17,11 @@ const ErrorDialog = ({
     <View style={styles?.container}>
       <Modal isVisible={visible}>
         <View style={styles?.modal}>
-          <Text style={styles?.header}>{errorHeader}</Text>
+          {showHeader ? (
+            <Text style={styles?.header}>{errorHeader}</Text>
+          ) : (
+            <></>
+          )}
           <Text style={styles?.description}>{errorDescription}</Text>
           <TouchableOpacity onPress={handleOK} style={styles?.buttonContainer}>
             <Text style={styles?.buttonText}>
@@ -49,6 +54,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontFamily: "Kanit-Regular",
+    fontSize: 16,
     marginVertical: 10,
   },
   buttonText: {
@@ -58,7 +64,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     backgroundColor: "#5188E3",
-    marginHorizontal: 90,
+    marginHorizontal: 70,
     paddingVertical: 10,
     borderRadius: 50,
     marginVertical: 10,
