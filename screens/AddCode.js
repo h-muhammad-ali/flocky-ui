@@ -137,7 +137,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     } else if (route.params?.adminConfirmationCode) {
       setLoading(true);
@@ -201,7 +201,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     } else {
       route.params?.resetCode
@@ -245,7 +245,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     } else if (route.params?.adminConfirmationCode) {
       setLoading(true);
@@ -272,7 +272,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     } else {
       const data = {
@@ -298,7 +298,7 @@ const AddCode = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     }
   };

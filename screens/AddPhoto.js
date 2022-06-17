@@ -182,7 +182,7 @@ const AddPhoto = ({ navigation, route }) => {
           }
         })
         .finally(() => {
-          // setLoading(false);
+          setLoading(false);
         });
     }
   }, [imgURL]);
