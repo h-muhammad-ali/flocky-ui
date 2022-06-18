@@ -6,7 +6,7 @@ import PendingRequests from "../screens/PendingRequests";
 import Companies from "../screens/Companies";
 import BlockedCompanies from "../screens/BlockedCompanies";
 import { useDispatch } from "react-redux";
-import { clearCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import { resetCurrentUser } from "../redux/currentUser/currentUserActions";
 import ConfirmationDialog from "../components/ConfirmationDialog";
 
 const Tab = createBottomTabNavigator();
@@ -21,7 +21,7 @@ const CompaniesManagementTabNavigator = ({ navigation }) => {
         heading={"Wait!"}
         body={"Are you sure you want to logout?"}
         positiveHandler={() => {
-          dispatch(clearCurrentUserJWT());
+          dispatch(resetCurrentUser());
         }}
         negativeHandler={() => {
           setShowLogoutDialog(false);

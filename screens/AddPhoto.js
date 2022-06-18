@@ -16,15 +16,14 @@ import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 import { storage } from "../config/firebase";
-import {
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from "firebase/storage";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { useDispatch } from "react-redux";
-import { setCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import {
+  setCurrentUserJWT,
+  setCurrentUserImageURL,
+} from "../redux/currentUser/currentUserActions";
 import ConfirmationDialog from "../components/ConfirmationDialog";
+import ProfilePicture from "../components/ProfilePicture";
 
 const AddPhoto = ({ navigation, route }) => {
   const [image, setImage] = useState("");
@@ -47,6 +46,7 @@ const AddPhoto = ({ navigation, route }) => {
       quality: 1,
     });
     if (!result?.cancelled) {
+      console.log(result?.uri);
       setImage(result?.uri);
     }
   };
@@ -110,7 +110,7 @@ const AddPhoto = ({ navigation, route }) => {
   }
 
   const removePhoto = () => {
-    setUploading(true);
+    setLoading(true);
     axios
       .delete(`${BASE_URL}/account/user/profile-picture/delete`, {
         timeout: 5000,
@@ -120,6 +120,7 @@ const AddPhoto = ({ navigation, route }) => {
       })
       .then(() => {
         console?.log("Successful!");
+        dispatch(setCurrentUserImageURL(null));
         showToast("Photo removed successfully!");
         navigation?.navigate("Roles");
       })
@@ -134,7 +135,7 @@ const AddPhoto = ({ navigation, route }) => {
         }
       })
       .finally(() => {
-        setUploading(false);
+        setLoading(false);
       });
   };
 
@@ -153,6 +154,8 @@ const AddPhoto = ({ navigation, route }) => {
         })
         .then(() => {
           if (route.params?.isEdit) {
+            dispatch(setCurrentUserImageURL(null));
+            dispatch(setCurrentUserImageURL(imgURL));
             showToast("Photo updated successfully!");
             navigation?.navigate("Roles");
           } else if (route.params?.isAdmin) {
@@ -233,8 +236,10 @@ const AddPhoto = ({ navigation, route }) => {
           <View style={styles?.imageContainer}>
             {uploading ? (
               <ActivityIndicator size="large" color="#5188E3" />
-            ) : (
+            ) : image?.includes("ImagePicker") ? (
               <Image source={{ uri: image }} style={styles?.image} />
+            ) : (
+              <ProfilePicture imageURL={image} size={180} />
             )}
           </View>
         ) : (

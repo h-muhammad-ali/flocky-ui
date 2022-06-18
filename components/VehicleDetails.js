@@ -7,7 +7,7 @@ const VehicleDetails = ({ make, model, registration_no, type }) => (
   <View style={styles?.container}>
     <View style={{ flexDirection: "row", alignItems: "center" }}>
       <Text style={styles?.titleText}>Vehicle Details</Text>
-      {type === "car" ? (
+      {type === "C" ? (
         <Ionicons name="car-sport-sharp" size={24} color="black" />
       ) : (
         <FontAwesome5 name="motorcycle" size={24} color="black" />

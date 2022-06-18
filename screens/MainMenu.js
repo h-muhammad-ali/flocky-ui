@@ -111,5 +111,6 @@ const styles = StyleSheet.create({
   logo: {
     width: SCREEN_HEIGHT / 8,
     height: SCREEN_HEIGHT / 8,
+    marginTop: 10,
   },
 });

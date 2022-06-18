@@ -1,6 +1,8 @@
 import {
-  CLEAR_CURRENT_USER_JWT,
   SET_CURRENT_USER_JWT,
+  SET_CURRENT_USER_IMG_URL,
+  SET_CURRENT_USER_NAME,
+  RESET_CURRENT_USER,
 } from "./currentUserTypes";
 
 export const setCurrentUserJWT = (jwt) => ({
@@ -8,6 +10,16 @@ export const setCurrentUserJWT = (jwt) => ({
   payload: jwt,
 });
 
-export const clearCurrentUserJWT = () => ({
-  type: CLEAR_CURRENT_USER_JWT,
+export const setCurrentUserImageURL = (imgURL) => ({
+  type: SET_CURRENT_USER_IMG_URL,
+  payload: imgURL,
+});
+
+export const setCurrentUserName = (name) => ({
+  type: SET_CURRENT_USER_NAME,
+  payload: name,
+});
+
+export const resetCurrentUser = () => ({
+  type: RESET_CURRENT_USER,
 });

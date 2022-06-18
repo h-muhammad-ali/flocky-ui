@@ -26,6 +26,42 @@ const Map = ({ navigation, route }) => {
   const [error, setError] = useState("");
   const prevLocation = usePrevious(location);
   const dispatch = useDispatch();
+  const haversineFormula = (coords1, coords2) => {
+    const R = 6371000;
+    let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
+    let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
+
+    let a =
+      Math.pow(Math.sin(latDiff / 2), 2) +
+      Math.cos(coords1.lat * (Math.PI / 180)) *
+        Math.cos(coords2.lat * (Math.PI / 180)) *
+        Math.pow(Math.sin(longDiff / 2), 2);
+
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+  const dispatchSource = () => {
+    if (
+      haversineFormula(location?.coords, {
+        lat: route.params?.orgLoc?.coordinates?.latitude,
+        lng: route.params?.orgLoc?.coordinates?.longitude,
+      }) > 100
+    ) {
+      dispatch(setSource(location));
+      dispatch(
+        setDestination({
+          ...route.params?.orgLoc,
+          coords: {
+            lat: route.params?.orgLoc?.coordinates?.latitude,
+            lng: route.params?.orgLoc?.coordinates?.longitude,
+          },
+        })
+      );
+    } else {
+      dispatch(setSource(location));
+      dispatch(setDestination(null));
+    }
+  };
   const onRegionChangeComplete = (region) => {
     setAddress("Loading...");
     if (location === null && prevLocation === undefined) {
@@ -38,12 +74,15 @@ const Map = ({ navigation, route }) => {
         )
         .then((response) => {
           let result = response.data["results"][0];
-          setAddress(result["formatted_address"]);
+          setAddress(result?.formatted_address || "Unknown Address");
           setLocation({
             coords: result["geometry"]["location"],
             place_id: result["place_id"],
-            formatted_address: result["formatted_address"],
-            short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
+            formatted_address:
+              result?.formatted_address || "Unknown Formatted Address",
+            short_address: `${
+              result?.address_components[0]?.long_name || "unknown"
+            }, ${result?.address_components[1]?.short_name || "unknown"}`,
           });
         })
         .catch((error) => {
@@ -75,12 +114,15 @@ const Map = ({ navigation, route }) => {
               )
               .then((response) => {
                 let result = response.data["results"][0];
-                setAddress(result["formatted_address"]);
+                setAddress(result?.formatted_address || "Unknown Address");
                 setLocation({
                   coords: result["geometry"]["location"],
                   place_id: result["place_id"],
-                  formatted_address: result["formatted_address"],
-                  short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
+                  formatted_address:
+                    result?.formatted_address || "Unknown Formatted Address",
+                  short_address: `${
+                    result?.address_components[0]?.long_name || "unknown"
+                  }, ${result?.address_components[1]?.short_name || "unknown"}`,
                 });
                 if (isAnimate) {
                   const coords = result["geometry"]["location"];
@@ -183,7 +225,7 @@ const Map = ({ navigation, route }) => {
         style={styles?.button}
         onPress={() => {
           route.params?.origin === "From"
-            ? dispatch(setSource(location))
+            ? dispatchSource()
             : route.params?.origin === "To"
             ? dispatch(setDestination(location))
             : route.params?.origin === "Stop"

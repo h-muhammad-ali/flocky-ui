@@ -1,5 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
+import {
+  StyleSheet,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import {
   Ionicons,
@@ -10,12 +15,22 @@ import {
 import { useSelector, useDispatch } from "react-redux";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import Polyline from "@mapbox/polyline";
-import { setOverViewPolyline } from "../redux/locations/locationsActions";
+import {
+  setOverViewPolyline,
+  clearOverViewPolyline,
+} from "../redux/locations/locationsActions";
 import axios from "axios";
 import ErrorDialog from "../components/ErrorDialog";
 
 let apiCancelToken;
-const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
+const Map = ({
+  navigation,
+  start,
+  end,
+  way_points,
+  overview_polyline,
+  loading,
+}) => {
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
@@ -30,7 +45,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
   });
   const mapRef = useRef(null);
   const [error, setError] = useState("");
-  const getDirections = async () => { 
+  const getDirections = async () => {
     let waypoints = wayPoints
       ?.map((wayPoint) => `place_id:${wayPoint?.place_id}`)
       ?.join("|");
@@ -61,7 +76,9 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
         return coords;
       })
       .then(() => {
-        fitToMarkers(wayPoints);
+        setTimeout(() => {
+          fitToMarkers(wayPoints);
+        }, 500);
       })
       .catch((error) => {
         console?.log(error);
@@ -100,7 +117,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
       ...wayPoints?.map((waypoint, index) => `waypoint#${index + 1}`)
     );
     if (paramArray.length === 1) {
-      const region = source ?? destination ?? wayPoints[0]; 
+      const region = source ?? destination ?? wayPoints[0];
       mapRef?.current?.animateToRegion(
         {
           latitude: region?.coords?.lat,
@@ -130,6 +147,8 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
+    if ((source && !destination) || (!source && destination))
+      dispatch(clearOverViewPolyline());
     if (!source || !destination || (start && end)) {
       setTimeout(() => {
         fitToMarkers(wayPoints);
@@ -142,6 +161,13 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
         "API Request was cancelled because of component unmount."
       );
   }, [source, destination, wayPoints]);
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", opacity: 0.5 }}>
+        <ActivityIndicator size="small" color="#5188E3" />
+      </View>
+    );
+  }
   return (
     <View style={{ flex: 1 }}>
       <MapView ref={mapRef} style={styles?.mapView} initialRegion={region}>
@@ -199,8 +225,7 @@ const Map = ({ navigation, start, end, way_points, overview_polyline }) => {
               </Marker>
             ))}
 
-        {(source && (destination || wayPoints?.length)) ||
-        (start && (end || way_points?.length)) ? (
+        {(source && destination) || (start && (end || way_points?.length)) ? (
           <MapView.Polyline
             coordinates={coords}
             strokeWidth={6}

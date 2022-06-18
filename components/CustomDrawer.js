@@ -5,7 +5,6 @@ import {
   View,
   ActivityIndicator,
   TouchableOpacity,
-  Image,
 } from "react-native";
 import {
   DrawerContentScrollView,
@@ -14,20 +13,26 @@ import {
 } from "@react-navigation/drawer";
 import { Ionicons, FontAwesome, EvilIcons } from "@expo/vector-icons";
 import { useDispatch } from "react-redux";
-import { clearCurrentUserJWT } from "../redux/currentUser/currentUserActions";
+import {
+  resetCurrentUser,
+  setCurrentUserImageURL,
+  setCurrentUserName,
+} from "../redux/currentUser/currentUserActions";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
+import ProfilePicture from "./ProfilePicture";
 
 let apiCancelToken;
 const CustomDrawer = ({ isAdmin, ...props }) => {
   const dispatch = useDispatch();
-  const { jwt } = useSelector((state) => state?.currentUser);
-  const [organizationName, setOrganizationName] = useState("");
+  const { jwt, imageURL, userName } = useSelector(
+    (state) => state?.currentUser
+  );
+  const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const [peopleCount, setPeopleCount] = useState(0);
-  const [userName, setUserName] = useState("");
-  const [imgURL, setImgURL] = useState("");
+  const [companyName, setCompanyName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const fetchAdminInfo = () => {
@@ -42,15 +47,13 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
       })
       .then((response) => {
         const resp = response?.data;
-        setOrganizationName(resp?.organization_name);
+        setCompanyName(resp?.organization_name);
         setPeopleCount(resp?.people_count);
       })
       .catch((error) => {
         console?.log(error);
         if (error?.response) {
-          setError(
-            `${error?.response?.data}.`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else {
@@ -80,15 +83,13 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
           company: resp?.organization?.name,
           email: resp?.email,
         };
-        setUserName(resp?.name);
-        setImgURL(resp?.imgURL);
+        dispatch(setCurrentUserName(resp?.name));
+        dispatch(setCurrentUserImageURL(resp?.imgURL));
       })
       .catch((error) => {
         console?.log(error);
         if (error?.response) {
-          setError(
-            `${error?.response?.data}.`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else {
@@ -102,13 +103,15 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
-    if (isAdmin) {
-      fetchAdminInfo();
-    } else {
-      fetchUserInfo();
+    if (connectionStatus) {
+      if (isAdmin) {
+        fetchAdminInfo();
+      } else {
+        fetchUserInfo();
+      }
     }
     return () => apiCancelToken?.cancel("Data Fetching Cancelled");
-  }, []);
+  }, [connectionStatus]);
   return (
     <View style={styles.container}>
       <DrawerContentScrollView {...props}>
@@ -122,13 +125,12 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
           <>
             {!isAdmin ? (
               <View style={styles.headerContainer}>
-                {imgURL ? (
-                  <View style={styles?.imageContainer}>
-                    <Image source={{ uri: imgURL }} style={styles?.image} />
-                  </View>
-                ) : (
-                  <Ionicons name="person-circle" size={100} />
-                )}
+                <ProfilePicture
+                  imageURL={imageURL}
+                  size={100}
+                  showEdit={true}
+                  navigation={props?.navigation}
+                />
                 {userName ? (
                   <Text style={[styles?.headerText, { fontSize: 30 }]}>
                     {userName}
@@ -138,12 +140,12 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
                 )}
               </View>
             ) : (
-              <View>
+              <>
                 <View style={styles.headerContainer}>
                   <FontAwesome name="institution" size={100} color="black" />
-                  {organizationName ? (
+                  {companyName ? (
                     <Text style={[styles?.headerText, { fontSize: 30 }]}>
-                      {organizationName}
+                      {companyName}
                     </Text>
                   ) : (
                     <></>
@@ -156,20 +158,19 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
                     <></>
                   )}
                 </View>
-              </View>
+                <View style={styles.headerContainer}>
+                  <TouchableOpacity
+                    style={styles?.button}
+                    onPress={() => {
+                      fetchAdminInfo();
+                    }}
+                  >
+                    <Text style={styles?.buttonText}>Refresh</Text>
+                    <EvilIcons name="refresh" size={24} color="#427646" />
+                  </TouchableOpacity>
+                </View>
+              </>
             )}
-            <View style={styles.headerContainer}>
-              <TouchableOpacity
-                style={styles?.button}
-                onPress={() => {
-                  if (isAdmin) fetchAdminInfo();
-                  else fetchUserInfo();
-                }}
-              >
-                <Text style={styles?.buttonText}>Refresh</Text>
-                <EvilIcons name="refresh" size={24} color="#427646" />
-              </TouchableOpacity>
-            </View>
           </>
         )}
         <DrawerItemList {...props} />
@@ -179,7 +180,7 @@ const CustomDrawer = ({ isAdmin, ...props }) => {
         labelStyle={styles.logoutText}
         label="Logout"
         onPress={() => {
-          dispatch(clearCurrentUserJWT());
+          dispatch(resetCurrentUser());
         }}
         icon={({ focused, color, size }) => (
           <Ionicons color={color} size={size} name="exit" />
@@ -236,18 +237,5 @@ const styles = StyleSheet.create({
     fontFamily: "NunitoSans-Regular",
     fontSize: 10,
     textAlignVertical: "center",
-  },
-  image: {
-    resizeMode: "cover",
-    width: "100%",
-    height: "100%",
-  },
-  imageContainer: {
-    aspectRatio: 1 * 1,
-    width: 100,
-    height: 100,
-    overflow: "hidden",
-    borderRadius: 100,
-    marginVertical: 15,
   },
 });

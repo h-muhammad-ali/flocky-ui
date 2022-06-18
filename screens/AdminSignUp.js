@@ -53,9 +53,14 @@ const AdminSignUp = ({ navigation, route }) => {
         gender: data?.gender(),
         password: route?.params?.password,
       },
-      coordinates: {
-        latitude: route.params?.location?.coords?.lat,
-        longitude: route.params?.location?.coords?.lng,
+      location: {
+        coordinates: {
+          latitude: route.params?.location?.coords?.lat,
+          longitude: route.params?.location?.coords?.lng,
+        },
+        formatted_address: route.params?.location?.formatted_address,
+        place_id: route.params?.location?.place_id,
+        short_address: route.params?.location?.short_address,
       },
     };
     axios

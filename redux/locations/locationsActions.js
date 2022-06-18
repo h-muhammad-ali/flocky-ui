@@ -7,6 +7,7 @@ import {
   EMPTY_SOURCE,
   EMPTY_DESTINATION,
   SET_OVERVIEW_POLYLINE,
+  CLEAR_OVERVIEW_POLYLINE,
   RESET_LOCATION_STATE,
 } from "./locationsTypes";
 
@@ -45,6 +46,10 @@ export const emptyDestination = () => ({
 export const setOverViewPolyline = (overview_polyline) => ({
   type: SET_OVERVIEW_POLYLINE,
   payload: overview_polyline,
+});
+
+export const clearOverViewPolyline = () => ({
+  type: CLEAR_OVERVIEW_POLYLINE,
 });
 
 export const resetLocationState = () => ({

@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   ToastAndroid,
 } from "react-native";
+import { setCurrentUserName } from "../redux/currentUser/currentUserActions";
 import DropDownPicker from "react-native-dropdown-picker";
 import Header from "../components/Header";
 import { useForm, Controller } from "react-hook-form";
@@ -17,10 +18,11 @@ import Button from "../components/Button";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
 import ErrorDialog from "../components/ErrorDialog";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 
 let apiCancelToken;
 const EditProfile = ({ navigation }) => {
+  const dispatch = useDispatch();
   const [genderOpen, setGenderOpen] = useState(false);
   const [gender, setGender] = useState([
     { label: "Male", value: "M" },
@@ -31,9 +33,8 @@ const EditProfile = ({ navigation }) => {
   const [error, setError] = useState("");
   const [focusName, setFocusName] = useState(false);
   const [imgURL, setImgURL] = useState("");
-  const [name, setName] = useState("");
   const [genderFromAPI, setGenderFromAPI] = useState("");
-  const { jwt } = useSelector((state) => state?.currentUser);
+  const { jwt, userName } = useSelector((state) => state?.currentUser);
   const showToast = () => {
     ToastAndroid.show("User info updated successfully!", ToastAndroid?.LONG);
   };
@@ -62,28 +63,30 @@ const EditProfile = ({ navigation }) => {
 
   const onSubmit = (data) => {
     setLoading(true);
-    if (name === data?.name && genderFromAPI === data?.gender) {
+    if (userName === data?.name && genderFromAPI === data?.gender()) {
       reset();
-      navigation?.navigate("Add Photo", {
-        isEdit: true,
-        imageURL: imgURL,
-      });
+      navigation?.navigate("Roles");
       setLoading(false);
     } else {
       axios
-        .put(`${BASE_URL}/account/user/details/update`, data, {
-          timeout: 5000,
-          headers: {
-            Authorization: `Bearer ${jwt}`,
+        .put(
+          `${BASE_URL}/account/user/details/update`,
+          {
+            ...data,
+            gender: data?.gender(),
           },
-        })
+          {
+            timeout: 5000,
+            headers: {
+              Authorization: `Bearer ${jwt}`,
+            },
+          }
+        )
         .then((response) => {
           showToast();
+          dispatch(setCurrentUserName(data?.name));
           reset();
-          navigation?.navigate("Add Photo", {
-            isEdit: true,
-            imageURL: imgURL,
-          });
+          navigation?.navigate("Roles");
         })
         .catch((error) => {
           console?.log(error);
@@ -121,7 +124,6 @@ const EditProfile = ({ navigation }) => {
           email: resp?.email,
         };
         setImgURL(resp?.imgURL);
-        setName(resp?.name);
         setGenderFromAPI(resp?.gender);
         reset(info);
       })

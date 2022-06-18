@@ -14,6 +14,62 @@ import { GOOGLE_MAPS_API_KEY } from "@env";
 
 const SelectLocation = ({ navigation, route }) => {
   const dispatch = useDispatch();
+  const haversineFormula = (coords1, coords2) => {
+    const R = 6371000;
+    let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
+    let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
+
+    let a =
+      Math.pow(Math.sin(latDiff / 2), 2) +
+      Math.cos(coords1.lat * (Math.PI / 180)) *
+        Math.cos(coords2.lat * (Math.PI / 180)) *
+        Math.pow(Math.sin(longDiff / 2), 2);
+
+    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+  const dispatchSource = (details) => {
+    if (
+      haversineFormula(details["geometry"]["location"], {
+        lat: route.params?.orgLoc?.coordinates?.latitude,
+        lng: route.params?.orgLoc?.coordinates?.longitude,
+      }) > 100
+    ) {
+      dispatch(
+        setSource({
+          coords: details["geometry"]["location"],
+          place_id: details["place_id"],
+          formatted_address:
+            details?.formatted_address || "Unknown Formatted Address",
+          short_address: `${
+            details?.address_components[0]?.long_name || "unknown"
+          }, ${details?.address_components[1]?.short_name || "unknown"}`,
+        })
+      );
+      dispatch(
+        setDestination({
+          ...route.params?.orgLoc,
+          coords: {
+            lat: route.params?.orgLoc?.coordinates?.latitude,
+            lng: route.params?.orgLoc?.coordinates?.longitude,
+          },
+        })
+      );
+    } else {
+      dispatch(
+        setSource({
+          coords: details["geometry"]["location"],
+          place_id: details["place_id"],
+          formatted_address:
+            details?.formatted_address || "Unknown Formatted Address",
+          short_address: `${
+            details?.address_components[0]?.long_name || "unknown"
+          }, ${details?.address_components[1]?.short_name || "unknown"}`,
+        })
+      );
+      dispatch(setDestination(null));
+    }
+  };
   return (
     <View style={styles?.container}>
       <Header
@@ -49,14 +105,7 @@ const SelectLocation = ({ navigation, route }) => {
         )}
         onPress={(data, details = null) => {
           route.params?.origin === "From"
-            ? dispatch(
-                setSource({
-                  coords: details["geometry"]["location"],
-                  place_id: details["place_id"],
-                  formatted_address: details["formatted_address"],
-                  short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
-                })
-              )
+            ? dispatchSource(details)
             : route.params?.origin === "To"
             ? dispatch(
                 setDestination({
@@ -112,6 +161,7 @@ const SelectLocation = ({ navigation, route }) => {
                   })
                 : navigation?.navigate("Map", {
                     origin: route?.params?.origin,
+                    orgLoc: route.params?.orgLoc,
                   });
             }}
           >

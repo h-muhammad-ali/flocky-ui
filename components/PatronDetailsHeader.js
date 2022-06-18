@@ -1,6 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View, Image } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import ProfilePicture from "../components/ProfilePicture";
 
 const PatronDetailsHeader = ({
   name,
@@ -12,11 +13,7 @@ const PatronDetailsHeader = ({
 }) => {
   return (
     <View style={styles?.container}>
-      {imgURL ? (
-        <Image source={{ uri: imgURL }} style={styles?.image} />
-      ) : (
-        <Ionicons name="person-circle" size={100} color={"#5188E3"} />
-      )}
+      <ProfilePicture imageURL={imgURL} size={90} />
       <View style={styles?.semiContainer}>
         <Text style={styles?.name}>{name}</Text>
         <Text style={styles?.nunitoSemiBold}>Rides Completed: {rides}</Text>

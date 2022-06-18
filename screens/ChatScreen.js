@@ -4,7 +4,12 @@ import React, {
   useCallback,
   useLayoutEffect,
 } from "react";
-import { View, KeyboardAvoidingView, Text } from "react-native";
+import {
+  View,
+  KeyboardAvoidingView,
+  Text,
+  ActivityIndicator,
+} from "react-native";
 import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import { firestore } from "../config/firebase";
 import {
@@ -18,11 +23,13 @@ import {
 import { useSelector } from "react-redux";
 import { LogBox } from "react-native";
 import ErrorDialog from "../components/ErrorDialog";
+import ProfilePicture from "../components/ProfilePicture";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
 const ChatScreen = ({ navigation, route }) => {
   const { rideID, role } = useSelector((state) => state?.ride);
+  const { imageURL } = useSelector((state) => state?.currentUser);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState("");
@@ -109,8 +116,8 @@ const ChatScreen = ({ navigation, route }) => {
         onSend={(messages) => onSend(messages)}
         user={{
           _id: role === "P" ? rideID : route.params?.id,
-          avatar: !!route.params?.imgURL
-            ? route.params?.imgURL
+          avatar: imageURL
+            ? imageURL
             : "https://firebasestorage.googleapis.com/v0/b/flocky-2716.appspot.com/o/user_unknown.png?alt=media&token=65beea94-11e7-407b-ae25-fd33e4f0c7b3",
         }}
         showUserAvatar
@@ -147,6 +154,16 @@ const ChatScreen = ({ navigation, route }) => {
               borderRadius: 20,
               marginHorizontal: 10,
             }}
+          />
+        )}
+        renderAvatar={(props) => (
+          <ProfilePicture
+            imageURL={
+              props?.currentMessage?.user?.avatar ||
+              "https://firebasestorage.googleapis.com/v0/b/flocky-2716.appspot.com/o/user_unknown.png?alt=media&token=65beea94-11e7-407b-ae25-fd33e4f0c7b3"
+            }
+            size={36}
+            removeMargins={true}
           />
         )}
       />

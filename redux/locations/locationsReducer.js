@@ -7,6 +7,7 @@ import {
   EMPTY_SOURCE,
   EMPTY_DESTINATION,
   SET_OVERVIEW_POLYLINE,
+  CLEAR_OVERVIEW_POLYLINE,
   RESET_LOCATION_STATE,
 } from "./locationsTypes";
 
@@ -60,6 +61,11 @@ const locationsReducer = (state = initialState, { type, payload }) => {
       return {
         ...state,
         overview_polyline: payload,
+      };
+    case CLEAR_OVERVIEW_POLYLINE:
+      return {
+        ...state,
+        overview_polyline: null,
       };
     case RESET_LOCATION_STATE:
       return {

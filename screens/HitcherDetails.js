@@ -18,6 +18,7 @@ import ErrorDialog from "../components/ErrorDialog";
 import { useSelector } from "react-redux";
 import MapForPatron from "../components/MapForPatron";
 import { useFocusEffect } from "@react-navigation/native";
+import ProfilePicture from "../components/ProfilePicture";
 
 let apiCancelToken;
 const HitcherDetails = ({ route, navigation }) => {
@@ -170,11 +171,8 @@ const HitcherDetails = ({ route, navigation }) => {
         isBackButtonVisible={true}
       />
       <View style={styles?.headerContainer}>
-        {hitcher?.img_url ? (
-          <Image source={{ uri: hitcher?.img_url }} style={styles?.image} />
-        ) : (
-          <Ionicons name="person-circle" size={100} color={"#5188E3"} />
-        )}
+        {/* <Image source={{ uri: hitcher?.img_url }} style={styles?.image} /> */}
+        <ProfilePicture imageURL={hitcher?.img_url} size={90} />
         <View style={styles?.semiContainer}>
           <Text style={styles?.name}>{hitcher?.name}</Text>
         </View>

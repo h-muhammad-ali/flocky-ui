@@ -13,11 +13,12 @@ import { useSelector, useDispatch } from "react-redux";
 import Header from "../components/Header";
 import Map from "../components/Map";
 import Button from "../components/Button";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, Entypo } from "@expo/vector-icons";
 import {
   setSource,
   removeWayPoint,
   resetLocationState,
+  setDestination,
 } from "../redux/locations/locationsActions";
 import { setRideInWaiting } from "../redux/ride/rideActions";
 import * as Location from "expo-location";
@@ -35,7 +36,10 @@ const WhereTo = ({ navigation, route }) => {
   const [location, setLocation] = useState(null);
   const [errorMsg, setErrorMsg] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [mapLoading, setMapLoading] = useState(false);
   const [error, setError] = useState("");
+  const [orgLoc, setOrgLoc] = useState(null);
+  const [reset, resetLocation] = useState(true);
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const { role } = useSelector((state) => state?.ride);
   const { jwt } = useSelector((state) => state?.currentUser);
@@ -64,6 +68,7 @@ const WhereTo = ({ navigation, route }) => {
   );
 
   const haversineFormula = (coords1, coords2) => {
+    console.log(coords1, coords2);
     const R = 6371000;
     let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
     let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
@@ -79,7 +84,43 @@ const WhereTo = ({ navigation, route }) => {
   };
 
   const checkRadius = () => {
-    setLoading(true);
+    let betSourceAndOrg = haversineFormula(
+      {
+        lat: orgLoc?.coordinates?.latitude,
+        lng: orgLoc?.coordinates?.longitude,
+      },
+      source?.coords
+    );
+    let betDestinationAndOrg = haversineFormula(
+      {
+        lat: orgLoc?.coordinates?.latitude,
+        lng: orgLoc?.coordinates?.longitude,
+      },
+      destination?.coords
+    );
+    let betSourceAndDestination = haversineFormula(
+      source?.coords,
+      destination?.coords
+    );
+    if (betSourceAndOrg > 200 && betDestinationAndOrg > 200) {
+      setError(
+        "Either your source or destination should be within the 200 m radius of your organization."
+      );
+    } else if (betSourceAndDestination < 200) {
+      setError("Source & Destination are too close.");
+    } else if (
+      source?.coords?.lat === destination?.coords?.lat &&
+      source?.coords?.lng === destination?.coords?.lng
+    ) {
+      setError("Source & Destination can't be same!");
+    } else
+      role === "H"
+        ? dispatch(setRideInWaiting())
+        : navigation?.navigate("RideDetails");
+  };
+
+  useEffect(() => {
+    apiCancelToken = axios.CancelToken.source();
     axios
       .get(`${BASE_URL}/organization/${organization_id}/location`, {
         timeout: 5000,
@@ -88,38 +129,17 @@ const WhereTo = ({ navigation, route }) => {
       .then((response) => {
         const resp = response?.data;
         console?.log(resp);
-        let betSourceAndOrg = haversineFormula(
-          { lat: resp?.latitude, lng: resp?.longitude },
-          source?.coords
-        );
-        let betDestinationAndOrg = haversineFormula(
-          { lat: resp?.latitude, lng: resp?.longitude },
-          destination?.coords
-        );
-        if (betSourceAndOrg > 200 && betDestinationAndOrg > 200) {
-          setError(
-            "Either your source or destination should be within the 200 m radius of your organization."
-          );
-        } else if (
-          source?.coords?.lat === destination?.coords?.lat &&
-          source?.coords?.lng === destination?.coords?.lng
-        ) {
-          setError("Source & Destination can't be same!");
-        } else
-          role === "H"
-            ? dispatch(setRideInWaiting())
-            : navigation?.navigate("RideDetails");
+        if (isMounted()) setOrgLoc(resp);
       })
       .catch((error) => {
         console?.log(error);
         if (!connectionStatus) {
-          setError("No Internet Connection!");
+          if (isMounted()) setError("No Internet Connection!");
         } else if (error?.response) {
-          setError(
-            `${error?.response?.data}.`
-          );
+          if (isMounted()) setError(`${error?.response?.data}.`);
         } else if (error?.request) {
-          setError("Server not reachable! Please try again later.");
+          if (isMounted())
+            setError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {
           console.log(error?.message);
         } else {
@@ -127,13 +147,19 @@ const WhereTo = ({ navigation, route }) => {
         }
       })
       .finally(() => {
-        setLoading(false);
+        if (isMounted()) setLoading(false);
       });
-  };
+    return () => {
+      apiCancelToken?.cancel(
+        "API Request was cancelled because of component unmount."
+      );
+    };
+  }, [connectionStatus, isMounted]);
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
     const getCurrentPosition = async () => {
+      setMapLoading(true);
       Location.requestForegroundPermissionsAsync().then((response) => {
         if (response?.status === "granted") {
           Location.getCurrentPositionAsync({})
@@ -147,18 +173,50 @@ const WhereTo = ({ navigation, route }) => {
                 .then((response) => {
                   let result = response.data["results"][0];
                   if (isMounted()) {
+                    console.log(
+                      haversineFormula(result["geometry"]["location"], {
+                        lat: orgLoc?.coords?.latitude,
+                        lng: orgLoc?.coords?.longitude,
+                      })
+                    );
+                    if (
+                      haversineFormula(result["geometry"]["location"], {
+                        lat: orgLoc?.coordinates?.latitude,
+                        lng: orgLoc?.coordinates?.longitude,
+                      }) > 100
+                    ) {
+                      dispatch(
+                        setDestination({
+                          coords: {
+                            lat: orgLoc?.coordinates?.latitude,
+                            lng: orgLoc?.coordinates?.longitude,
+                          },
+                          formatted_address: orgLoc?.formatted_address,
+                          place_id: orgLoc?.place_id,
+                          short_address: orgLoc?.short_address,
+                        })
+                      );
+                    }
                     dispatch(
                       setSource({
                         coords: result["geometry"]["location"],
                         place_id: result["place_id"],
-                        formatted_address: result["formatted_address"],
-                        short_address: `${result["address_components"][0]["long_name"]}, ${result["address_components"][1]["short_name"]}`,
+                        formatted_address:
+                          result?.formatted_address ||
+                          "Unknown Formatted Address",
+                        short_address: `${
+                          result?.address_components[0]?.long_name || "unknown"
+                        }, ${
+                          result?.address_components[1]?.short_name || "unknown"
+                        }`,
                       })
                     );
+                    setMapLoading(false);
                   }
                 })
                 .catch((error) => {
                   console?.log(error);
+                  setMapLoading(false);
                   if (connectionStatus) {
                     if (axios.isCancel(error)) {
                       console.log(error?.message);
@@ -174,22 +232,25 @@ const WhereTo = ({ navigation, route }) => {
             })
             .catch((error) => {
               console?.log(error?.message);
+              if (isMounted()) setMapLoading(false);
               if (!connectionStatus && isMounted())
                 setError("No Internet Connection!");
             });
         } else {
+          setMapLoading(false);
           setErrorMsg("Permission to access location was denied");
           dispatch(setSource(null));
         }
       });
     };
-    getCurrentPosition();
+    if (orgLoc) getCurrentPosition();
     return () => {
       apiCancelToken?.cancel(
         "API Request was cancelled because of component unmount."
       );
     };
-  }, [isMounted, connectionStatus]);
+  }, [isMounted, connectionStatus, orgLoc, reset]);
+
   useEffect(() => {
     if (destination !== "" && ref?.current) {
       ref?.current?.setNativeProps({
@@ -218,19 +279,43 @@ const WhereTo = ({ navigation, route }) => {
       />
 
       <Text style={styles.label}>From</Text>
-      <TextInput
-        value={location ? source?.short_address : errorMsg ?? "Loading..."}
-        style={styles?.input}
-        selectionColor={"#5188E3"}
-        placeholder="City, town, address or place"
-        onPressOut={() =>
-          navigation?.navigate("SelectLocation", {
-            origin: "From",
-            org_id: organization_id,
-          })
-        }
-        showSoftInputOnFocus={false}
-      />
+      <View
+        style={[
+          styles?.input,
+          {
+            flexDirection: "row",
+            justifyContent: "space-between",
+            alignItems: "center",
+            paddingHorizontal: 10,
+          },
+        ]}
+      >
+        <TextInput
+          value={location ? source?.short_address : errorMsg ?? "Loading..."}
+          style={{
+            fontSize: 15,
+            height: 45,
+            flex: 1,
+            marginEnd: 5,
+          }}
+          selectionColor={"#5188E3"}
+          placeholder="City, town, address or place"
+          onPressOut={() =>
+            navigation?.navigate("SelectLocation", {
+              origin: "From",
+              orgLoc: orgLoc,
+            })
+          }
+          showSoftInputOnFocus={false}
+        />
+        <TouchableOpacity
+          onPress={() => {
+            resetLocation(!reset);
+          }}
+        >
+          <Entypo name="location" size={24} color="black" />
+        </TouchableOpacity>
+      </View>
       {wayPoints?.length != 0 && <Text style={styles?.label}>Way-Points</Text>}
       {route.params?.isPatron && wayPoints?.length != 0 ? (
         <FlatList
@@ -271,7 +356,7 @@ const WhereTo = ({ navigation, route }) => {
         onPressOut={() =>
           navigation?.navigate("SelectLocation", {
             origin: "To",
-            org_id: organization_id,
+            orgLoc: orgLoc,
           })
         }
         showSoftInputOnFocus={false}
@@ -294,11 +379,13 @@ const WhereTo = ({ navigation, route }) => {
       )}
 
       <Map
+        loading={mapLoading}
         navigation={() => {
           navigation?.navigate("Full Screen Map");
         }}
       />
       <Button
+        isDisabled={!orgLoc}
         text={route.params?.isPatron ? "Continue" : "Find Matching Rides"}
         onPress={() => {
           if (destination === null && ref.current) {
