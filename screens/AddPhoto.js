@@ -239,7 +239,11 @@ const AddPhoto = ({ navigation, route }) => {
             ) : image?.includes("ImagePicker") ? (
               <Image source={{ uri: image }} style={styles?.image} />
             ) : (
-              <ProfilePicture imageURL={image} size={180} />
+              <ProfilePicture
+                imageURL={image}
+                size={180}
+                removeMargins={true}
+              />
             )}
           </View>
         ) : (

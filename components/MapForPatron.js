@@ -143,24 +143,29 @@ const MapForPatron = ({ navigation, start, end }) => {
           </>
         )}
         {wayPoints.length ? (
-          wayPoints?.map((waypoint, index) => (
-            <Marker
-              key={waypoint?.place_id + index}
-              coordinate={{
-                latitude: waypoint?.coords?.lat,
-                longitude: waypoint?.coords?.lng,
-              }}
-              title={`WayPoint ${index + 1}`}
-              description={waypoint?.formatted_address}
-              identifier={`waypoint#${index + 1}`}
-            >
-              <MaterialCommunityIcons
-                name={`numeric-${index + 1}-circle`}
-                size={24}
-                color={"black"}
-              />
-            </Marker>
-          ))
+          wayPoints?.map((waypoint, index) =>
+            areCoordinatesAlmostEqual(start?.coords, waypoint?.coords) < 20 ||
+            areCoordinatesAlmostEqual(end?.coords, waypoint?.coords) < 20 ? (
+              <></>
+            ) : (
+              <Marker
+                key={waypoint?.place_id + index}
+                coordinate={{
+                  latitude: waypoint?.coords?.lat,
+                  longitude: waypoint?.coords?.lng,
+                }}
+                title={`WayPoint ${index + 1}`}
+                description={waypoint?.formatted_address}
+                identifier={`waypoint#${index + 1}`}
+              >
+                <MaterialCommunityIcons
+                  name={`numeric-${index + 1}-circle`}
+                  size={24}
+                  color={"black"}
+                />
+              </Marker>
+            )
+          )
         ) : (
           <></>
         )}

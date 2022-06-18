@@ -4,12 +4,7 @@ import React, {
   useCallback,
   useLayoutEffect,
 } from "react";
-import {
-  View,
-  KeyboardAvoidingView,
-  Text,
-  ActivityIndicator,
-} from "react-native";
+import { View, KeyboardAvoidingView, Text, Image } from "react-native";
 import { GiftedChat, Bubble, InputToolbar } from "react-native-gifted-chat";
 import { firestore } from "../config/firebase";
 import {
@@ -24,6 +19,7 @@ import { useSelector } from "react-redux";
 import { LogBox } from "react-native";
 import ErrorDialog from "../components/ErrorDialog";
 import ProfilePicture from "../components/ProfilePicture";
+import { Ionicons } from "@expo/vector-icons";
 
 LogBox.ignoreLogs(["Setting a timer"]);
 
@@ -156,16 +152,20 @@ const ChatScreen = ({ navigation, route }) => {
             }}
           />
         )}
-        renderAvatar={(props) => (
-          <ProfilePicture
-            imageURL={
-              props?.currentMessage?.user?.avatar ||
-              "https://firebasestorage.googleapis.com/v0/b/flocky-2716.appspot.com/o/user_unknown.png?alt=media&token=65beea94-11e7-407b-ae25-fd33e4f0c7b3"
-            }
-            size={36}
-            removeMargins={true}
-          />
-        )}
+        renderAvatar={(props) =>
+          !props?.currentMessage?.user?.avatar?.includes("user_unknown") ? (
+            <ProfilePicture
+              imageURL={props?.currentMessage?.user?.avatar}
+              size={36}
+              removeMargins={true}
+            />
+          ) : (
+            <Image
+              source={require("../assets/flocky-assets/user_unknown.png")}
+              style={{ width: 36, height: 36, borderRadius: 18 }}
+            />
+          )
+        }
       />
       <View>
         <ErrorDialog

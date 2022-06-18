@@ -25,7 +25,7 @@ const ProfilePicture = ({
             height: size || 100,
             borderRadius: size / 2 || 50,
           },
-          removeMargins && {
+          !removeMargins && {
             margin: 10,
           },
         ]}
@@ -88,8 +88,8 @@ const styles = StyleSheet.create({
   },
   editButton: {
     position: "absolute",
-    bottom: 0,
-    right: 0,
+    bottom: 10,
+    right: 10,
     backgroundColor: "white",
     borderRadius: 15,
     padding: 4,
