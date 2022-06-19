@@ -33,9 +33,13 @@ const ForgotPassword = ({ navigation }) => {
   const onSubmit = (data) => {
     setLoading(true);
     axios
-      .post(`${BASE_URL}/auth/password/reset/token`, data, {
-        timeout: 5000,
-      })
+      .post(
+        `${BASE_URL}/auth/password/reset/token`,
+        { email: data?.email.toLowerCase() },
+        {
+          timeout: 5000,
+        }
+      )
       .then((response) => {
         reset();
         navigation?.navigate("AddCode", {
@@ -88,6 +92,7 @@ const ForgotPassword = ({ navigation }) => {
             onChangeText={onChange}
             onBlur={onBlur}
             value={value}
+            autoCapitalize="none"
           />
         )}
       />

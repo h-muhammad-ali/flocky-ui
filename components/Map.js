@@ -147,8 +147,6 @@ const Map = ({
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
-    if ((source && !destination) || (!source && destination))
-      dispatch(clearOverViewPolyline());
     if (!source || !destination || (start && end)) {
       setTimeout(() => {
         fitToMarkers(wayPoints);

@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   Image,
   AppState,
+  ToastAndroid,
 } from "react-native";
 import Button from "../components/Button";
 import TimeLine from "../components/TimeLine";
@@ -133,13 +134,24 @@ const HitcherDetails = ({ route, navigation }) => {
         })
         .catch((error) => {
           if (!connectionStatus) {
-            setGoBackError("No Internet connection!");
+            // setGoBackError("No Internet connection!");
+            ToastAndroid.show("No Internet Connection", ToastAndroid?.SHORT);
+            navigation?.goBack();
           } else if (error?.response) {
-            setGoBackError(`${error?.response?.data}.`);
+            // setGoBackError(`${error?.response?.data}.`);
+            ToastAndroid.show("No User Found!", ToastAndroid?.SHORT);
+            navigation?.goBack();
           } else if (error?.request) {
-            setGoBackError("Server not reachable! Can't get your vehicles.");
+            // setGoBackError("Server not reachable! Can't get your vehicles.");
+            ToastAndroid.show(
+              "Server not reachable! Can't get your vehicles.",
+              ToastAndroid?.SHORT
+            );
+            navigation?.goBack();
           } else if (axios.isCancel(error)) {
             console.log(error?.message);
+            ToastAndroid.show("Something went wrong!", ToastAndroid?.SHORT);
+            navigation?.goBack();
           } else {
             console.log(error);
           }

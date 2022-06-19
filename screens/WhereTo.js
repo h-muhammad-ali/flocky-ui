@@ -157,6 +157,29 @@ const WhereTo = ({ navigation, route }) => {
   }, [connectionStatus, isMounted]);
 
   useEffect(() => {
+    if (isMounted() && source) {
+      if (
+        haversineFormula(source?.coords, {
+          lat: orgLoc?.coordinates?.latitude,
+          lng: orgLoc?.coordinates?.longitude,
+        }) > 100
+      ) {
+        dispatch(
+          setDestination({
+            coords: {
+              lat: orgLoc?.coordinates?.latitude,
+              lng: orgLoc?.coordinates?.longitude,
+            },
+            formatted_address: orgLoc?.formatted_address,
+            place_id: orgLoc?.place_id,
+            short_address: orgLoc?.short_address,
+          })
+        );
+      }
+    }
+  }, [source, isMounted]);
+
+  useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
     const getCurrentPosition = async () => {
       setMapLoading(true);
@@ -173,30 +196,6 @@ const WhereTo = ({ navigation, route }) => {
                 .then((response) => {
                   let result = response.data["results"][0];
                   if (isMounted()) {
-                    console.log(
-                      haversineFormula(result["geometry"]["location"], {
-                        lat: orgLoc?.coords?.latitude,
-                        lng: orgLoc?.coords?.longitude,
-                      })
-                    );
-                    if (
-                      haversineFormula(result["geometry"]["location"], {
-                        lat: orgLoc?.coordinates?.latitude,
-                        lng: orgLoc?.coordinates?.longitude,
-                      }) > 100
-                    ) {
-                      dispatch(
-                        setDestination({
-                          coords: {
-                            lat: orgLoc?.coordinates?.latitude,
-                            lng: orgLoc?.coordinates?.longitude,
-                          },
-                          formatted_address: orgLoc?.formatted_address,
-                          place_id: orgLoc?.place_id,
-                          short_address: orgLoc?.short_address,
-                        })
-                      );
-                    }
                     dispatch(
                       setSource({
                         coords: result["geometry"]["location"],
