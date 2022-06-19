@@ -157,7 +157,7 @@ const WhereTo = ({ navigation, route }) => {
   }, [connectionStatus, isMounted]);
 
   useEffect(() => {
-    if (isMounted() && source) {
+    if (isMounted() && source && orgLoc) {
       if (
         haversineFormula(source?.coords, {
           lat: orgLoc?.coordinates?.latitude,
@@ -177,7 +177,7 @@ const WhereTo = ({ navigation, route }) => {
         );
       }
     }
-  }, [source, isMounted]);
+  }, [source, isMounted, orgLoc]);
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
@@ -290,7 +290,7 @@ const WhereTo = ({ navigation, route }) => {
         ]}
       >
         <TextInput
-          value={location ? source?.short_address : errorMsg ?? "Loading..."}
+          value={source ? source?.short_address : errorMsg ?? "Loading..."}
           style={{
             fontSize: 15,
             height: 45,
@@ -348,7 +348,7 @@ const WhereTo = ({ navigation, route }) => {
       <Text style={styles?.label}>To</Text>
       <TextInput
         ref={ref}
-        value={destination?.short_address}
+        value={source ? destination?.short_address : "Loading..."}
         style={styles?.input}
         selectionColor={"#5188E3"}
         placeholder="City, town, address or place"

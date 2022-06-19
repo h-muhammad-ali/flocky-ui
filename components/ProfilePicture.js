@@ -65,7 +65,7 @@ const ProfilePicture = ({
             });
           }}
         >
-          <Entypo name="edit" size={20} color="black" />
+          <Entypo name="edit" size={18} color="white" />
         </TouchableOpacity>
       ) : (
         <></>
@@ -88,9 +88,9 @@ const styles = StyleSheet.create({
   },
   editButton: {
     position: "absolute",
-    bottom: 10,
-    right: 10,
-    backgroundColor: "white",
+    bottom: 12,
+    right: 12,
+    backgroundColor: "#5188E3",
     borderRadius: 15,
     padding: 4,
   },

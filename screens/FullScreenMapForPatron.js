@@ -146,8 +146,14 @@ const FullScreenMapForPatron = ({ route }) => {
         )}
         {wayPoints.length ? (
           wayPoints?.map((waypoint, index) =>
-            areCoordinatesAlmostEqual(start?.coords, waypoint?.coords) < 20 ||
-            areCoordinatesAlmostEqual(end?.coords, waypoint?.coords) < 20 ? (
+            areCoordinatesAlmostEqual(
+              route.params?.start?.coords,
+              waypoint?.coords
+            ) < 20 ||
+            areCoordinatesAlmostEqual(
+              route.params?.end?.coords,
+              waypoint?.coords
+            ) < 20 ? (
               <></>
             ) : (
               <Marker

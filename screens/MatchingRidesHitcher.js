@@ -119,7 +119,7 @@ const MatchingRidesHitcher = ({ navigation }) => {
       <Header
         text="Matching Your Ride..."
         navigation={() => navigation?.goBack()}
-        isBackButtonVisible={true}
+        isBackButtonVisible={false}
         isCancel={true}
         onCancel={() => {
           setCancel(true);

@@ -76,9 +76,7 @@ const Map = ({
         return coords;
       })
       .then(() => {
-        setTimeout(() => {
-          fitToMarkers(wayPoints);
-        }, 500);
+        fitToMarkers(wayPoints);
       })
       .catch((error) => {
         console?.log(error);
@@ -147,7 +145,13 @@ const Map = ({
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
-    if (!source || !destination || (start && end)) {
+    if (!source || !destination) {
+      // setTimeout(() => {
+      fitToMarkers(wayPoints);
+      // }, 1000);
+      return;
+    }
+    if (start && end) {
       setTimeout(() => {
         fitToMarkers(wayPoints);
       }, 1000);
