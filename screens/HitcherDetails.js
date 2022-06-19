@@ -139,7 +139,7 @@ const HitcherDetails = ({ route, navigation }) => {
             navigation?.goBack();
           } else if (error?.response) {
             // setGoBackError(`${error?.response?.data}.`);
-            ToastAndroid.show("No User Found!", ToastAndroid?.SHORT);
+            ToastAndroid.show(error?.response?.data, ToastAndroid?.SHORT);
             navigation?.goBack();
           } else if (error?.request) {
             // setGoBackError("Server not reachable! Can't get your vehicles.");
