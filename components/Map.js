@@ -16,11 +16,12 @@ import { useSelector, useDispatch } from "react-redux";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import Polyline from "@mapbox/polyline";
 import {
+  setDestination,
   setOverViewPolyline,
-  clearOverViewPolyline,
 } from "../redux/locations/locationsActions";
 import axios from "axios";
 import ErrorDialog from "../components/ErrorDialog";
+import usePrevious from "../custom-hooks/usePrevious";
 
 let apiCancelToken;
 const Map = ({
@@ -30,11 +31,14 @@ const Map = ({
   way_points,
   overview_polyline,
   loading,
+  selectionCompanyLocation,
 }) => {
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
   const { source, destination, wayPoints } = useSelector(
     (state) => state?.locations
   );
+  const { companyLocation } = useSelector((state) => state?.companyLocation);
+  const prevDestination = usePrevious(destination);
   const dispatch = useDispatch();
   const [coords, setCoords] = useState([]);
   const [region, setRegion] = useState({
@@ -76,7 +80,11 @@ const Map = ({
         return coords;
       })
       .then(() => {
-        fitToMarkers(wayPoints);
+        if (source && destination && !prevDestination) {
+          setTimeout(() => {
+            fitToMarkers(wayPoints);
+          }, 1500);
+        } else fitToMarkers(wayPoints);
       })
       .catch((error) => {
         console?.log(error);
@@ -111,6 +119,8 @@ const Map = ({
     let paramArray = [];
     if (source || start) paramArray?.push("source");
     if (destination || end) paramArray?.push("destination");
+    if (companyLocation && selectionCompanyLocation)
+      paramArray?.push("companyLocation");
     paramArray.push(
       ...wayPoints?.map((waypoint, index) => `waypoint#${index + 1}`)
     );
@@ -145,10 +155,15 @@ const Map = ({
 
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
+    if (companyLocation && selectionCompanyLocation) {
+      setTimeout(() => {
+        fitToMarkers(wayPoints);
+      }, 1000);
+    }
     if (!source || !destination) {
-      // setTimeout(() => {
-      fitToMarkers(wayPoints);
-      // }, 1000);
+      setTimeout(() => {
+        fitToMarkers(wayPoints);
+      }, 1000);
       return;
     }
     if (start && end) {
@@ -173,6 +188,28 @@ const Map = ({
   return (
     <View style={{ flex: 1 }}>
       <MapView ref={mapRef} style={styles?.mapView} initialRegion={region}>
+        {companyLocation && (
+          <Marker
+            coordinate={{
+              latitude: companyLocation
+                ? companyLocation?.coords?.lat
+                : companyLocation?.coords?.lat,
+              longitude: companyLocation
+                ? companyLocation?.coords?.lng
+                : companyLocation?.coords?.lng,
+            }}
+            title="Company's Location"
+            description={
+              companyLocation
+                ? companyLocation?.formatted_address
+                : companyLocation?.formatted_address
+            }
+            identifier="companyLocation"
+          >
+            <MaterialIcons name="my-location" size={30} color="black" />
+          </Marker>
+        )}
+
         {(source || start) && (
           <Marker
             coordinate={{

@@ -35,7 +35,7 @@ const CompanyRegisteration = ({ navigation, route }) => {
   });
   const onSubmit = (data) => {
     reset();
-    navigation?.navigate("SelectOrganizationLocation", {
+    navigation?.navigate("MapScreenForAdmin", {
       origin: "CompanyLocation",
       company: data?.company,
       password: data?.password,

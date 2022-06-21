@@ -63,7 +63,7 @@ const EditProfile = ({ navigation }) => {
 
   const onSubmit = (data) => {
     setLoading(true);
-    if (userName === data?.name && genderFromAPI === data?.gender()) {
+    if (userName === data?.name && genderFromAPI === data?.gender) {
       reset();
       navigation?.navigate("Roles");
       setLoading(false);
@@ -73,7 +73,7 @@ const EditProfile = ({ navigation }) => {
           `${BASE_URL}/account/user/details/update`,
           {
             ...data,
-            gender: data?.gender(),
+            gender: data?.gender,
           },
           {
             timeout: 5000,

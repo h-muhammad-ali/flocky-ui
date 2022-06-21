@@ -46,7 +46,13 @@ const AdminDrawerNavigator = () => {
           drawerLabel: "Home",
         }}
       />
-      <Drawer.Screen name="Wall of Honor" component={WallOfHonor} />
+      <Drawer.Screen
+        name="Wall of Honor"
+        options={{
+          unmountOnBlur: true,
+        }}
+        component={WallOfHonor}
+      />
     </Drawer.Navigator>
   );
 };

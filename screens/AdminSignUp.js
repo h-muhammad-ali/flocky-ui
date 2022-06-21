@@ -18,11 +18,13 @@ import { Ionicons } from "@expo/vector-icons";
 import ErrorDialog from "../components/ErrorDialog";
 import axios from "axios";
 import { BASE_URL } from "../config/baseURL";
+import { useSelector } from "react-redux";
 
 const AdminSignUp = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [genderOpen, setGenderOpen] = useState(false);
+  const { location } = useSelector((state) => state?.companyLocation);
   const [gender, setGender] = useState([
     { label: "Male", value: "M" },
     { label: "Female", value: "F" },
@@ -43,7 +45,6 @@ const AdminSignUp = ({ navigation, route }) => {
     ToastAndroid.show(text, ToastAndroid?.SHORT);
   };
   const onSubmit = (data) => {
-    setLoading(true);
     const orgData = {
       organization_name: route?.params?.company,
       email_domain: route?.params?.domain,
@@ -55,14 +56,34 @@ const AdminSignUp = ({ navigation, route }) => {
       },
       location: {
         coordinates: {
-          latitude: route.params?.location?.coords?.lat,
-          longitude: route.params?.location?.coords?.lng,
+          latitude: location?.coords?.lat,
+          longitude: location?.coords?.lng,
         },
-        formatted_address: route.params?.location?.formatted_address,
-        place_id: route.params?.location?.place_id,
-        short_address: route.params?.location?.short_address,
+        formatted_address: location?.formatted_address,
+        place_id: location?.place_id,
+        short_address: location?.short_address,
       },
     };
+    setLoading(true);
+    // const orgData = {
+    //   organization_name: route?.params?.company,
+    //   email_domain: route?.params?.domain,
+    //   admin: {
+    //     email: route?.params?.email,
+    //     name: data?.name,
+    //     gender: data?.gender(),
+    //     password: route?.params?.password,
+    //   },
+    //   location: {
+    //     coordinates: {
+    //       latitude: route.params?.location?.coords?.lat,
+    //       longitude: route.params?.location?.coords?.lng,
+    //     },
+    //     formatted_address: route.params?.location?.formatted_address,
+    //     place_id: route.params?.location?.place_id,
+    //     short_address: route.params?.location?.short_address,
+    //   },
+    // };
     axios
       .post(
         `${BASE_URL}/organization/register/token`,

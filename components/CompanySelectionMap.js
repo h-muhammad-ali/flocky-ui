@@ -2,14 +2,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
 import MapView from "react-native-maps";
 import { Ionicons, FontAwesome, MaterialIcons } from "@expo/vector-icons";
-import Header from "../components/Header";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 import { useDispatch } from "react-redux";
-import {
-  setSource,
-  setDestination,
-  setWayPoint,
-} from "../redux/locations/locationsActions";
 import * as Location from "expo-location";
 import usePrevious from "../custom-hooks/usePrevious";
 var _ = require("lodash");
@@ -19,55 +13,16 @@ import { useSelector } from "react-redux";
 import { setCompanyLocation } from "../redux/companyLocation/companyLocationActions";
 
 let apiCancelToken;
-const Map = ({ navigation, route }) => {
+const CompanySelectionMap = () => {
   const { connectionStatus } = useSelector((state) => state?.internetStatus);
-  const [location, setLocation] = useState(null);
-  const [address, setAddress] = useState("");
+  const { location } = useSelector((state) => state?.companyLocation);
   const mapRef = useRef(null);
   const [error, setError] = useState("");
-  const prevLocation = usePrevious(location);
   const dispatch = useDispatch();
-  const haversineFormula = (coords1, coords2) => {
-    const R = 6371000;
-    let latDiff = (coords2.lat - coords1.lat) * (Math.PI / 180);
-    let longDiff = (coords2.lng - coords1.lng) * (Math.PI / 180);
+  const prevLocation = usePrevious(location);
 
-    let a =
-      Math.pow(Math.sin(latDiff / 2), 2) +
-      Math.cos(coords1.lat * (Math.PI / 180)) *
-        Math.cos(coords2.lat * (Math.PI / 180)) *
-        Math.pow(Math.sin(longDiff / 2), 2);
-
-    let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
-  };
-  const dispatchSource = () => {
-    if (
-      haversineFormula(location?.coords, {
-        lat: route.params?.orgLoc?.coordinates?.latitude,
-        lng: route.params?.orgLoc?.coordinates?.longitude,
-      }) > 100
-    ) {
-      dispatch(setSource(location));
-      dispatch(
-        setDestination({
-          ...route.params?.orgLoc,
-          coords: {
-            lat: route.params?.orgLoc?.coordinates?.latitude,
-            lng: route.params?.orgLoc?.coordinates?.longitude,
-          },
-        })
-      );
-    } else {
-      dispatch(setSource(location));
-      dispatch(setDestination(null));
-    }
-  };
   const onRegionChangeComplete = (region) => {
-    setAddress("Loading...");
-    if (location === null && prevLocation === undefined) {
-      getCurrentPosition();
-    } else {
+    if (location) {
       axios
         .get(
           `https://maps.googleapis.com/maps/api/geocode/json?latlng=${region?.latitude},${region?.longitude}&key=${GOOGLE_MAPS_API_KEY}`,
@@ -75,17 +30,17 @@ const Map = ({ navigation, route }) => {
         )
         .then((response) => {
           let result = response.data["results"][0];
-          setAddress(result?.formatted_address || "Unknown Address");
-          setLocation({
-            // coords: result["geometry"]["location"],
-            coords: { lat: region?.latitude, lng: region?.longitude },
-            place_id: result["place_id"],
-            formatted_address:
-              result?.formatted_address || "Unknown Formatted Address",
-            short_address: `${
-              result?.address_components[0]?.long_name || "unknown"
-            }, ${result?.address_components[1]?.short_name || "unknown"}`,
-          });
+          dispatch(
+            setCompanyLocation({
+              coords: { lat: region?.latitude, lng: region?.longitude },
+              place_id: result["place_id"],
+              formatted_address:
+                result?.formatted_address || "Unknown Formatted Address",
+              short_address: `${
+                result?.address_components[0]?.long_name || "unknown"
+              }, ${result?.address_components[1]?.short_name || "unknown"}`,
+            })
+          );
         })
         .catch((error) => {
           console?.log(error);
@@ -103,6 +58,7 @@ const Map = ({ navigation, route }) => {
         });
     }
   };
+
   const getCurrentPosition = async (isAnimate = false) => {
     Location.requestForegroundPermissionsAsync().then((response) => {
       if (response?.status === "granted") {
@@ -116,28 +72,33 @@ const Map = ({ navigation, route }) => {
               )
               .then((response) => {
                 let result = response.data["results"][0];
-                setAddress(result?.formatted_address || "Unknown Address");
-                setLocation({
-                  coords: result["geometry"]["location"],
-                  place_id: result["place_id"],
-                  formatted_address:
-                    result?.formatted_address || "Unknown Formatted Address",
-                  short_address: `${
-                    result?.address_components[0]?.long_name || "unknown"
-                  }, ${result?.address_components[1]?.short_name || "unknown"}`,
-                });
-                if (isAnimate) {
-                  const coords = result["geometry"]["location"];
-                  mapRef?.current?.animateToRegion(
-                    {
-                      latitude: coords?.lat,
-                      longitude: coords?.lng,
-                      latitudeDelta: 0.01,
-                      longitudeDelta: 0.01,
+                dispatch(
+                  setCompanyLocation({
+                    coords: {
+                      lat: response?.coords?.latitude,
+                      lng: response?.coords?.longitude,
                     },
-                    2000
-                  );
-                }
+                    place_id: result["place_id"],
+                    formatted_address:
+                      result?.formatted_address || "Unknown Formatted Address",
+                    short_address: `${
+                      result?.address_components[0]?.long_name || "unknown"
+                    }, ${
+                      result?.address_components[1]?.short_name || "unknown"
+                    }`,
+                  })
+                );
+
+                // const coords = result["geometry"]["location"];
+                // mapRef?.current?.animateToRegion(
+                //   {
+                //     latitude: coords?.lat,
+                //     longitude: coords?.lng,
+                //     latitudeDelta: 0.01,
+                //     longitudeDelta: 0.01,
+                //   },
+                //   1000
+                // );
               })
               .catch((error) => {
                 console?.log(error);
@@ -160,16 +121,18 @@ const Map = ({ navigation, route }) => {
           });
       } else {
         setErrorMsg("Permission to access location was denied");
-        dispatch(setSource(null));
       }
     });
   };
+  // useEffect(() => {
+  //   getCurrentPosition();
+  // }, []);
   useEffect(() => {
     apiCancelToken = axios.CancelToken.source();
-    if (prevLocation === null) {
+    if (location) {
       setTimeout(() => {
         animateRegion();
-      }, 1000);
+      }, 1500);
     }
     return () =>
       apiCancelToken?.cancel(
@@ -184,11 +147,11 @@ const Map = ({ navigation, route }) => {
         latitudeDelta: 0.01,
         longitudeDelta: 0.01,
       },
-      2000
+      1000
     );
   };
   return (
-    <View style={[StyleSheet?.absoluteFillObject, styles?.container]}>
+    <View style={styles?.container}>
       <MapView
         showsCompass={false}
         style={[StyleSheet?.absoluteFillObject, styles?.mapView]}
@@ -201,54 +164,13 @@ const Map = ({ navigation, route }) => {
         onRegionChangeComplete={onRegionChangeComplete}
         ref={mapRef}
       />
-      <View style={styles?.heading}>
-        <Header
-          text="Select Custom Location"
-          navigation={() => navigation?.goBack()}
-          isBackButtonVisible={true}
-        />
-      </View>
-      <View style={styles?.marker}>
-        <FontAwesome name="dot-circle-o" size={35} color={"#5188E3"} />
-      </View>
-      <View style={styles.textView}>
-        <Text>{address}</Text>
-      </View>
-      <TouchableOpacity
-        style={styles?.currentLocation}
-        onPress={() => {
-          if (location?.place_id !== prevLocation?.place_id)
-            getCurrentPosition(true);
-        }}
-      >
-        <MaterialIcons name="my-location" size={60} color="black" />
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles?.button}
-        onPress={() => {
-          route.params?.origin === "From"
-            ? dispatchSource()
-            : route.params?.origin === "To"
-            ? dispatch(setDestination(location))
-            : route.params?.origin === "Stop"
-            ? dispatch(setWayPoint(location))
-            : dispatch(setCompanyLocation(location));
-          // : navigation?.navigate({
-          //     name: "AdminSignUp",
-          //     params: {
-          //       location: location,
-          //       company: route.params?.company,
-          //       password: route.params?.password,
-          //       email: route.params?.email,
-          //       domain: route.params?.domain,
-          //     },
-          //   });
-          if (route.params?.origin !== "CompanyLocation")
-            navigation?.navigate({ name: "WhereTo", merge: true });
-        }}
-      >
-        <Ionicons name="checkmark-circle" size={80} color={"#5188E3"} />
-      </TouchableOpacity>
+      {location ? (
+        <View style={styles?.marker}>
+          <FontAwesome name="dot-circle-o" size={35} color={"#5188E3"} />
+        </View>
+      ) : (
+        <></>
+      )}
       <View>
         <ErrorDialog
           visible={!!error}
@@ -263,7 +185,7 @@ const Map = ({ navigation, route }) => {
   );
 };
 
-export default Map;
+export default CompanySelectionMap;
 
 const styles = StyleSheet.create({
   container: {

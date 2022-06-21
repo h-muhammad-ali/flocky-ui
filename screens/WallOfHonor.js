@@ -45,9 +45,7 @@ const WallOfHonor = ({ navigation }) => {
       .catch((error) => {
         console?.log(error);
         if (error?.response) {
-          setError(
-            `${error?.response?.data}.`
-          );
+          setError(`${error?.response?.data}.`);
         } else if (error?.request) {
           setError("Server not reachable! Please try again later.");
         } else if (axios.isCancel(error)) {
@@ -149,11 +147,13 @@ const WallOfHonor = ({ navigation }) => {
               ) : (
                 <Ionicons
                   name="person-circle"
-                  size={SCREEN_WIDTH / 3}
+                  size={SCREEN_WIDTH / 3.5}
                   color={"white"}
                 />
               )}
-              <Text style={styles.name}>{topUsers[1]?.name}</Text>
+              <Text style={styles.name} numberOfLines={3}>
+                {topUsers[1]?.name}
+              </Text>
               <View style={styles.ridesContainer}>
                 <Ionicons name="disc" size={25} />
                 <Text style={styles.rides}>{topUsers[1]?.ride_count}</Text>
@@ -168,11 +168,13 @@ const WallOfHonor = ({ navigation }) => {
               ) : (
                 <Ionicons
                   name="person-circle"
-                  size={SCREEN_WIDTH / 2.5}
+                  size={SCREEN_WIDTH / 3}
                   color={"white"}
                 />
               )}
-              <Text style={styles.name}>{topUsers[0]?.name}</Text>
+              <Text style={styles.name} numberOfLines={3}>
+                {topUsers[0]?.name}
+              </Text>
               <View style={styles.ridesContainer}>
                 <Ionicons name="disc" size={25} />
                 <Text style={styles.rides}>{topUsers[0]?.ride_count}</Text>
@@ -187,11 +189,13 @@ const WallOfHonor = ({ navigation }) => {
               ) : (
                 <Ionicons
                   name="person-circle"
-                  size={SCREEN_WIDTH / 3.5}
+                  size={SCREEN_WIDTH / 4}
                   color={"white"}
                 />
               )}
-              <Text style={styles.name}>{topUsers[2]?.name}</Text>
+              <Text style={styles.name} numberOfLines={3}>
+                {topUsers[2]?.name}
+              </Text>
               <View style={styles.ridesContainer}>
                 <Ionicons name="disc" size={25} />
                 <Text style={styles.rides}>{topUsers[2]?.ride_count}</Text>
@@ -255,28 +259,32 @@ const styles = StyleSheet.create({
     fontFamily: "Kanit-Regular",
     fontSize: 20,
     color: "white",
+    width: SCREEN_WIDTH / 3.3,
+    textAlign: "center",
+    textAlignVertical: "center",
+    marginHorizontal: 3,
   },
   rides: {
     fontFamily: "Kanit-Light",
   },
   imagePos1: {
-    width: SCREEN_WIDTH / 2.5 - 15,
-    height: SCREEN_WIDTH / 2.5 - 15,
-    borderRadius: (SCREEN_WIDTH / 2.5 - 10) / 2,
-    marginVertical: 10,
-    marginHorizontal: 5,
-  },
-  imagePos2: {
     width: SCREEN_WIDTH / 3 - 15,
     height: SCREEN_WIDTH / 3 - 15,
     borderRadius: (SCREEN_WIDTH / 3 - 10) / 2,
     marginVertical: 10,
     marginHorizontal: 5,
   },
-  imagePos3: {
+  imagePos2: {
     width: SCREEN_WIDTH / 3.5 - 15,
     height: SCREEN_WIDTH / 3.5 - 15,
     borderRadius: (SCREEN_WIDTH / 3.5 - 10) / 2,
+    marginVertical: 10,
+    marginHorizontal: 5,
+  },
+  imagePos3: {
+    width: SCREEN_WIDTH / 4 - 15,
+    height: SCREEN_WIDTH / 4 - 15,
+    borderRadius: (SCREEN_WIDTH / 4 - 10) / 2,
     marginVertical: 10,
     marginHorizontal: 5,
   },

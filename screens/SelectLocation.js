@@ -9,6 +9,7 @@ import {
   setDestination,
   setWayPoint,
 } from "../redux/locations/locationsActions";
+import { setCompanyLocation } from "../redux/companyLocation/companyLocationActions";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import { GOOGLE_MAPS_API_KEY } from "@env";
 
@@ -124,21 +125,35 @@ const SelectLocation = ({ navigation, route }) => {
                   short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
                 })
               )
-            : navigation?.navigate({
-                name: "AdminSignUp",
-                params: {
-                  location: {
-                    coords: details["geometry"]["location"],
-                    place_id: details["place_id"],
-                    formatted_address: details["formatted_address"],
-                    short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
-                  },
-                  company: route.params?.company,
-                  password: route.params?.password,
-                  email: route.params?.email,
-                  domain: route.params?.domain,
-                },
-              });
+            : dispatch(
+                setCompanyLocation({
+                  coords: details["geometry"]["location"],
+                  place_id: details["place_id"],
+                  formatted_address: details["formatted_address"],
+                  short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
+                })
+              );
+          if (route.params?.origin === "CompanyLocation") {
+            navigation?.navigate({
+              name: "MapScreenForAdmin",
+              merge: true,
+            });
+          }
+          // : navigation?.navigate({
+          //     name: "AdminSignUp",
+          //     params: {
+          //       location: {
+          //         coords: details["geometry"]["location"],
+          //         place_id: details["place_id"],
+          //         formatted_address: details["formatted_address"],
+          //         short_address: `${details["address_components"][0]["long_name"]}, ${details["address_components"][1]["short_name"]}`,
+          //       },
+          //       company: route.params?.company,
+          //       password: route.params?.password,
+          //       email: route.params?.email,
+          //       domain: route.params?.domain,
+          //     },
+          //   });
           if (route.params?.origin !== "CompanyLocation")
             navigation?.navigate({ name: "WhereTo", merge: true });
         }}
@@ -147,27 +162,34 @@ const SelectLocation = ({ navigation, route }) => {
           language: "en",
           components: "country:pk",
         }}
-        renderRightButton={() => (
-          <TouchableOpacity
-            style={{ flex: 0.1 }}
-            onPress={() => {
-              route.params?.origin === "CompanyLocation"
-                ? navigation?.navigate("MapForCompanyLocation", {
-                    origin: route?.params?.origin,
-                    company: route.params?.company,
-                    password: route.params?.password,
-                    email: route.params?.email,
-                    domain: route.params?.domain,
-                  })
-                : navigation?.navigate("Map", {
-                    origin: route?.params?.origin,
-                    orgLoc: route.params?.orgLoc,
-                  });
-            }}
-          >
-            <Ionicons name="map" size={25} />
-          </TouchableOpacity>
-        )}
+        renderRightButton={() =>
+          route.param?.origin !== "CompanyLocation" ? (
+            <TouchableOpacity
+              style={{ flex: 0.1 }}
+              onPress={() => {
+                route.params?.origin === "CompanyLocation"
+                  ? navigation.navigate("MapForCompanyLocation", {
+                      origin: "CompanyLocation",
+                    })
+                  : // ? navigation?.navigate("MapForCompanyLocation", {
+                    //     origin: route?.params?.origin,
+                    //     company: route.params?.company,
+                    //     password: route.params?.password,
+                    //     email: route.params?.email,
+                    //     domain: route.params?.domain,
+                    //   })
+                    navigation?.navigate("Map", {
+                      origin: route?.params?.origin,
+                      orgLoc: route.params?.orgLoc,
+                    });
+              }}
+            >
+              <Ionicons name="map" size={25} />
+            </TouchableOpacity>
+          ) : (
+            <></>
+          )
+        }
         nearbyPlacesAPI="GooglePlacesSearch"
         debounce={400}
         minLength={2}

@@ -17,6 +17,7 @@ import Map from "../screens/Map";
 import SelectLocation from "../screens/SelectLocation";
 import { useSelector } from "react-redux";
 import jwt_decode from "jwt-decode";
+import MapScreenForAdmin from "../screens/MapScreenForAdmin";
 
 const Stack = createNativeStackNavigator();
 const MainStackNavigator = () => {
@@ -87,6 +88,7 @@ const MainStackNavigator = () => {
             component={SelectLocation}
           />
           <Stack.Screen name="MapForCompanyLocation" component={Map} />
+          <Stack.Screen name="MapScreenForAdmin" component={MapScreenForAdmin} />
         </>
       )}
     </Stack.Navigator>

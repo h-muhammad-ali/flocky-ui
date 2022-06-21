@@ -162,7 +162,7 @@ const WhereTo = ({ navigation, route }) => {
         haversineFormula(source?.coords, {
           lat: orgLoc?.coordinates?.latitude,
           lng: orgLoc?.coordinates?.longitude,
-        }) > 100
+        }) > 150
       ) {
         dispatch(
           setDestination({
